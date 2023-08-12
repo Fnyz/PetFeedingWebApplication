@@ -1,8 +1,8 @@
 'use client'
 import React from 'react'
 import Image from 'next/image'
-import { TextField, Button } from '@mui/material'
-import { BiLogoGoogle } from "react-icons/bi";
+import { TextField } from '@mui/material'
+import Link from 'next/link'
 
 
 
@@ -16,7 +16,6 @@ function page() {
         <Image
             src="/Image/WebBackground.png"
             layout="fill"
-            objectFit="cover"
             quality={100}
             alt='back image'
         />
@@ -24,7 +23,7 @@ function page() {
    <div className='absolute top-0 left-0 '>
         <div className='flex justify-end w-screen px-10 mt-5'>
             <span className='mr-1 text-sm'>Have an account? </span>
-            <span className='text-red-700 font-semibold text-sm'>Sign-in.</span>
+            <Link href="/login" className='text-red-700 font-semibold text-sm'>Sign-in.</Link>
         </div>
         <div className='flex  flex-1 items-center px-2 gap-5'>
         <div className=' overflow-hidden border-r-2 ml-5'>
