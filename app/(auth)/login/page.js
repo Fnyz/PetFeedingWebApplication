@@ -5,6 +5,8 @@ import { TextField } from '@mui/material'
 import { BiLogoGoogle } from "react-icons/bi";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
+import { Button } from "@/components/ui/button"
+
 
 
 
@@ -62,6 +64,10 @@ function page() {
             <BiLogoGoogle className='h-5 w-5'/>
             <label className='text-sm'>Sign in with Google</label>
         </div>
+        <Button variant="outline">Button</Button>
+
+
+      
 
         
         

@@ -13,18 +13,6 @@ function ListOfPet() {
 
 
     
-    const [loading, setLoading] =useState(true);
-    useEffect(()=>{
-      let out =  setTimeout(()=>{
-            setLoading(false);
-        },2000);
-
-        () => {
-            return clearTimeout(out);
-        }
-
-    },[])
-
     
     
 const Search = styled('div')(({ theme }) => ({
@@ -70,19 +58,36 @@ const Search = styled('div')(({ theme }) => ({
   }));
 
 
-  if(loading){
-    return (
-        <h1>loading wait</h1>
-    )
-  }
+ 
 
   return (
     <div className='border w-4/5 h-[400px] rounded-md shadow-md'>
         <Box sx={{ flexGrow: 1 }}>
-    
-      {!loading && (
+        <AppBar position="static" className='bg-[coral]'>
+        <Toolbar>
+        
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+          >
+            List of Pets
+          </Typography>
+          <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Search…"
+              inputProps={{ 'aria-label': 'search' }}
+            />
+          </Search>
+        </Toolbar>
+      </AppBar>
+   
           <Tables/> 
-      )}
+     
     </Box>
     </div>
   )
