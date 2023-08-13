@@ -51,7 +51,7 @@ function page() {
                    <div className='border w-[100%] mb-7 rounded-md shadow-sm mt-2 overflow-auto h-40 no-scrollbar'>
                     {wifiAvailable.map((connect, i) => {
                         return (
-                            <div className='flex justify-between px-2 p-1'>
+                            <div className='flex justify-between px-2 p-1' key={i}>
                             <div className=' flex items-center gap-5 '>
                                 <div className='w-10 h-10 justify-center items-center flex rounded-full text-white font-bold bg-[#FAB1A0]'>
                                     IP

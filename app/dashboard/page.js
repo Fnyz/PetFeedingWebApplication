@@ -1,8 +1,10 @@
 'use client'
 import React from 'react'
 import Image from 'next/image'
-import { BiMenu, BiDotsVerticalRounded, BiSolidHand, BiBell} from "react-icons/bi";
-import { FiBell } from "react-icons/fi";
+import { BiMenu, BiDotsVerticalRounded, BiSolidHand} from "react-icons/bi";
+import ListOfPet from '@/components/ListOfPet';
+import Notifications from '@/components/Notifications';
+
 function page() {
   return (
     <div className="h-screen relative ">
@@ -22,7 +24,10 @@ function page() {
      <div className="w-[52px] h-[52px] rounded-full overflow-hidden relative">
         <Image
            src="/Image/luffy.png"
-          layout='fill'
+          fill
+          alt='profile'
+          
+
         />
       </div>
      </div>
@@ -47,9 +52,10 @@ function page() {
         />
                 
             </div>
+            <div className=' w-[100%]'>
             <div className='w-4/5  flex '>
                 <div className='flex flex-row gap-2 '>
-                    <div className=' w-[150px] border h-20 rounded-md'>
+                    <div className=' w-[150px] border h-20 rounded-md  shadow-sm'>
                         <h1 className='pl-2 text-[10px] pt-1'>Notifications</h1>
                         <div className='flex'>
                             <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> 100</span>
@@ -59,12 +65,13 @@ function page() {
                     src="/Image/icons8-notification.svg"
                     layout='fill'
                     className='fill-black stroke-2'
+                    alt='icons'
                     />
                             </div>
                         
                         </div>
                     </div>
-                    <div className=' w-[150px] border h-20 rounded-md'>
+                    <div className=' w-[150px] border h-20 rounded-md  shadow-sm'>
                     <h1 className='pl-2 text-[10px] pt-1'>Pets</h1>
                         <div className='flex'>
                             <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> 10</span>
@@ -73,6 +80,7 @@ function page() {
                     src="/Image/1517090.svg"
                     layout='fill'
                     className='fill-black stroke-2'
+                    alt='icons'
                     />
                             </div>
                         </div>
@@ -81,12 +89,24 @@ function page() {
                     <Image
                     src="/Image/undraw_sign_in_re_o58h.svg"
                     layout='fill'
+                    alt='icons'
                     />
                     </div>
                     
                 </div>
+               
             </div>
+            <div className='flex gap-5 mt-5'>
+            <ListOfPet />
+            <Notifications />
+            </div>
+
+            
+
+            </div>
+            
         </div>
+       
         </div>
     </div>
   )
