@@ -1,11 +1,14 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { BiMenu, BiDotsVerticalRounded, BiSolidHand} from "react-icons/bi";
 import ListOfPet from '@/components/ListOfPet';
 import Notifications from '@/components/Notifications';
+import { useEffect } from 'react';
 
 function page() {
+
+    
   return (
     <div className="h-screen relative ">
         <Image

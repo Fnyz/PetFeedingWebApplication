@@ -1,5 +1,4 @@
-'use client'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -8,67 +7,23 @@ import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
 import Tables from './Tables';
-import DataTable from 'react-data-table-component'
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
 
 
 function ListOfPet() {
 
 
-    const [loading, setLoading] = useState(false);
+    
+    const [loading, setLoading] =useState(true);
+    useEffect(()=>{
+      let out =  setTimeout(()=>{
+            setLoading(false);
+        },2000);
 
-    useEffect(() => {
-     setLoading(true);
-     let out = setTimeout(() => {
-      setLoading(false);
-     }, 2000);
-  
-     () => {
-      return clearTimeout(out);
-     }
-    },[loading])
-  
-    const columns = [
-      {
-          name: 'Image',
-          selector: row => 
-              <Image src ={row.image} width={100} height={100} alt='pet img'/>
-          
-         
-      },
-      {
-        name: 'Pet name',
-        selector: row => row.pet,
-    },
-    {
-      name: 'Weight',
-      selector: row => row.weigth,
-  },
-  {
-    name: 'Age',
-    selector: row => row.age,
-  },
-  {
-    name: 'Gender',
-    selector: row => row.gender,
-  },
-      
-  ];
-  
-  const data = [
-      {
-          id: 1,
-          pet: 'Beetlejuice',
-          image: 'https://cdn.pixabay.com/photo/2018/05/07/10/48/husky-3380548_640.jpg',
-          weigth:20, 
-          age:5,
-          gender:'male',
-      },
-     
-  ]
-  
+        () => {
+            return clearTimeout(out);
+        }
 
+    },[])
 
     
     
@@ -114,40 +69,20 @@ const Search = styled('div')(({ theme }) => ({
     },
   }));
 
+
+  if(loading){
+    return (
+        <h1>loading wait</h1>
+    )
+  }
+
   return (
     <div className='border w-4/5 h-[400px] rounded-md shadow-md'>
         <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" className='bg-[#FAB1A0]'>
-        <Toolbar>
-        <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
-          >
-            List of Pets
-          </Typography>
-          
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </Search>
-        </Toolbar>
-      </AppBar>
-      <DataTable
-       columns={columns}
-       data={data}
-       direction="auto"
-       fixedheaderscrollheight='300px'
-       pagination
-       responsive
-       progresspending={loading}
-      />
+    
+      {!loading && (
+          <Tables/> 
+      )}
     </Box>
     </div>
   )
