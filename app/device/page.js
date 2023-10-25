@@ -6,7 +6,7 @@ import { BiLogOut } from "react-icons/bi";
 import { BiSolidSend } from "react-icons/bi";
 import { TextField } from '@mui/material'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 function page() {
 
@@ -17,7 +17,10 @@ function page() {
         {ip: '192.186.255.02'},
         {ip: '192.186.255.11'},
     ]
-    const router = useRouter()
+    const params = useParams()
+    console.log(params.data)
+
+    
     
   return (
     <div  className="h-screen relative">
