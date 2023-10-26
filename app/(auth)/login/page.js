@@ -6,111 +6,89 @@ import Image from 'next/image'
 import { TextField } from '@mui/material'
 import { BiLogoGoogle } from "react-icons/bi";
 import Link from 'next/link';
-import { auth , db} from '@/app/firebase';
+import { auth} from '@/app/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import Loginform from '@/app/component/Loginform';
 import { useRouter } from 'next/navigation';
-
-
-
-
-
-
-
-
-
 
 
 function page() {
 
     const router = useRouter()
 
-
- 
- 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleLogin = async (e) => {
-
-        'use client'
-
         e.preventDefault();
 
-        router.push('/device', {
-            data: 'hello'
-        })
+
+        if(!email || !password) {
+            alert('Please input all fields?');
+            return;
+        }
     
-        
-
-
-        
-        // signInWithEmailAndPassword(auth, email, password)
-        // .then((userCredential) => {
+        signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
       
-        //     const user = userCredential.user;
+            const user = userCredential.user;
+ 
+            if(!user.emailVerified){
+              return;
+            }
       
-                 
-        //     if(!user.emailVerified){
-        //       return;
-        //     }
-      
-            
-      
+  
+            const profile = {
+              email: user.email,
+              id: user.uid,
+            }
 
-      
-        //     const profile = {
-        //       email: user.email,
-        //       id: user.uid,
-        //     }
+            setEmail('');
+            setPassword('');
 
-        //     setEmail('');
-        //     setPassword('');
-
-        //     history.push("/device");
-            
-        //     return;
+            router.push('/device');
+            localStorage.setItem("user", JSON.stringify(profile));
+            return;
        
        
-        // })
-        // .catch((error) => {
+        })
+        .catch((error) => {
       
-        //   let errorMessage = null;
+          let errorMessage = null;
       
       
-        //   switch(error.code) {
-        //     case "auth/missing-password":
-        //       errorMessage = "Password is missing, please try again!";
-        //     break;
-        //     case "auth/invalid-email":
-        //       errorMessage = "Email is in valid format, please try again!";
-        //     break;
-        //     case "auth/weak-password":
-        //       errorMessage = "Password must be at least 6 characters long.";
-        //     break;
-        //     case "auth/wrong-password":
-        //       errorMessage = "Password is incorrect!";
-        //     break;
-        //     case 'auth/user-not-found':
-        //       errorMessage = "Email is not registered!";
-        //     break;
-        //     case 'auth/invalid-login-credentials':
-        //       errorMessage = "Account is not registered yet.";
-        //     break;
-        //     case 'auth/too-many-requests':
-        //       errorMessage = "Access to this account is temporarily disabled due to many failed login attemps. You can immediately restore it by resetting your password or you can try again later.";
-        //     break;
-        //     default:
+          switch(error.code) {
+            case "auth/missing-password":
+              errorMessage = "Password is missing, please try again!";
+            break;
+            case "auth/invalid-email":
+              errorMessage = "Email is in valid format, please try again!";
+            break;
+            case "auth/weak-password":
+              errorMessage = "Password must be at least 6 characters long.";
+            break;
+            case "auth/wrong-password":
+              errorMessage = "Password is incorrect!";
+            break;
+            case 'auth/user-not-found':
+              errorMessage = "Email is not registered!";
+            break;
+            case 'auth/invalid-login-credentials':
+              errorMessage = "Account is not registered yet.";
+            break;
+            case 'auth/too-many-requests':
+              errorMessage = "Access to this account is temporarily disabled due to many failed login attemps. You can immediately restore it by resetting your password or you can try again later.";
+            break;
+            default:
              
-        //   }
+          }
       
-        //   if(errorMessage){
-        //     console.log(errorMessage)
+          if(errorMessage){
+            alert(errorMessage);
       
-        //   }
+          }
       
       
-        // });
+        });
     }
 
 
@@ -152,8 +130,8 @@ function page() {
         <TextField id="outlined-basic" label="Password" type='password' variant="outlined" className='w-[500px]' placeholder='***********' onChange={(e) => setPassword(e.target.value)} value={password}/>
         </div>
         <div className='flex gap-2'>
-        <button type="button" onClick={handleLogin} className='shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-2 hover:bg-[coral] ease-in' >LOGIN</button>
-        <button type="button" className='text-sm w-full p-2 border rounded text-[#FAB1A0] border-rose-200 font-semibold hover:text-[coral]'>FORGET PASSWORD</button>
+        <button type="button" onClick={handleLogin} className='shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 hover:bg-[coral] ease-in' >LOGIN</button>
+        <button type="button" className='text-sm w-full p-4 border rounded text-[#FAB1A0] border-rose-200 font-semibold hover:text-[coral]'>FORGET PASSWORD</button>
         </div> 
         <label className='text-sm opacity-[0.8]'>
            | Login with 
@@ -163,7 +141,7 @@ function page() {
             <BiLogoGoogle className='h-5 w-5'/>
             <label className='text-sm'>Sign in with Google</label>
         </div>
-        <Loginform />
+        
     
         
        

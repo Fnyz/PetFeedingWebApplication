@@ -40,7 +40,7 @@ function Notifications() {
             <span className='text-[12px] opacity-[0.6]'>See all</span>
         </di>
         <div>
-                <div className='border p-1 rounded-sm overflow-auto no-scrollbar h-[350px]'>
+                <div className='border p-1 rounded-sm overflow-auto no-scrollbar h-[450px]'>
                 {notif.map((item, i) => {
                     return (
                         <div key={i} className='w-[100%] border mb-2 h-[100px] border-l-4 border-red-300 rounded-sm shadow-md'>

@@ -61,17 +61,21 @@ const Search = styled('div')(({ theme }) => ({
  
 
   return (
-    <div className='border w-4/5 h-[400px] rounded-md shadow-md'>
-        <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static" className='bg-[coral]'>
-        <Toolbar>
+    <div className='border w-4/5 h-[500px] rounded-md overflow-hidden'>
         
+        <Box sx={{ flexGrow: 1 }} >
+        <AppBar position="static" className='bg-[#FAB1A0] mb-2'>
+      
+        <Toolbar>
+          
           <Typography
+            className='font-bold'
             variant="h6"
             noWrap
             component="div"
             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
           >
+           
             List of Pets
           </Typography>
           <Search>
@@ -85,8 +89,10 @@ const Search = styled('div')(({ theme }) => ({
           </Search>
         </Toolbar>
       </AppBar>
-   
+          
           <Tables/> 
+         
+         
      
     </Box>
     </div>
