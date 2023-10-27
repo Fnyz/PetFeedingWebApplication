@@ -8,6 +8,11 @@ const nextConfig = {
             port: '',
             pathname: '/photo/**',
           },
+          {
+            protocol: 'https',
+            hostname: 'imgix.ranker.com',
+           
+          },
         ],
       },
 }

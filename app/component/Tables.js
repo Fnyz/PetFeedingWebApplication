@@ -14,23 +14,27 @@ import { BiDotsVertical} from "react-icons/bi";
 
 function Tables() {
   return (
+    <>
+
+    <div className='p-2 flex justify-evenly'>
+      <label className='text-center font-bold'>Image</label>
+      <label className='text-center font-bold'>Petname</label>
+      <label className='text-center font-bold'>Weight</label>
+      <label className='text-center font-bold'>Age</label>
+      <label className='text-center font-bold'>Gender</label>
+      <label className='text-center font-bold'></label>
+      
+    </div>
+  
     <Table>
-   
     <TableHeader>
-      <TableRow>
-        <TableHead className=' w-52 text-center font-bold'>Image</TableHead>
-        <TableHead className=' text-center font-bold'>Petname</TableHead>
-        <TableHead className=' text-center font-bold'>Weight</TableHead>
-        <TableHead className='  text-center font-bold'>Age</TableHead>
-        <TableHead className=' text-center font-bold'>Gender</TableHead>
-        <TableHead className=' text-center font-bold'></TableHead>
-      </TableRow>
     </TableHeader>
- 
+
     <TableBody>
-   
-      <TableRow>
-        <TableCell className=''>
+
+
+     <TableRow>
+        <TableCell className='w-52'>
         <div className="w-[110px] h-[60px] overflow-hidden relative ml-[30px] rounded-md">
         <Image
            src="/Image/anyaCuttie.jpg"
@@ -48,7 +52,7 @@ function Tables() {
       </TableRow>
       <TableRow>
         <TableCell className=''>
-        <div className="w-[110px] h-[60px] overflow-hidden relative ml-[30px] rounded-md">
+        <div className="w-[110px] h-[60px] overflow-hidden relative ml-[50px] rounded-md">
         <Image
            src="/Image/anyaCuttie.jpg"
            quality={100}
@@ -116,12 +120,17 @@ function Tables() {
         <TableCell className='text-center'>Female</TableCell>
         <TableCell className='self-center text-[20px]'><BiDotsVertical /></TableCell>
       </TableRow>
+
+  
+      
     
      
     </TableBody>
    
   
   </Table>
+
+  </>
   
   )
 }

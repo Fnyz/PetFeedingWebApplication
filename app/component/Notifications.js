@@ -32,9 +32,16 @@ function Notifications() {
             about:'Fighter is over weight please do something about it.'
           
         },
+        {
+            name:'Fighter',
+            date:'3 mins ago', 
+            weight: '40kg',
+            about:'Fighter is over weight please do something about it.'
+          
+        },
     ]
   return (
-    <div className=' border w-1/5 rounded-md p-2 shadow-md'>
+    <div className=' border w-1/5 rounded-md p-2 shadow-md z-50'>
         <di className='flex justify-between p-2'>
             <h1 className='text-[12px] font-bold opacity-[0.7]'>!Notifications</h1>
             <span className='text-[12px] opacity-[0.6]'>See all</span>

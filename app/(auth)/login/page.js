@@ -116,6 +116,7 @@ function page() {
             fill
             objectFit='contained'
             alt='this is a logo image'
+            quality={100}
             
         />
         </div>
