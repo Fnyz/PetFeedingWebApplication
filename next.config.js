@@ -13,6 +13,11 @@ const nextConfig = {
             hostname: 'imgix.ranker.com',
            
           },
+          {
+            protocol: 'https',
+            hostname: 'img.freepik.com',
+           
+          },
         ],
       },
 }

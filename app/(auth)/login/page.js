@@ -9,6 +9,14 @@ import Link from 'next/link';
 import { auth} from '@/app/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import FormControl from '@mui/material/FormControl';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import InputLabel from '@mui/material/InputLabel';
+import InputAdornment from '@mui/material/InputAdornment';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import IconButton from '@mui/material/IconButton';
+
 
 
 function page() {
@@ -17,6 +25,14 @@ function page() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -123,15 +139,35 @@ function page() {
         <div className='flex flex-col gap-5 pl-5'>
         <div className='flex flex-1 flex-col gap-5'>
         <div className='flex flex-col'>
-        <label className='font-bold text-[40px]'>Welcome user!</label>
+        <label className='font-bold text-[30px]'>WELCOME USER!</label>
         <label className='text-sm opacity-[0.7]'>Login to continue</label>
        
         </div>
         <TextField id="outlined-basic" label="Email" variant="outlined" className='w-[500px]' placeholder='noonenero@gmail.com' onChange={(e) => setEmail(e.target.value)} value={email} />
-        <TextField id="outlined-basic" label="Password" type='password' variant="outlined" className='w-[500px]' placeholder='***********' onChange={(e) => setPassword(e.target.value)} value={password}/>
+        <FormControl className='w-[500px]' variant="outlined" onChange={(e) => setPassword(e.target.value)} value={password}>
+          <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+          <OutlinedInput
+            id="outlined-adornment-password"
+            type={showPassword ? 'text' : 'password'}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+            label="Password"
+          />
+        </FormControl>
         </div>
         <div className='flex gap-2'>
         <button type="button" onClick={handleLogin} className='shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 hover:bg-[coral] ease-in' >LOGIN</button>
+      
         <button type="button" className='text-sm w-full p-4 border rounded text-[#FAB1A0] border-rose-200 font-semibold hover:text-[coral]'>FORGET PASSWORD</button>
         </div> 
         <label className='text-sm opacity-[0.8]'>

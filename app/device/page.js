@@ -8,6 +8,13 @@ import { signOut} from 'firebase/auth'
 import { auth, db } from '../firebase';
 import { useRouter } from 'next/navigation';
 import {getDocs, collection} from 'firebase/firestore'
+import FormControl from '@mui/material/FormControl';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import InputLabel from '@mui/material/InputLabel';
+import InputAdornment from '@mui/material/InputAdornment';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import IconButton from '@mui/material/IconButton';
 
 function page() {
 
@@ -16,6 +23,14 @@ function page() {
     const [deviceName, setDeviceName] = useState('');
     const [password, setPassword] = useState('');
     const [data, setUserData] = useState({});
+    
+    const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
 
     useEffect(()=>{
@@ -24,7 +39,7 @@ function page() {
             const data = JSON.parse(user);
             setUserData(data);
         }
-    })
+    },[])
 
 
     
@@ -45,7 +60,10 @@ function page() {
     try {
 
       if(!deviceName || !password){
+        setDeviceName('');
+        setPassword('')
         alert('Please input all fields?');
+      
        return;
       }
 
@@ -64,9 +82,10 @@ function page() {
       const {email, DeviceName, password: pass } = doc.data();
 
       if(password !== pass) {
-        alert('Password is incorrect!, please try again.');
         setDeviceName('');
         setPassword('')
+        alert('Password is incorrect!, please try again.');
+      
         return;
       }
 
@@ -81,10 +100,10 @@ function page() {
 
 
       if(email.toLowerCase().trim() === credentials.email.toLowerCase().trim() && DeviceName.toLowerCase().trim() ===  deviceName.toLowerCase().trim()) {
-        localStorage.setItem('credentials', credentials)
-        window.location.href = '/dashboard';
         setDeviceName('');
         setPassword('')
+        localStorage.setItem('credentials', JSON.stringify(credentials))
+        window.location.href = '/dashboard';
         return;
       }
 
@@ -122,6 +141,8 @@ function page() {
             console.log(error);
           });
     }
+
+    console.log(password)
     
   return (
     <div  className="h-screen relative">
@@ -155,7 +176,28 @@ function page() {
                    <span className='text-sm opacity-[0.8]'>Please input fields to connect</span>
                    <div className='gap-2 flex flex-col'>
                    <TextField id="outlined-basic" label="Devicename" variant="outlined" className=' mt-2' placeholder='KissMemama' value={deviceName} onChange={(e)=> setDeviceName(e.target.value)}/>
-                   <TextField id="outlined-basic" type='password' label="Password" variant="outlined" placeholder='2456*********' value={password} onChange={(e)=> setPassword(e.target.value)}/>
+                   <FormControl className=' mt-2' variant="outlined" >
+          <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+          <OutlinedInput
+            value={password}
+            onChange={(e)=> setPassword(e.target.value)}
+            id="outlined-adornment-password"
+            type={showPassword ? 'text' : 'password'}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+            label="Password"
+          />
+        </FormControl>
                    <a onClick={handleSubmitAuth} className='shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 cursor-pointer hover:bg-[coral] ease-in text-center'>CONNECT</a>
                    </div>
                 </div>
