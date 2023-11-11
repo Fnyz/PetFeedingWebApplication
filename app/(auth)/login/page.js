@@ -144,9 +144,10 @@ function page() {
        
         </div>
         <TextField id="outlined-basic" label="Email" variant="outlined" className='w-[500px]' placeholder='noonenero@gmail.com' onChange={(e) => setEmail(e.target.value)} value={email} />
-        <FormControl className='w-[500px]' variant="outlined" onChange={(e) => setPassword(e.target.value)} value={password}>
+        <FormControl className='w-[500px]' variant="outlined" >
           <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
           <OutlinedInput
+            onChange={(e) => setPassword(e.target.value)} value={password}
             id="outlined-adornment-password"
             type={showPassword ? 'text' : 'password'}
             endAdornment={

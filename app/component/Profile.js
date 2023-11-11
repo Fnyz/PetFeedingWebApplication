@@ -251,7 +251,7 @@ export function ProfileAccount() {
 
      <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md border-[#FAB1A0] cursor-pointer'>
       <BiUpload color='#FAB1A0'/>
-      <label className='text-[#FAB1A0]'>Upload Image</label>
+      <label className='text-[#FAB1A0]'>UPLOAD IMAGE</label>
      </div>
          
          

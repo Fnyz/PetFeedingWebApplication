@@ -37,7 +37,7 @@ function SideBar() {
         },
         {
           name: 'Schedule',
-          link: '/schedule',
+          link: '/schedules',
           icon: <BiTimeFive size={24}/>,
         },
         {
