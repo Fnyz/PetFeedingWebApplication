@@ -26,7 +26,7 @@ function page() {
            <div className=' w-3/5 h-min flex justify-center items-center '>
             <div className='relative h-[650px] w-[1100px]  md:block hidden '>
             <Image
-                src="/Image/undraw_add_document_re_mbjx.svg"
+                src="/Image/undraw_time_management_re_tk5w.svg"
                 layout='fill'
                 quality={100}
                 alt='back image'
