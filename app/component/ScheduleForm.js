@@ -427,7 +427,7 @@ function ScheduleForm() {
       noValidate
       autoComplete="off"
     >
-      <TextField id="outlined-basic" label="Caps" variant="outlined" value={caps} onChange={(e)=> setCaps(e.target.value)}/>
+      <TextField id="outlined-basic" label="Cups" variant="outlined" value={caps} onChange={(e)=> setCaps(e.target.value)}/>
     </Box>
 
       
@@ -542,7 +542,7 @@ function ScheduleForm() {
               <div className='ml-2 font-bold opacity-80'>
               <label>{d.time} {d.parameters2}</label>
               <label> / </label>
-              <label>{d.cups} {d.cups > 1 ? 'caps': 'cap'}</label>
+              <label>{d.cups} {d.cups > 1 ? 'cups': 'cup'}</label>
               </div>
       
               <BiXCircle className=' cursor-pointer hover:text-[red] transition-all ease-in' size={20}  onClick={()=>{

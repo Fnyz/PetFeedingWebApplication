@@ -7,7 +7,7 @@ import { TextField } from '@mui/material'
 import { signOut} from 'firebase/auth'
 import { auth, db } from '../firebase';
 import { useRouter } from 'next/navigation';
-import {getDocs, collection} from 'firebase/firestore'
+import {updateDoc , collection, query, onSnapshot, doc} from 'firebase/firestore'
 import FormControl from '@mui/material/FormControl';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -15,6 +15,20 @@ import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import IconButton from '@mui/material/IconButton';
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import bcrypt from 'bcryptjs'
+import CryptoJS, { SHA256 } from 'crypto-js'
 
 function page() {
 
@@ -23,6 +37,9 @@ function page() {
     const [deviceName, setDeviceName] = useState('');
     const [password, setPassword] = useState('');
     const [data, setUserData] = useState({});
+    const [deviceList, setDeviceList] = useState([]);
+    const [email, setEmail] = useState('');
+    const [show, setShow] = useState(false);
     
     const [showPassword, setShowPassword] = React.useState(false);
 
@@ -38,8 +55,52 @@ function page() {
         if(user){
             const data = JSON.parse(user);
             setUserData(data);
+            setEmail(data.email)
         }
     },[])
+
+
+    
+    const getListDevice = () => {
+      const q = query(collection(db, "Device_Authorization"));
+     onSnapshot(q, (querySnapshot) => {
+    const dt = [];
+    querySnapshot.forEach((doc) => {
+        dt.push({data:doc.data(), id:doc.id});
+    });
+    setDeviceList(dt);
+    console.log(dt);
+
+  });
+  
+    }
+
+
+  
+
+    useEffect(()=>{
+      getListDevice()
+    },[])
+
+
+
+
+
+    const handleNewDevice = async () => {
+      const res = deviceList.find(d => d.data.Email === '' && d.data.Token === 0);
+     
+const devicess = doc(db, "Device_Authorization", res.id);
+await updateDoc(devicess, {
+  Email: email.trim(),
+  Token:1,
+});
+    setDeviceName(res.data.DeviceName);
+    setShow(false);
+ 
+    }
+
+
+    
 
 
     
@@ -50,14 +111,13 @@ function page() {
     e.preventDefault();
 
 
+ 
     const credentials = {
       DeviceName: deviceName.trim(),
-      password: password,
       email:data.email,
       userId:data.id,
     }
 
-    try {
 
       if(!deviceName || !password){
         setDeviceName('');
@@ -74,54 +134,43 @@ function page() {
         return;
       }
 
-      const querySnapshot = await getDocs(collection(db, "Device_Authorization"));
-      querySnapshot.forEach((doc) => {
-  
+
+
+      const res = deviceList.find(d => d.data.Email === data.email && d.data.DeviceName.trim() === deviceName.trim())
+
+
+
+
+      var hashPass = CryptoJS.SHA256(password, '').toString();
+ 
+
+      if(!res){
+         alert('Email is dont have a device');
+         setShow(true);
+        return;
+      }
+
      
-
-      const {email, DeviceName, password: pass } = doc.data();
-
-      if(password !== pass) {
+      if(res.data.Password.trim() !== hashPass.trim() || res.data.Email !== data.email) {
+        alert('Invalid Credentials, please try again.')
         setDeviceName('');
-        setPassword('')
-        alert('Password is incorrect!, please try again.');
-      
+        setPassword('');
         return;
       }
 
 
-      if(email.toLowerCase().trim() !== credentials.email.toLowerCase().trim() || DeviceName.toLowerCase().trim() !==  deviceName.toLowerCase().trim()) {
+      if(res.data.Password.trim() === hashPass.trim() && res.data.Email === data.email) {
         setDeviceName('');
         setPassword('')
-       alert('Device not found! Please try again.');
-       return;
-      }
-
-
-
-      if(email.toLowerCase().trim() === credentials.email.toLowerCase().trim() && DeviceName.toLowerCase().trim() ===  deviceName.toLowerCase().trim()) {
-        setDeviceName('');
-        setPassword('')
-        localStorage.setItem('credentials', JSON.stringify(credentials))
+        localStorage.setItem("credentials", JSON.stringify(credentials));
+        alert('Welcome user, please wait for a moment.');
         window.location.href = '/dashboard';
         return;
       }
 
       
-});
 
-
-
-
-      
-    } catch (error) {
-      
-    }
-    
-
-    
-
-
+  
 
    
    }
@@ -142,7 +191,7 @@ function page() {
           });
     }
 
-    console.log(password)
+ 
     
   return (
     <div  className="h-screen relative">
@@ -198,6 +247,36 @@ function page() {
             label="Password"
           />
         </FormControl>
+        <Dialog>
+      <DialogTrigger asChild>
+        {show && (
+  <div className=' text-sm font-bold rounded text-[#FAB1A0] w-full border border-[#FAB1A0] transition-all  p-4 cursor-pointer hover:text-[coral] ease-in text-center '>
+  ADD DEVICE
+</div>
+        )}
+        
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Bind Device</DialogTitle>
+          <DialogDescription>
+           Please click submit to bind a new device.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+         
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="email" className="text-right">
+              Email
+            </Label>
+            <Input id="email" value={email} placeholder='@pedropenduco' className="col-span-3" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit" onClick={handleNewDevice}>SUBMIT</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
                    <a onClick={handleSubmitAuth} className='shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 cursor-pointer hover:bg-[coral] ease-in text-center'>CONNECT</a>
                    </div>
                 </div>

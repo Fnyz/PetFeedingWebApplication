@@ -113,20 +113,19 @@ function page() {
   
         <Image
             src="/Image/WebBackground.png"
-            layout="fill"
-            
+            fill
             quality={100}
             alt='back image'
         />
   
    <div className='absolute top-0 left-0 '>
-        <div className='flex justify-end w-screen px-10 mt-5'>
+        <div className='flex justify-end w-screen px-10 mt-5  max-sm:w-full'>
             <span className='mr-1 text-sm'>New user?</span>
             <Link href="/register" className='text-red-700 font-semibold text-sm'>Sign-up.</Link>
            
         </div>
-        <div className='flex  flex-1 items-center px-2 gap-5'>
-        <div className='border-r-2 ml-5 w-[900px] h-[900px] relative md:block hidden'>
+        <div className='flex flex-1 items-center px-2 gap-2'>
+        <div className='border-r-2 w-[50%] h-[900px] relative   max-lg:block  max-md:hidden  max-sm:hidden '>
         <Image
             src="/Image/logo.png"
             fill
@@ -136,14 +135,14 @@ function page() {
             
         />
         </div>
-        <div className='flex flex-col gap-5 pl-5'>
-        <div className='flex flex-1 flex-col gap-5'>
+        <div className='flex flex-col gap-5 p-5 max-sm:mt-[300px]'>
+        <div className='flex flex-1 flex-col gap-5 '>
         <div className='flex flex-col'>
         <label className='font-bold text-[30px]'>WELCOME USER!</label>
         <label className='text-sm opacity-[0.7]'>Login to continue</label>
        
         </div>
-        <TextField id="outlined-basic" label="Email" variant="outlined" className='w-[500px]' placeholder='noonenero@gmail.com' onChange={(e) => setEmail(e.target.value)} value={email} />
+        <TextField id="outlined-basic" label="Email" variant="outlined" className='w-[100%]' placeholder='noonenero@gmail.com' onChange={(e) => setEmail(e.target.value)} value={email} />
         <FormControl className='w-[500px]' variant="outlined" >
           <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
           <OutlinedInput

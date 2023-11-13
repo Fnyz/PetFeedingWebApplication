@@ -101,7 +101,7 @@ function page() {
 
                 <AlertDialog>
       <AlertDialogTrigger asChild>
-         <BiLogOutCircle size={20} color='red' opacity={0.6}/>
+         <BiLogOutCircle size={20} color='red' opacity={0.6} className=' cursor-pointer'/>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
