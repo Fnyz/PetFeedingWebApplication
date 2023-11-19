@@ -4,9 +4,10 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import { TextField } from '@mui/material'
-import { BiLogoGoogle } from "react-icons/bi";
 import Link from 'next/link';
 import { auth} from '@/app/firebase';
+import { getDocs , collection} from 'firebase/firestore';
+import { db } from '@/app/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import FormControl from '@mui/material/FormControl';
@@ -16,6 +17,8 @@ import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import IconButton from '@mui/material/IconButton';
+import { useEffect } from 'react';
+
 
 
 
@@ -27,6 +30,25 @@ function page() {
     const [password, setPassword] = useState('');
 
     const [showPassword, setShowPassword] = React.useState(false);
+
+    const [allUserData, setUserData] = useState([]);
+
+
+    useEffect(()=>{
+
+      const gedDatas = async () => {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        const data = [];
+        querySnapshot.forEach((doc) => {
+          data.push({id: doc.id, data: doc.data()});
+        });
+
+        setUserData(data);
+      }
+
+      gedDatas();
+ 
+    },[])
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -47,23 +69,48 @@ function page() {
         .then((userCredential) => {
       
             const user = userCredential.user;
- 
-            if(!user.emailVerified){
-              return;
-            }
-      
-  
+
+            
             const profile = {
               email: user.email,
               id: user.uid,
             }
 
+
+            const res = allUserData.find(ur => ur.id === user.uid && ur.data.isAdmin === true);
+        
+            if(res){
+            setEmail('');
+            setPassword('');
+
+            const credentials = {
+              DeviceName: null,
+              email:user.email,
+              userId:user.uid,
+            }
+            router.push('/home');
+            localStorage.setItem("credentials", JSON.stringify(credentials));
+            return;
+            }
+            
+            
+            
+            if(!user.emailVerified){
+              alert('ACCOUNT is not verified yet!');
+              return;
+            }
+      
+  
             setEmail('');
             setPassword('');
 
             router.push('/device');
             localStorage.setItem("user", JSON.stringify(profile));
             return;
+           
+            
+ 
+           
        
        
         })
@@ -109,41 +156,38 @@ function page() {
 
 
   return (
-    <div className="h-screen relative">
+    <div className=" h-screen relative    ">
   
         <Image
             src="/Image/WebBackground.png"
             fill
             quality={100}
             alt='back image'
+            objectFit='cover'
         />
   
-   <div className='absolute top-0 left-0 '>
-        <div className='flex justify-end w-screen px-10 mt-5  max-sm:w-full'>
-            <span className='mr-1 text-sm'>New user?</span>
-            <Link href="/register" className='text-red-700 font-semibold text-sm'>Sign-up.</Link>
-           
-        </div>
-        <div className='flex flex-1 items-center px-2 gap-2'>
-        <div className='border-r-2 w-[50%] h-[900px] relative   max-lg:block  max-md:hidden  max-sm:hidden '>
+   <div className='absolute top-0 left-0 border bottom-0 right-0'>
+       
+        <div className='flex  items-center px-2 gap-2  h-full '>
+        <div className='border-r-2 h-[90%] w-full   relative  max-lg:block  max-md:hidden  max-sm:hidden '>
         <Image
-            src="/Image/logo.png"
+            src="/Image/petLogo.png"
             fill
-            objectFit='contained'
+            objectFit='cover'
             alt='this is a logo image'
             quality={100}
             
         />
         </div>
-        <div className='flex flex-col gap-5 p-5 max-sm:mt-[300px]'>
-        <div className='flex flex-1 flex-col gap-5 '>
-        <div className='flex flex-col'>
+        <div className='flex flex-col gap-5 p-5  h-full w-full justify-center'>
+        <div className='flex flex-col gap-5  w-[75%] max-md:w-full'>
+        <div className='flex flex-col  '>
         <label className='font-bold text-[30px]'>WELCOME USER!</label>
-        <label className='text-sm opacity-[0.7]'>Login to continue</label>
+        <label className='text-sm opacity-[0.7]'>Login to continue.</label>
        
         </div>
-        <TextField id="outlined-basic" label="Email" variant="outlined" className='w-[100%]' placeholder='noonenero@gmail.com' onChange={(e) => setEmail(e.target.value)} value={email} />
-        <FormControl className='w-[500px]' variant="outlined" >
+        <TextField id="outlined-basic" label="Email" variant="outlined" className='w-full' placeholder='noonenero@gmail.com' onChange={(e) => setEmail(e.target.value)} value={email} />
+        <FormControl className='w-full' variant="outlined" >
           <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
           <OutlinedInput
             onChange={(e) => setPassword(e.target.value)} value={password}
@@ -164,20 +208,21 @@ function page() {
             label="Password"
           />
         </FormControl>
-        </div>
         <div className='flex gap-2'>
-        <button type="button" onClick={handleLogin} className='shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 hover:bg-[coral] ease-in' >LOGIN</button>
+        <button type="button" onClick={handleLogin} className=' shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 hover:bg-[coral] ease-in' >
+           LOGIN
+          </button>
       
-        <button type="button" className='text-sm w-full p-4 border rounded text-[#FAB1A0] border-rose-200 font-semibold hover:text-[coral]'>FORGET PASSWORD</button>
+        <button type="button" className='text-sm w-full p-4 border rounded text-[#FAB1A0] gap-2 border-rose-200 font-semibold hover:text-[coral] '>
+    
+          FORGET PASSWORD</button>
         </div> 
-        <label className='text-sm opacity-[0.8]'>
-           | Login with 
-        </label>
-
-        <div className=' hover:shadow-md shadow w-full p-3 border flex justify-center items-center gap-1 rounded cursor-pointer font-semibold opacity-[0.7]'>
-            <BiLogoGoogle className='h-5 w-5'/>
-            <label className='text-sm'>Sign in with Google</label>
+        <div className='flex justify-end items-center max-sm:w-full gap-1'>
+            <span className=' text-sm opacity-50 font-semibold'>NEW USER?</span>
+            <Link href="/register" className='text-red-700 font-bold text-sm opacity-70'>SIGN-UP.</Link>
         </div>
+        </div>
+      
         
     
         

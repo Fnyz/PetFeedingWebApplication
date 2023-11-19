@@ -12,7 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import Stack from '@mui/material/Stack';
-import { BiXCircle, BiAddToQueue, BiShowAlt, BiTimeFive, BiX } from "react-icons/bi";
+import { BiXCircle, BiAddToQueue, BiShowAlt, BiTimeFive, BiX, BiEdit ,BiSolidTrash, BiSave   } from "react-icons/bi";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import moment from 'moment';
+import { ScrollArea  } from "@/components/ui/scroll-area"
 
 
 
@@ -45,7 +48,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { collection, addDoc, query, onSnapshot, serverTimestamp, where, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, query, onSnapshot, serverTimestamp, where, deleteDoc, doc , updateDoc} from "firebase/firestore";
 import { db } from '../firebase';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -74,8 +77,8 @@ function FormRow({days, setChooseDay, chooseDay}) {
       <React.Fragment>
         {days.map((d, i)=> {
             return (
-                <Grid item xs={5}  key={i}  >
-                <Item className={`cursor-pointer transition-all ease-in font-bold text-white bg-[#FAB1A0] ${chooseDay === d.day && "bg-[coral]"} w-[100%] `} onClick={()=> setChooseDay(d.day)}>{d.day === 'Everyday' ? d.day : d.day.slice(0,3).trim()}</Item>
+                <Grid item xs={6}  key={i}  >
+                <Item className={`cursor-pointer transition-all ease-in font-bold text-white bg-[#FAB1A0] ${chooseDay === d.day && "bg-[coral]"} w-full `} onClick={()=> setChooseDay(d.day)}>{d.day === 'Everyday' ? d.day : d.day.slice(0,3).trim()}</Item>
                 </Grid>
             )
         })}
@@ -113,6 +116,10 @@ function ScheduleForm() {
     const [listSched, setListSched] = useState([]);
     const [show, setShow] = useState(false);
     const [petSchesData, setPetSchedDataset] = useState([]);
+    const [time2 , setTime2] = useState('');
+    const [cups2, setCups2] = useState('');
+    const [currentTime, setCurrentTime] = useState('');
+   
     
 
 
@@ -136,6 +143,66 @@ function ScheduleForm() {
   };  
 
 
+  const handleUpdateTimeManage = (time, cups) => {
+    setTime2(time)
+    setCups2(cups)
+    setCurrentTime(time)
+   
+  }
+
+
+  const handleRemoveSchedTimeSched = async (time, days) => {
+   
+    const a = petSchesData.find((d) => d.dts.Days === days && d.dts.DeviceName === credential.DeviceName)
+    const b = a?.dts.ScheduleTime.filter((d) => d.time !== time );
+    
+    if(a.dts.ScheduleTime.length - 1 === 0){
+      await deleteDoc(doc(db, "feeding_schedule",a.id));
+      return;
+    }
+    const docRef = doc(db, 'feeding_schedule', a.id);
+    updateDoc(docRef, {
+     ScheduleTime:b,
+  }).then(()=>{
+     
+  });
+    
+    
+  
+  
+  }
+
+  const handleUpdateTimeHere = (days, parameters) => {
+    const a = petSchesData.find((d) => d.dts.Days === days && d.dts.DeviceName === credential.DeviceName)
+    const b = a?.dts.ScheduleTime.find((d) => d.time === currentTime);
+    
+    if(b){
+     const res = a?.dts.ScheduleTime.filter(d => d.time !== currentTime);
+     const newArray =  [
+      {cups: cups2,
+       parameters:parameters,
+       time:time2,
+      }
+     ]
+    
+     const updateSched = [...res, ...newArray]
+     const docRef = doc(db, 'feeding_schedule', a.id);
+     updateDoc(docRef, {
+      ScheduleTime:updateSched,
+   }).then(()=>{
+     alert('Time is updated successfully');
+   });
+
+
+    }
+  
+  
+  
+    
+     
+  }
+
+
   
 
 
@@ -148,6 +215,7 @@ function ScheduleForm() {
           schedDatas.push({dts: doc.data(), id: doc.id});
       });
       setPetSchedDataset(schedDatas);
+     
       
     });
     }
@@ -163,7 +231,7 @@ function ScheduleForm() {
 
   useEffect(()=> {
     const isSchedule = () => {
-      const res = listSched.find(d => d?.Petname.toLowerCase().trim() === name.toLowerCase().trim());
+      const res = listSched.find(d => d.data.Petname.toLowerCase().trim() === name.toLowerCase().trim());
       
       if(!res){
         setShow(false);
@@ -198,9 +266,24 @@ function ScheduleForm() {
       alert('Please fill out all fields');
       return;
     }
+
+
+    const res  = listSched.find(d => d.data.Days === chooseDay && d.data.DeviceName === credential.DeviceName && d.data.Petname === name);
+    
+    const exist  = res?.data.ScheduleTime.find(s => s.time === militaryTime.trim() && s.parameters === parameters)
+    
+    if(exist){
+          alert(`Schedule ${exist.time} time is already set please try again.`);
+      return;
+    }
+
+  
+    // Check if the time already exists in the list
+
    
 
-    // Check if the time already exists in the list
+   
+
     const existingItem = scheds1.find((item) => item.time === militaryTime.trim() && item.parameters === parameters);
    
     if (existingItem) {
@@ -210,7 +293,8 @@ function ScheduleForm() {
 
     // Add the new food item and time to the list
     setSchedules([...scheds1, { time: militaryTime.trim(), cups: caps, parameters }]);
- 
+     
+    
 
 
     const existingItem2 = scheds2.find((item) => item.time === militaryTime2.trim() && item.parameters2 === parameters2);
@@ -234,11 +318,19 @@ function ScheduleForm() {
     const q = query(collection(db, "feeding_schedule"));
    onSnapshot(q, (querySnapshot) => {
   const dt = [];
+  const d = [];
   querySnapshot.forEach((doc) => {
-      dt.push(doc.data());
+      dt.push({data:doc.data(), id: doc.id});
   });
   
   setListSched(dt);
+
+ 
+
+ 
+  
+  
+  
 });
   }
   
@@ -313,7 +405,7 @@ function ScheduleForm() {
         return;
       }
   
-      const res = listSched.find(d => d?.Days.toLowerCase().trim() === chooseDay.toLowerCase().trim());
+      const res = listSched.find(d => d.data.Days.toLowerCase().trim() === chooseDay.toLowerCase().trim());
   
       if(!res){
         const docRef = await addDoc(collection(db, "feeding_schedule"), petSchedule);
@@ -333,11 +425,23 @@ function ScheduleForm() {
         return;
        }
   
-       if(res.Days.toLowerCase().trim() === chooseDay.toLowerCase().trim()){
-       
-       alert('Pet schedule is already exists.');
-       return;
-       }
+
+       const currentSched  = res.data.ScheduleTime || [];
+       const updatedSched = [...currentSched, ...scheds1];
+       const docRef = doc(db, 'feeding_schedule', res.id);
+       updateDoc(docRef, {
+         ScheduleTime:updatedSched,
+      }).then(()=>{
+        alert('Pet Schedule updated successfully');
+        setSchedules([])
+        setSchedules2([])
+        setName('')
+        setTwelveHourTime('')
+      });
+      return;
+   
+
+
     
         
     }
@@ -360,7 +464,7 @@ function ScheduleForm() {
 
 
   return (
-    <Card className="w-[440px]">
+    <Card className="w-full">
     <CardHeader>
      <CardTitle>Scheduler!</CardTitle>
      <CardDescription>Fill out this form belows.</CardDescription>
@@ -373,6 +477,10 @@ function ScheduleForm() {
        <Autocomplete
        onInputChange={(event, newInputValue) => {
         setName(newInputValue)
+        setSchedules([]);
+        setSchedules2([])
+        setTwelveHourTime('');
+        setChooseDay('Everyday');
     }} // handles typing
       disablePortal
       id="combo-box-demo"
@@ -388,7 +496,7 @@ function ScheduleForm() {
            <Label className='mb-2 font-bold  opacity-50'>Days</Label>
           
            <Box sx={{ flexGrow: 1 }}>
-         <Grid container spacing={2} direction='row' className='ml-5'  >
+         <Grid container spacing={2} direction='row'   >
         <Grid container item spacing={1} >
             <FormRow days={days} setChooseDay={setChooseDay} chooseDay={chooseDay} />
        </Grid>
@@ -397,44 +505,49 @@ function ScheduleForm() {
       
     </Box>
 
-    <div className='flex ' style={{
-      marginTop:15
+    <div className='flex max-lg:flex-col gap-2 ' style={{
+      width:'100%',
+      paddingBottom:10,
+    
     }}>
     <LocalizationProvider dateAdapter={AdapterDayjs}   >
-      <DemoContainer components={['TimePicker']}   >
+      <DemoContainer components={['TimePicker']} sx={{
+        width:'100%',
+       
+      }} >
+
         <TimePicker
           
           label="Select Time"
-          className='w-[100%] '
+          className='w-full'
           viewRenderers={{
             hours: renderTimeViewClock,
             minutes: renderTimeViewClock,
             seconds: renderTimeViewClock,
           }}
-          ampm={true}
-
-        
+          
+          ampm={true}  
+          value={twelveHourTime}      
           onChange={(e) =>  setTwelveHourTime(`${e.$H}:${e.$m}`)}
+          autoFocus={false}
         />
       </DemoContainer>
     </LocalizationProvider>
 
     <Box
       component="form"
-      sx={{
-        m: 1, width: '40%' 
-      }}
+      className='w-full pt-2'
       noValidate
       autoComplete="off"
     >
-      <TextField id="outlined-basic" label="Cups" variant="outlined" value={caps} onChange={(e)=> setCaps(e.target.value)}/>
+      <TextField id="outlined-basic" className='w-full'  label="Cups" variant="outlined" value={caps} onChange={(e)=> setCaps(e.target.value)}/>
     </Box>
 
       
     </div>
 
     
-    <div className='w-[100%] rounded-md p-2 text-center ml-1 bg-[#FAB1A0] text-white hover:bg-[coral] transition-all ease-in cursor-pointer flex justify-center items-center gap-2 shadow-sm' onClick={addFoodItem} >
+    <div className='w-full rounded-md p-2 text-center  bg-[#FAB1A0] text-white hover:bg-[coral] transition-all ease-in cursor-pointer flex justify-center items-center gap-2 shadow-sm' onClick={addFoodItem} >
       <BiAddToQueue size={20} />
       <label className='cursor-pointer font-bold'>SET CAPS AND TIME</label>
     </div>
@@ -469,28 +582,76 @@ function ScheduleForm() {
       {`You have ${petSchesData.length} schedules for ${name}.`}
     </DialogDescription>
   </DialogHeader>
-  <div className="flex p-2 flex-col h-[400px] overflow-auto border rounded-md space-y-1.5">
+  <ScrollArea className="flex p-2 flex-col h-[400px]  border rounded-md space-y-1.5 ">
          {petSchesData.map((d, i)=> {
           return (
-         <div className='flex flex-col border min-h-fit w-[100%] p-3 rounded-md ' key={i}>
-          <div className='flex justify-between items-center'>
+         <div className='flex flex-col border min-h-fit w-[100%] p-3 rounded-md mt-2' key={i}>
+          <div className='flex justify-between items-center text-[13px]'>
           <label>Day: <span className='text-red-500' style={{
         
         fontWeight:'bold'
       }}>{d.dts.Days}</span></label>
+       
+       <div className='flex '>
 
-      <BiX size={25}  className='hover:text-red-500 cursor-pointer text-[coral]' onClick={()=>handleRemoveSched(d.id)}/>
+     
+       <BiX size={25}  className='hover:text-red-500 cursor-pointer text-[coral]' onClick={()=>handleRemoveSched(d.id)}/>
+       </div>
+     
     
           </div>
 
-          <label>Schedule Time:</label>
+          <label className='text-[13px]'>Schedule Time:</label>
        
          {d.dts.ScheduleTime.map((s, b) => {
-          return (
-            <div className='flex  items-center gap-1 space-y-0'>
-                 <label key={b} className='text-[12px]'> * {s.time} {s.parameters}</label>
-                 <label className='text-[12px] text-[#FAB1A0]'>/</label>
-                 <label key={b} className='text-[12px]'>{s.cups} {s.cups > 1 ? 'cups': 'cup'}</label>
+          return (  
+            <div className='flex justify-between gap-1 space-y-0 border p-2 m-1 rounded-md' key={b}>
+                 <div className='flex  items-center gap-1 space-y-0'>
+                 <label className='text-[15px]'>{s.time} {s.parameters}</label>
+                 <label className='text-[15px] text-[#FAB1A0]'>/</label>
+                 <label  className='text-[15px]'>{s.cups} {s.cups > 1 ? 'cups': 'cup'}</label>
+                 </div>
+                 <div className='flex gap-2 justify-center items-center  '>
+                 
+                
+                 <Dialog>
+      <DialogTrigger asChild>
+      <BiEdit size={20}  className='hover:text-blue-600 cursor-pointer text-blue-400 ' onClick={()=> handleUpdateTimeManage(s.time, s.cups)} />
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Time Schedule</DialogTitle>
+          <DialogDescription>
+            Make changes to the schedule time here. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Time
+            </Label>
+            <Input id="name" value={time2} className="col-span-3" onChange={(e)=> setTime2(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="username" className="text-right">
+              Cups
+            </Label>
+            <Input id="username" value={cups2} className="col-span-3" onChange={(e)=> setCups2(e.target.value)}  />
+          </div>
+        </div>
+        <DialogFooter className=' flex  max-md:items-end'>
+          <div className='flex justify-center items-center gap-2 p-2 w-[60%]  text-center rounded-md font-bold bg-[#FAB1A0] text-white cursor-pointer hover:bg-[coral] transition-all ease-in' onClick={()=> handleUpdateTimeHere(d.dts.Days, s.parameters)}>
+            <BiSave size={20}/>
+            <span>SAVE CHANGES</span>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    /
+                   <BiSolidTrash  size={20}  className='hover:text-red-600 cursor-pointer text-red-400 ' onClick={()=> handleRemoveSchedTimeSched(s.time, d.dts.Days, s.parameters)}/>
+
+                 </div>
             </div>
          
 
@@ -500,15 +661,16 @@ function ScheduleForm() {
         <label style={{
          alignSelf:'flex-end',
          fontSize:13,
-         opacity:0.7
-        }}>01/10/20</label>
+         opacity:0.7,
+         marginTop:10,
+        }}>{moment(d.dts?.created_at?.toDate()).calendar()}</label>
        </div>
           )
          })}
         
 
        
-  </div>
+  </ScrollArea>
 
 
 </DialogContent>

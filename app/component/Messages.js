@@ -3,8 +3,7 @@
 import React from 'react'
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
-import { BiMessageRoundedDots } from "react-icons/bi";
-import { Button } from "@/components/ui/button"
+import { BiMessageRoundedDots, BiMailSend } from "react-icons/bi";
 import {
   Dialog,
   DialogContent,
@@ -165,7 +164,7 @@ function Messages() {
     
   </Box>
     </DialogTrigger>
-    <DialogContent className="sm:max-w-[425px]">
+    <DialogContent className="w-full ">
       <DialogHeader>
         <DialogTitle>Message</DialogTitle>
         <DialogDescription>
@@ -206,11 +205,16 @@ function Messages() {
     </ScrollArea>
       </div>
       <Divider />
-      <DialogFooter>
-          <div >
-          <Input value={mess} placeholder='Input message here' onChange={(e)=> setMess(e.target.value)}  />
+      <DialogFooter className='flex max-sm:flex-col gap-2'>
+        
+          <div className='w-full' >
+          <Input value={mess} placeholder='Input message here' className='w-full' onChange={(e)=> setMess(e.target.value)}  />
          </div>
-        <Button type="submit" onClick={handleSendMessage}>SEND</Button>
+         <div className=' rounded-md w-full p-2 gap-1 justify-center font-bold flex items-center text-white bg-[#FAB1A0] cursor-pointer hover:bg-[coral]' onClick={handleSendMessage}>
+         <BiMailSend size={20} color='white'/>
+          <span>SEND</span>
+         </div>
+      
       </DialogFooter>
     </DialogContent>
   </Dialog>

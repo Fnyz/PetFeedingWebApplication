@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react';
-import { BiEditAlt, BiUpload, BiSolidPencil, BiX} from "react-icons/bi";
+import { BiEditAlt, BiSave, BiSolidPencil, BiX, BiSolidFolderOpen} from "react-icons/bi";
 import { Button } from "@/components/ui/button"
 import Image from 'next/image';
 import {
@@ -152,7 +152,9 @@ export function ProfileAccount() {
    }
 
   const handleShowUserData = () => {
-    const user = localStorage.getItem("credentials")
+
+    
+    const user = localStorage.getItem("credentials")   
     if(user){
         const datas = JSON.parse(user);
         onSnapshot(doc(db, "users", datas.userId), (doc) => {
@@ -179,7 +181,7 @@ export function ProfileAccount() {
       <DialogTrigger asChild className='cursor-pointer' onClick={handleShowUserData}>
         <BiEditAlt  size={20} opacity={0.5} />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-gray">
+      <DialogContent className="sm:max-w-[425px]  bg-gray absolute">
         <DialogHeader>
           <DialogTitle>Update profile</DialogTitle>
           <DialogDescription>
@@ -195,11 +197,11 @@ export function ProfileAccount() {
 />      
         </div>
        </div>
-          <Sheet>
+          <Sheet >
       <SheetTrigger asChild>
         <div className='justify-center items-center border gap-1 flex mx-24 p-2 rounded-md bg-[#FAB1A0] cursor-pointer'>
         <BiEditAlt  size={15} color='white' />
-          <label className='text-[10px] text-white font-bold cursor-pointer'>Choose your profile</label>
+          <label className='text-[10px] text-white font-bold cursor-pointer'>CHOOSE YOUR IMAGE</label>
         </div>
       </SheetTrigger>
       <SheetContent>
@@ -211,10 +213,10 @@ export function ProfileAccount() {
         </SheetHeader>
         <div className="grid gap-4 py-4">
           <label className='font-bold text-blue-500  opacity-50'>Male</label>
-          <ImageList  cols={3} rowHeight={100}>
+          <ImageList  cols={3} rowHeight={110}>
       {male.map((item) => (
         <ImageListItem key={item.image}>
-          <div className='w-[100px] h-[100px]  overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]' onClick={()=>{
+          <div className={`${item.image === choose && " border-2 border-[#FAB1A0]"} w-[100px] border h-[100px]  overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]`} onClick={()=>{
             setChoose(item.image)
           }}>
           <Image 
@@ -233,10 +235,10 @@ export function ProfileAccount() {
     <label className='font-bold text-pink-500 opacity-50'>
   
        Female</label>
-          <ImageList  cols={3} rowHeight={120}>
+          <ImageList  cols={3} rowHeight={110}>
       {female.map((item) => (
         <ImageListItem key={item.image}>
-          <div className='w-[100px] h-[100px]  overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]' onClick={()=> setChoose(item.image)}>
+          <div className={`${item.image === choose && " border-2 border-[#FAB1A0]"} w-[100px] h-[100px] border overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]`} onClick={()=> setChoose(item.image)}>
           <Image 
           src={item.image}
           fill
@@ -249,16 +251,26 @@ export function ProfileAccount() {
       ))}
     </ImageList>
 
-     <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md border-[#FAB1A0] cursor-pointer'>
-      <BiUpload color='#FAB1A0'/>
-      <label className='text-[#FAB1A0]'>UPLOAD IMAGE</label>
+   
+     
+     <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer'>
+     <BiSolidFolderOpen size={22} color='white'/>
+      <label className='text-white font-bold cursor-pointer'>UPLOAD IMAGE</label>
+   
      </div>
+
+   
          
          
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button type="submit" className='w-[100%]'>Save image</Button>
+         
+            <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  border-[#FAB1A0] hover:shadow-md transition-all ease-in cursor-pointer w-full'>
+     <BiSave size={22} color='#FAB1A0'/>
+<label className='text-[#FAB1A0] font-bold cursor-pointer'>SAVE CHANGES</label>
+
+</div>
           </SheetClose>
         </SheetFooter>
       </SheetContent>

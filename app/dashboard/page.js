@@ -31,9 +31,9 @@ function page() {
 
 
     const [profile, setProfileData] = useState({});
+  
 
-    const router = useRouter();
-    
+ 
 
   useEffect(()=>{
     const user = localStorage.getItem("credentials");
@@ -43,6 +43,7 @@ function page() {
         const datas = JSON.parse(user);
         onSnapshot(doc(db, "users", datas.userId), (doc) => {
             setProfileData(doc.data())
+            console.log(doc.data())
         });
     }
   },[])
@@ -52,10 +53,11 @@ function page() {
 
 
 
-
-
     
   return (
+
+
+   
     <div className="h-screen relative ">
         <Image
             src="/Image/WebBackground.png"
@@ -64,17 +66,17 @@ function page() {
             alt='back image'
             objectFit='cover'
         />
-        <div className='absolute left-0 right-0  px-10 pt-5'>
-            <div className='flex justify-between'>
+        <div className='absolute left-0 right-0  px-5 pt-5 max-md:px-3'>
+            <div className='flex justify-between '>
             <SideBar />
         
-            <div className='flex items-center gap-2 mt-2'>
+            <div className='flex items-center gap-2 mt-2 '>
      
-     <div className='w-[60px] h-[60px] p-[2px] rounded-full border-[#FAB1A0] border-2 justify-center items-center'>
+     <div className='w-[60px] h-[60px] p-[2px] rounded-full border-[#FAB1A0] border  justify-center items-center'>
      
-     <div className="w-[52px] h-[52px] rounded-full overflow-hidden relative">
+     <div className="w-[52px] h-[52px] rounded-full overflow-hidden relative ">
         <Image
-           src={profile.image}
+           src={profile.image || '/Image/anyaCuttie.jpg'}
           fill
           alt='profile'
           
@@ -118,7 +120,7 @@ function page() {
               event.preventDefault();
               signOut(auth).then(() => {
                 localStorage.clear();
-                router.push('/login')
+                window.location.href = "/login"
               }).catch((error) => {
                 console.log(error);
               });
@@ -139,8 +141,8 @@ function page() {
         </div>
             </div>
            
-        <div className='flex gap-5 w-[100%] mt-5  h-[500px]'>
-            <div className='w-1/6  flex justify-center items-center relative'>
+        <div className='flex gap-5 w-[100%]   h-full max-md:p-2 '>
+            <div className='w-1/6  flex justify-center items-center relative max-md:hidden  '>
             <Image
             src="/Image/undraw_welcoming_re_x0qo.svg"
             layout='fill'
@@ -151,7 +153,7 @@ function page() {
             </div>
             <div className=' w-[100%]'>
             <TotalPets  />
-            <div className='flex gap-5 mt-5 '>
+            <div className='flex gap-5 mt-5 max-md:flex-col max-lg:flex-col'>
             <ListOfPet />
 
             <Notifications />

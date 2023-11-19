@@ -73,7 +73,7 @@ function TotalPets() {
                 </div>
             </div>
         </div>
-        <div className=' w-[150px]  h-20 rounded-md relative'>
+        <div className=' w-[150px]  h-20 rounded-md relative max-md:hidden block'>
         <Image
         src="/Image/undraw_sign_in_re_o58h.svg"
         layout='fill'

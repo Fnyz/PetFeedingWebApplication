@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { FaBalanceScale } from "react-icons/fa";
-import { BiEditAlt} from "react-icons/bi";
+import { BiEditAlt, BiSave, BiSolidFolderOpen} from "react-icons/bi";
 import {
   Card,
   CardContent,
@@ -195,7 +195,7 @@ function AddPetsForm() {
   },[])
 
   return (
-    <Card className="w-[440px]">
+    <Card className="w-full">
     <CardHeader>
      <CardTitle>Add pet!</CardTitle>
      <CardDescription>Fill out this form below.</CardDescription>
@@ -206,17 +206,20 @@ function AddPetsForm() {
         <Avatar
   alt="Remy Sharp"
   src={choose}
-  sx={{ width: 105, height: 100, objectFit:'contain' }}
+  sx={{ width: 100, height: 100, objectFit:'contain' }}
 />      
         </div>
     </div>
-
+    
     <Sheet>
-      <SheetTrigger asChild>
-        <div className='justify-center items-center border gap-1 flex mx-24 p-2 mt-2 rounded-md  bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer'>
+      <SheetTrigger asChild >
+        <div className='my-4 flex justify-center items-center'>
+        <div className='flex justify-center items-center gap-1 p-3  rounded-md  bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer max-md:w-[200px]'>
         <BiEditAlt  size={15} color='white' />
-          <label className='text-[10px] text-white font-bold cursor-pointer'>Choose pet image</label>
+          <label className='text-[10px] text-white font-bold cursor-pointer'>CHOOSE PET IMAGE</label>
         </div>
+        </div>
+     
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
@@ -226,11 +229,11 @@ function AddPetsForm() {
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
-          <label className='font-bold text-blue-500  opacity-50'>Dog</label>
-          <ImageList  cols={3} rowHeight={100}>
+          <label className='font-bold text-blue-500  opacity-50'>Dog's</label>
+          <ImageList  cols={3} rowHeight={115}>
       {dog.map((item) => (
         <ImageListItem key={item.image}>
-          <div className='w-[100px] h-[100px]  overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]' onClick={()=>{
+          <div className={`${item.image === choose && "border-2 border-[#FAB1A0]"} w-[100px] h-[100px] m-1 border  overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]`} onClick={()=>{
             setChoose(item.image)
           }}>
           <Image 
@@ -248,11 +251,11 @@ function AddPetsForm() {
 
     <label className='font-bold text-pink-500 opacity-50'>
   
-       Cat</label>
-          <ImageList  cols={3} rowHeight={120}>
+       Cat's</label>
+          <ImageList  cols={3} rowHeight={115}>
       {cat.map((item) => (
         <ImageListItem key={item.image}>
-          <div className='w-[100px] h-[100px]  overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]' onClick={()=> setChoose(item.image)}>
+          <div className={`${item.image === choose && "border-2 border-[#FAB1A0]"} border m-1 w-[100px] h-[100px]  overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]`} onClick={()=> setChoose(item.image)}>
           <Image 
           src={item.image}
           fill
@@ -266,7 +269,7 @@ function AddPetsForm() {
     </ImageList>
 
      <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer'>
-
+      <BiSolidFolderOpen size={20} color='white'/>
       <label className='text-white font-bold cursor-pointer'>UPLOAD IMAGE</label>
    
      </div>
@@ -276,7 +279,7 @@ function AddPetsForm() {
         <SheetFooter>
           <SheetClose asChild>
           <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  border-[#FAB1A0] hover:shadow-md transition-all ease-in cursor-pointer w-full'>
-
+<BiSave size={20} color='#FAB1A0'/>
 <label className='text-[#FAB1A0] font-bold cursor-pointer'>SAVE CHANGES</label>
 
 </div>
@@ -317,16 +320,16 @@ function AddPetsForm() {
              </SelectContent>
            </Select>
          </div>
-         <div className='flex justify-between  items-center  '>
+         <div className='flex justify-between  items-center  gap-2'>
     
-         <div className="flex flex-col  space-y-1.5 ">
+         <div className="flex flex-col w-full space-y-1.5 ">
            <Label htmlFor="rfid">RFID</Label>
            <Input id="rfid" placeholder="Generate RFID here" disabled  value={rfid} onChange={(e)=>{
               SetRfid(e.target.value);
             }}/>
          </div>
-         <div className=' gap-2 h-[40px] mt-5 flex justify-center items-center w-[160px] rounded-sm cursor-pointer   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={handleFakeRFID}>
-            <BiRfid size={20} color='white'/>
+         <div className=' gap-2 h-[40px] mt-5 flex justify-center items-center w-full rounded-sm cursor-pointer   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={handleFakeRFID}>
+            <BiRfid size={20} color='white' className='max-md:hidden block'/>
              <label className='text-white font-bold cursor-pointer'>Set RFID</label>
          </div>
     
@@ -334,16 +337,16 @@ function AddPetsForm() {
        
          </div>
     
-         <div className='flex justify-between  items-center  '>
+         <div className='flex justify-between  items-center  gap-2  '>
     
-    <div className="flex flex-col  space-y-1.5 ">
-    <Label htmlFor="weight">Weight</Label>
-    <Input id="weight" placeholder="Generate or Input pet here"  value={weight} onChange={(e)=>{
+    <div className="flex flex-col w-full space-y-1.5 ">
+    <Label htmlFor="rfid">Weight</Label>
+    <Input id="weight"  placeholder="Pet weight"  value={weight} onChange={(e)=>{
               SetWeight(e.target.value);
             }}  />
     </div>
-    <div className='gap-2 cursor-pointer h-[40px] mt-5 flex justify-center items-center w-[160px] rounded-sm   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={handleFakeWeight}>
-        <FaBalanceScale size={20} color='white'/>
+    <div className='gap-2 cursor-pointer h-[40px] mt-5 flex justify-center items-center w-full rounded-sm   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={handleFakeWeight}>
+        <FaBalanceScale size={20} color='white' className=' max-md:hidden block'/>
     <label className='text-white font-bold cursor-pointer'>Weight PET</label>
     </div>
      </div>
@@ -360,7 +363,11 @@ function AddPetsForm() {
     </CardContent>
     <CardFooter className="flex justify-between">
      <Button variant="outline">CLEAR</Button>
-     <Button className='gap-1' onClick={handleSubmit}> <BiPlus size={20}/> SUBMIT </Button>
+     <div onClick={handleSubmit} className='flex transition-all ease-in  justify-center items-center gap-1 border p-2 rounded-md bg-[#FAB1A0] text-white shadow-sm cursor-pointer hover:bg-[coral]'>
+      <BiSave size={20} />
+      <label className=' cursor-pointer font-bold '>SUBMIT</label>
+      </div>
+   
     </CardFooter>
     </Card>
   )

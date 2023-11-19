@@ -1,5 +1,6 @@
 import React from 'react'
 import { AiFillWarning } from "react-icons/ai";
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 function Notifications() {
 
@@ -41,13 +42,13 @@ function Notifications() {
         },
     ]
   return (
-    <div className=' border w-1/5 rounded-md p-2 shadow-md z-50'>
+    <div className=' border w-1/5 rounded-md p-2 shadow-md z-50 max-md:w-full max-lg:w-full'>
         <di className='flex justify-between p-2'>
             <h1 className='text-[12px] font-bold opacity-[0.7]'>!Notifications</h1>
             <span className='text-[12px] opacity-[0.6]'>See all</span>
         </di>
         <div>
-                <div className='border p-1 rounded-sm overflow-auto no-scrollbar h-[450px]'>
+                <ScrollArea className='border p-1 rounded-sm w-full no-scrollbar h-[450px]'>
                 {notif.map((item, i) => {
                     return (
                         <div key={i} className='w-[100%] border mb-2 h-[100px] border-l-4 border-red-300 rounded-sm shadow-md'>
@@ -66,7 +67,7 @@ function Notifications() {
                     )
                 })}
 
-                </div>
+                </ScrollArea>
         </div>
     </div>
   )

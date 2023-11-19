@@ -9,7 +9,8 @@ import Messages from '../component/Messages';
 function page() {
  
   return (
-    <div className="h-screen relative">
+    <div className="h-screen relative  ">
+
         <Image
             src="/Image/WebBackground.png"
             layout='fill'
@@ -17,17 +18,17 @@ function page() {
             alt='back image'
             objectFit='cover'
         />
-        <div className='absolute left-0 right-0  px-10 pt-5'>
+        <div className='absolute left-0 right-0 max-md:px-2 px-10  min-h-max '>
             <div className='flex justify-between'>
             <SideBar />
-        </div>
+           </div>
 
-        <div className='flex gap-5 w-[100%]  mt-5 mb-5 h-min  p-2'>
-       <div className='w-2/5 h-min pl-10 flex justify-end items-center '>
+        <div className='flex gap-5 w-full   min-h-max  '>
+       <div className='w-2/5 min-h-max flex  justify-center items-center max-lg:w-full mt-32 max-md:mt-12'>
        <ReportsForm />
         </div>
-       <div className=' w-3/5 h-min flex justify-center items-center '>
-        <div className='relative h-[650px] w-[1100px]  md:block hidden '>
+       <div className=' w-3/5 min-h-max flex justify-center items-center max-md:hidden   '>
+        <div className='relative h-full  w-full mt-36 max-md:mt-12'>
         <Image
             src="/Image/undraw_anonymous_feedback_re_rc5v.svg"
             layout='fill'

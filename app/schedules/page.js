@@ -14,17 +14,17 @@ function page() {
                 alt='back image'
                 objectFit='cover'
             />
-            <div className='absolute left-0 right-0  px-10 pt-5'>
+            <div className='absolute left-0 right-0 max-sm:px-5  px-10 '>
                 <div className='flex justify-between'>
                 <SideBar />
             </div>
     
-            <div className='flex gap-5 w-[100%]  mt-5 mb-5 h-min  p-2'>
-           <div className='w-2/5 h-min pl-10 flex justify-end items-center '>
+            <div className='flex gap-5 w-full min-h-max p-2'>
+           <div className='w-2/5 min-h-max  flex justify-end items-center max-md:w-full'>
            <ScheduleForm />
             </div>
-           <div className=' w-3/5 h-min flex justify-center items-center '>
-            <div className='relative h-[650px] w-[1100px]  md:block hidden '>
+           <div className=' w-3/5 min-h-max flex justify-center items-center max-md:hidden '>
+            <div className='relative h-full w-full  '>
             <Image
                 src="/Image/undraw_time_management_re_tk5w.svg"
                 layout='fill'

@@ -7,7 +7,7 @@ import { TextField } from '@mui/material'
 import { signOut} from 'firebase/auth'
 import { auth, db } from '../firebase';
 import { useRouter } from 'next/navigation';
-import {updateDoc , collection, query, onSnapshot, doc} from 'firebase/firestore'
+import {updateDoc , collection, query, onSnapshot, doc, where, getDocs} from 'firebase/firestore'
 import FormControl from '@mui/material/FormControl';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -27,8 +27,9 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import bcrypt from 'bcryptjs'
 import CryptoJS, { SHA256 } from 'crypto-js'
+import { BiSolidDevices } from "react-icons/bi";
+import { FaConnectdevelop } from "react-icons/fa6";
 
 function page() {
 
@@ -57,6 +58,7 @@ function page() {
             setUserData(data);
             setEmail(data.email)
         }
+       
     },[])
 
 
@@ -69,7 +71,20 @@ function page() {
         dt.push({data:doc.data(), id:doc.id});
     });
     setDeviceList(dt);
-    console.log(dt);
+    const user = localStorage.getItem("user");
+    if(user){
+        const data = JSON.parse(user);
+        const res = dt.find(d => d.data.Email === data.email);
+        if(!res) {
+          setShow(true);
+          return;
+        };
+
+        setDeviceName(res.data.DeviceName);
+
+
+    }
+    
 
   });
   
@@ -90,12 +105,31 @@ function page() {
       const res = deviceList.find(d => d.data.Email === '' && d.data.Token === 0);
      
 const devicess = doc(db, "Device_Authorization", res.id);
+
 await updateDoc(devicess, {
   Email: email.trim(),
   Token:1,
-});
+}).then(async()=>{
+
+const q = query(collection(db, "users"), where("email", "==", email.trim()));
+const querySnapshot = await getDocs(q);
+querySnapshot.forEach(async (docss) => {
+
+  const devicesss = doc(db, "users", docss.id);
+  await updateDoc(devicesss, {
+    hasDevice: true,
+    Devicename:res.data.DeviceName,
+  }).then(()=> {
     setDeviceName(res.data.DeviceName);
     setShow(false);
+  })
+ 
+});
+
+
+
+});
+   
  
     }
 
@@ -120,7 +154,7 @@ await updateDoc(devicess, {
 
 
       if(!deviceName || !password){
-        setDeviceName('');
+      
         setPassword('')
         alert('Please input all fields?');
       
@@ -129,7 +163,7 @@ await updateDoc(devicess, {
 
       if(password.length < 4) {
         alert('Password must be at least 4 to 6 characters long!')
-        setDeviceName('');
+     
         setPassword('')
         return;
       }
@@ -153,14 +187,14 @@ await updateDoc(devicess, {
      
       if(res.data.Password.trim() !== hashPass.trim() || res.data.Email !== data.email) {
         alert('Invalid Credentials, please try again.')
-        setDeviceName('');
+    
         setPassword('');
         return;
       }
 
 
       if(res.data.Password.trim() === hashPass.trim() && res.data.Email === data.email) {
-        setDeviceName('');
+    
         setPassword('')
         localStorage.setItem("credentials", JSON.stringify(credentials));
         alert('Welcome user, please wait for a moment.');
@@ -204,7 +238,7 @@ await updateDoc(devicess, {
         />
 
         <div className='gap-7 justify-center items-center flex absolute top-0 left-0 w-[100%]  p-5 h-[100%] '>
-            <div className='flex flex-1  justify-center items-center h-screen'>
+            <div className='flex flex-1  justify-center items-center h-screen max-md:hidden '>
               
         <Image
             src="/Image/undraw_two_factor_authentication_namy.svg"
@@ -219,12 +253,14 @@ await updateDoc(devicess, {
                 <BiLogOut  size={30}/>
                 </a>
                 
-                <div className='w-[90%]'>
+                <div className='w-[85%] max-md:w-[100%]'>
                   
                    <h1 className='font-bold text-[30px]'>Connect Via Device</h1>    
-                   <span className='text-sm opacity-[0.8]'>Please input fields to connect</span>
-                   <div className='gap-2 flex flex-col'>
-                   <TextField id="outlined-basic" label="Devicename" variant="outlined" className=' mt-2' placeholder='KissMemama' value={deviceName} onChange={(e)=> setDeviceName(e.target.value)}/>
+                   <span className='text-sm opacity-[0.8]'>{show ? 'Please click the button below to add device.': 'Please input fields to connect.'}</span>
+                   <div className='gap-2 flex flex-col mt-4'>
+               {!show && (
+                <>
+                    <TextField disabled id="outlined-basic" label="Devicename" variant="outlined"  placeholder='KissMemama' value={deviceName} onChange={(e)=> setDeviceName(e.target.value)}/>
                    <FormControl className=' mt-2' variant="outlined" >
           <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
           <OutlinedInput
@@ -247,10 +283,13 @@ await updateDoc(devicess, {
             label="Password"
           />
         </FormControl>
+                </>
+               )}
         <Dialog>
       <DialogTrigger asChild>
         {show && (
-  <div className=' text-sm font-bold rounded text-[#FAB1A0] w-full border border-[#FAB1A0] transition-all  p-4 cursor-pointer hover:text-[coral] ease-in text-center '>
+  <div className='flex justify-center items-center gap-2 text-sm font-bold rounded text-white w-full border bg-[#FAB1A0] transition-all  p-4 cursor-pointer hover:bg-[coral] ease-in text-center '>
+    <BiSolidDevices size={20}/>
   ADD DEVICE
 </div>
         )}
@@ -277,7 +316,14 @@ await updateDoc(devicess, {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-                   <a onClick={handleSubmitAuth} className='shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 cursor-pointer hover:bg-[coral] ease-in text-center'>CONNECT</a>
+
+                 {!show && (
+                   <a onClick={handleSubmitAuth} className='shadow text-sm font-bold rounded flex justify-center items-center gap-2 text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 cursor-pointer hover:bg-[coral] ease-in text-center'>
+                    <FaConnectdevelop size={20} color='white'/>
+                    CONNECT
+                    </a>
+
+                 )}
                    </div>
                 </div>
                 
