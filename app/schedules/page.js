@@ -1,10 +1,15 @@
-import React from 'react'
+'use client'
 
+import React, { useEffect } from 'react'
 import Image from 'next/image'
 import SideBar from '../component/SideBar';
 import ScheduleForm from '../component/ScheduleForm';
 
+
 function page() {
+
+    
+
     return (
         <div className="h-screen relative">
             <Image

@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { TextField } from '@mui/material'
 import Link from 'next/link'
@@ -26,9 +26,17 @@ function page() {
     const [lastName, setLastname] = useState('');
     const [username, setUsername] = useState('');
     const router = useRouter()
+    const [isclient, setIsClient] = useState(false);
  
 
     const [showPassword, setShowPassword] = React.useState(false);
+
+
+    useEffect(()=>{
+     setIsClient(true);
+    },[])
+
+
 
 
     const handleSubmit = () => {
@@ -126,6 +134,10 @@ function page() {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+
+  if(!isclient){
+    return;
+  }
   return (
     <div className="h-screen relative w-full">
   

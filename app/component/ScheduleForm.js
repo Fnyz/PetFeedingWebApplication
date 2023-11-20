@@ -71,20 +71,7 @@ const days = [
 
 
 
-function FormRow({days, setChooseDay, chooseDay}) {
 
-    return (
-      <React.Fragment>
-        {days.map((d, i)=> {
-            return (
-                <Grid item xs={6}  key={i}  >
-                <Item className={`cursor-pointer transition-all ease-in font-bold text-white bg-[#FAB1A0] ${chooseDay === d.day && "bg-[coral]"} w-full `} onClick={()=> setChooseDay(d.day)}>{d.day === 'Everyday' ? d.day : d.day.slice(0,3).trim()}</Item>
-                </Grid>
-            )
-        })}
-      </React.Fragment>
-    );
-}
 
 
 
@@ -119,6 +106,30 @@ function ScheduleForm() {
     const [time2 , setTime2] = useState('');
     const [cups2, setCups2] = useState('');
     const [currentTime, setCurrentTime] = useState('');
+    const [isClient, setIsclient] = useState(false);
+
+
+    useEffect(()=>{
+       setIsclient(true);
+    },[])
+
+
+    
+
+    function FormRow({days, setChooseDay, chooseDay}) {
+
+      return (
+        <React.Fragment>
+          {days.map((d, i)=> {
+              return (
+                  <Grid item xs={6}  key={i}  >
+                  <Item className={`cursor-pointer transition-all ease-in font-bold text-white bg-[#FAB1A0] ${chooseDay === d.day && "bg-[coral]"} w-full `} onClick={()=> setChooseDay(d.day)}>{d.day === 'Everyday' ? d.day : d.day.slice(0,3).trim()}</Item>
+                  </Grid>
+              )
+          })}
+        </React.Fragment>
+      );
+  }
    
     
 
@@ -459,6 +470,8 @@ function ScheduleForm() {
 
 
 
+
+    if(!isClient) return;
  
 
 

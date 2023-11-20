@@ -1,11 +1,21 @@
-
+'use client'
 import React from 'react'
 import Image from 'next/image'
 import SideBar from '../component/SideBar';
 import AddPetsForm from '../component/AddPetsForm';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
 
 function page() {
+
+  const [isclient, setIsclient] = useState(false);
+
+  useEffect(()=>{
+    setIsclient(true)
+  },[])
+
+  if(!isclient) return;
  
   return (
     <div className=" h-screen relative  ">

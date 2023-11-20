@@ -40,6 +40,28 @@ function page() {
     const [credential, setCredential] = React.useState({});
     const [youtubeUrl, setYoutubeUrl] = React.useState('https://www.youtube.com/watch?v=EF8C4v7JIbA&ab_channel=BBCEarth');
     const [loading, setLoading] = React.useState(false);
+    const [liveStreamUrl, setLiveStreamUrl] = useState('');
+
+        useEffect(() => {
+      const apiKey = 'AIzaSyAswYUBVDRW-TQaMlXy2eCaq1VEQjDWk4Y';
+      const channelId = 'UCfz2mEXrgNp1WUgiKsiscWg';
+  
+      const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&eventType=live&type=video&channelId=${channelId}&key=${apiKey}`;
+  
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          const liveVideo = data.items[0];
+          const videoId = liveVideo.id.videoId;
+          const url = `https://www.youtube.com/watch?v=${videoId}`;
+          setLiveStreamUrl(url);
+          console.log(url);
+         
+        })
+        .catch(error => {
+          console.error('Error fetching live stream data:', error);
+        });
+    }, []);
 
 
     useEffect(()=> {
@@ -187,11 +209,11 @@ function page() {
                 <SideBar />
                  </div>
 
-                 <div className=' max-h-min mt-2'>
-                {isClient && <VideoFrame  youtubeUrl={youtubeUrl} /> }
+                 <div className=' max-h-min mt- 2'>
+                {isClient && <VideoFrame  youtubeUrl={liveStreamUrl} /> }
                  
                  </div>
-                
+                  
             </div>
 
             <div>

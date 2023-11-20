@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { BiSolidHand, BiLogOutCircle} from "react-icons/bi";
 import ListOfPet from '@/app/component/ListOfPet';
 import Notifications from '@/app/component/Notifications';
-import SideBar from '../component/SideBar';
+import SideBarAdmin from '../component/SideBarAdmin';
 import { ProfileAccount } from '../component/Profile';
 import { doc, onSnapshot} from "firebase/firestore";
 import { db, auth } from '../firebase';
@@ -34,7 +34,8 @@ function page() {
     const [profile, setProfileData] = useState({});
   
 
- 
+
+
   
     useEffect(()=>{
         const user = localStorage.getItem("credentials");
@@ -68,7 +69,7 @@ function page() {
         />
         <div className='absolute left-0 right-0  px-5 pt-5 max-md:px-3'>
             <div className='flex justify-between '>
-            <SideBar />
+            <SideBarAdmin />
         
             <div className='flex items-center gap-2 mt-2 '>
      

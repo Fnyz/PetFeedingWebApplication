@@ -32,10 +32,11 @@ function page() {
     const [showPassword, setShowPassword] = React.useState(false);
 
     const [allUserData, setUserData] = useState([]);
-
-
+  
+    const [isclient, setIsClient] = useState(false);
+  
     useEffect(()=>{
-
+      setIsClient(true);
       const gedDatas = async () => {
         const querySnapshot = await getDocs(collection(db, "users"));
         const data = [];
@@ -153,6 +154,8 @@ function page() {
       
         });
     }
+
+  if(!isclient) return;
 
 
   return (

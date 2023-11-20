@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import {BiSolidInfoCircle, BiEditAlt, BiSolidTrashAlt, BiSave, BiSolidFolderOpen, BiEdit, BiSolidLike} from "react-icons/bi";
+import {BiSolidInfoCircle, BiEditAlt, BiSolidTrashAlt, BiSave, BiSolidFolderOpen, BiEdit, BiSolidLike, BiSolidKey} from "react-icons/bi";
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
@@ -109,6 +109,10 @@ const [weight, setWeight] = React.useState('');
 const [goalWeight, setGoalWeight] = React.useState('');
 const [suggestDelete, setDelete] = React.useState(false);
 const [search, setSearch] = React.useState('');
+
+
+
+
 
 const HandleDelete = async () => {
 
@@ -222,10 +226,13 @@ const [opens, setOpens] = React.useState(false);
       setUsername(res.dt.username);
       setEmail(res.dt.email);
       setDevice(res.dt.Devicename)
+      setChoose(res.dt.image);
       
-   
 
-        return;
+      return;
+
+    
+
       }
 
       const res = listOfData.find(d => d.id === petId);
@@ -297,7 +304,7 @@ const [opens, setOpens] = React.useState(false);
       <div className='flex justify-between items-center  gap-5 px-10'>
       <div className='flex justify-center items-center  gap-5'>
       <Image
-           src="/Image/animals.png"
+           src="/Image/team.png"
           width={40}
           height={40}
           alt='profile'
@@ -309,7 +316,7 @@ const [opens, setOpens] = React.useState(false);
         fontWeight:'bold',
       
         color:'#FAB1A0'
-       }}>List of Pets
+       }}>List of Users
        </label>
       </div>
    
@@ -344,7 +351,8 @@ const [opens, setOpens] = React.useState(false);
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">USERNAME</div>
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">EMAIL</div>
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">Device</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] ">OPTIONS</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">OPTIONS</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] "></div>
       </div>
 
       <div className=' h-[350px] overflow-auto  p-2 '>
@@ -365,9 +373,9 @@ const [opens, setOpens] = React.useState(false);
              />
              </div>
             </div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80">{item.dt.username}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.email}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.Devicename}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80 text-sm">{item.dt.username}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-[12px]">{item.dt.email}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-sm text-red-500 font-bold text-[12px]">{item.dt.Devicename}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">
 
             <div>
@@ -401,6 +409,7 @@ const [opens, setOpens] = React.useState(false);
           style: {
             maxHeight: ITEM_HEIGHT * 4.5,
             width: '15ch',
+            
           },
         }}
       >
@@ -417,10 +426,16 @@ const [opens, setOpens] = React.useState(false);
       </Menu>
     </div>
             </div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-sm text-red-500 font-bold">
+              <span className='text-[10px] p-2 bg-red-500 text-white rounded-sm'>OFFLINE</span>
+            </div>
            </div>
+           
      
           )
         })}
+
+
 
 
        <Modal
@@ -431,9 +446,9 @@ const [opens, setOpens] = React.useState(false);
         <Box sx={style}>
         <div className='flex justify-between '>
           <div>
-          <Typography variant="h5" className='font-bold'>VIEW PET PROFILE</Typography>
+          <Typography variant="h5" className='font-bold'>VIEW USER'S PROFILE</Typography>
           
-        <Typography variant="caption" className=' opacity-75'>See more details about this pet.</Typography>
+        <Typography variant="caption" className=' opacity-75'>See more details about this profile.</Typography>
           </div>
           <BiX size={30} onClick={()=> setVisible(false)} color='red' className='cursor-pointer'/>
       
@@ -449,10 +464,7 @@ const [opens, setOpens] = React.useState(false);
 />      
         </div>
     </div>
-    {needUpdate &&  <div className='justify-center items-center border gap-1 flex mx-24 p-2 mt-2 rounded-md  bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer' onClick={handleClickOpen}>
-        <BiEditAlt  size={15} color='white' />
-          <label className='text-[10px] text-white font-bold cursor-pointer'>CHANGE PET IMAGE</label>
-        </div>}
+    
    
     <Modal
         open={opens}
@@ -471,58 +483,13 @@ const [opens, setOpens] = React.useState(false);
       
         </div>
         <div className="grid gap-4 py-4">
-          <label className='font-bold text-blue-500  opacity-50'>Dog's</label>
-          <ImageList  cols={3} rowHeight={110} >
-      {dog.map((item) => (
-        <ImageListItem key={item.image} >
-          <div className={`${item.image === choose && 'border  border-[#FAB1A0]'} hover:border hover:border-[#FAB1A0] cursor-pointer w-[100px] h-[100px]  overflow-hidden rounded-md relative `} onClick={()=>{
-            setChoose(item.image)
-          }}>
-          <Image 
-          src={item.image}
-          fill
-          objectFit='cover'
-          className='p-2 rounded-md border '
-          />
-          </div>
-         
-        </ImageListItem>
-      ))}
-    </ImageList>
+        
 
 
-    <label className='font-bold text-pink-500 opacity-50'>
   
-       Cat's</label>
-          <ImageList  cols={3} rowHeight={110}>
-      {cat.map((item) => (
-        <ImageListItem key={item.image}>
-          <div className={`${item.image === choose && 'border  border-[#FAB1A0]'} hover:border hover:border-[#FAB1A0] cursor-pointer w-[100px] h-[100px]  overflow-hidden rounded-md relative `} onClick={()=> {
-            setChoose(item.image)
-          }}>
-          <Image 
-          src={item.image}
-          fill
-          objectFit='contain'
-          className='p-2 border rounded-md'
-          />
-          </div>
-         
-        </ImageListItem>
-      ))}
-    </ImageList>
+  
 
-     <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer'>
-     <BiSolidFolderOpen size={22} color='white'/>
-      <label className='text-white font-bold cursor-pointer'>UPLOAD IMAGE</label>
    
-     </div>
-
-     <div onClick={()=> setOpens(false)} className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  border-[#FAB1A0] hover:shadow-md transition-all ease-in cursor-pointer w-full'>
-     <BiSave size={22} color='#FAB1A0'/>
-<label className='text-[#FAB1A0] font-bold cursor-pointer'>SAVE CHANGES</label>
-
-</div>
          
          
         </div>
@@ -537,20 +504,20 @@ const [opens, setOpens] = React.useState(false);
             <Label htmlFor="petname" className="text-right">
               Name
             </Label>
-            <Input id="petname" placeholder='Kussy' value={petname} className="col-span-3" disabled={!needUpdate} onChange={(e) => setPetname(e.target.value)}/>
+            <Input id="petname" placeholder='Kussy' value={name} className="col-span-3" disabled={!needUpdate} />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="age" className="text-right">
               Lastname
             </Label>
-            <Input id="age" placeholder="15" value={age} className="col-span-3" disabled={!needUpdate} onChange={(e) => setAge(e.target.value)} />
+            <Input id="age" placeholder="15" value={lasname} className="col-span-3" disabled={!needUpdate}  />
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="age" className="text-right">
               Username
             </Label>
-            <Input id="age" placeholder="15" value={age} className="col-span-3" disabled={!needUpdate} onChange={(e) => setAge(e.target.value)} />
+            <Input id="age" placeholder="15" value={username} className="col-span-3" disabled={!needUpdate}  />
           </div>
         
           
@@ -559,37 +526,25 @@ const [opens, setOpens] = React.useState(false);
             <Label htmlFor="age" className="text-right">
               Email
             </Label>
-            <Input id="age" placeholder="15" value={goalWeight} className="col-span-3" disabled={!needUpdate} onChange={(e) => setGoalWeight(e.target.value)} />
+            <Input id="age" placeholder="15" value={email} className="col-span-3" disabled={!needUpdate} />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="age" className="text-right">
               Device
             </Label>
-            <Input id="age" placeholder="15" className="col-span-3 " value={weight} disabled={!needUpdate}  onChange={(e) => setWeight(e.target.value)} />
+            <Input id="age" placeholder="15" className="col-span-3 " value={device} disabled={!needUpdate}  />
+          </div>
+
+          <div className="grid grid-cols items-center gap-4">
+           <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2'>
+            <BiSolidKey size={20} color='white'/>
+            <span>
+              ADD YOUTUBE KEY
+            </span>
+           </div>
           </div>
        
-          {needUpdate && (
-
-<div className="flex items-center gap-2 border p-2 justify-center rounded-md border-[#FAB1A0] cursor-pointer hover:border-[coral] transition-all ease-in" onClick={handleFakeWeight}>
-          <FaBalanceScale size={20} className='hover:text-[coral] text-[#FAB1A0]'/>
-            <span className='text-[#FAB1A0] hover:text-[coral] font-bold' >GENERATE WEIGHT</span>
-          </div>
-          )}
-          {needUpdate ?
-          <div className='flex gap-2'>
-          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleUpdate}>
-          <BiSave size={25} color='white'/>
-           <span className='text-white font-bold'>SUBMIT</span>
-          </div>
-          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleNeedupdate}>
-          <BiX size={25} color='white'/>
-           <span className='text-white font-bold'>CANCEL</span>
-          </div>
-          </div> 
-           :   <div className="flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleNeedupdate}>
-          <BiEdit size={20} color='white'/>
-           <span className='text-white font-bold'>EDIT</span>
-          </div>}
+          
          
           
         </div>

@@ -1,5 +1,5 @@
-
-import React from 'react'
+'use client'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import SideBar from '../component/SideBar';
 import ReportsForm from '../component/ReportsForm';
@@ -7,7 +7,15 @@ import Messages from '../component/Messages';
 
 
 function page() {
- 
+  const [isclient, SetIsClient] = useState(false);
+
+  useEffect(()=>{
+    SetIsClient(true)
+  },[])
+
+  if(!isclient){
+    return;
+  }
   return (
     <div className="h-screen relative  ">
 
@@ -24,7 +32,7 @@ function page() {
            </div>
 
         <div className='flex gap-5 w-full   min-h-max  '>
-       <div className='w-2/5 min-h-max flex  justify-center items-center max-lg:w-full mt-32 max-md:mt-12'>
+       <div className='w-2/5 min-h-max flex  justify-center items-center max-lg:w-full mt-10 max-md:mt-12'>
        <ReportsForm />
         </div>
        <div className=' w-3/5 min-h-max flex justify-center items-center max-md:hidden   '>

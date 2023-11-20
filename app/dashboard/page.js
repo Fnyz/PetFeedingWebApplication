@@ -31,6 +31,12 @@ function page() {
 
 
     const [profile, setProfileData] = useState({});
+
+    const [isclient, setIsclient] = useState(false);
+
+    useEffect(()=>{
+      setIsclient(true);
+    },[])
   
 
  
@@ -49,6 +55,10 @@ function page() {
   },[])
   
  
+
+  if(!isclient){
+    return;
+  }
 
 
 
