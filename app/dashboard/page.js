@@ -6,11 +6,11 @@ import ListOfPet from '@/app/component/ListOfPet';
 import Notifications from '@/app/component/Notifications';
 import SideBar from '../component/SideBar';
 import { ProfileAccount } from '../component/Profile';
-import { doc, onSnapshot} from "firebase/firestore";
+import { doc, onSnapshot, updateDoc} from "firebase/firestore";
 import { db, auth } from '../firebase';
 import TotalPets from '../component/TotalPets';
 import { signOut} from 'firebase/auth'
-import { useRouter } from 'next/navigation';
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -31,7 +31,7 @@ function page() {
 
 
     const [profile, setProfileData] = useState({});
-
+    const [userId, setUserId] = useState("");
     const [isclient, setIsclient] = useState(false);
 
     useEffect(()=>{
@@ -48,8 +48,8 @@ function page() {
     if(user){
         const datas = JSON.parse(user);
         onSnapshot(doc(db, "users", datas.userId), (doc) => {
-            setProfileData(doc.data())
-            console.log(doc.data())
+            setProfileData(doc.data());
+            setUserId(doc.id)
         });
     }
   },[])
@@ -129,8 +129,14 @@ function page() {
             onSubmit={(event) => {
               event.preventDefault();
               signOut(auth).then(() => {
-                localStorage.clear();
-                window.location.href = "/login"
+                const a = doc(db, "users", userId);
+                updateDoc(a, {
+                isActive:false
+               }).then(()=> {
+               localStorage.clear();
+               window.location.href = "/login"
+            })
+                
               }).catch((error) => {
                 console.log(error);
               });

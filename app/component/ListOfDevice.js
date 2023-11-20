@@ -16,15 +16,22 @@ import Modal from '@mui/material/Modal';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { BiX } from "react-icons/bi";
-import { petsData } from '../animeData';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import { FaBalanceScale } from "react-icons/fa";
+
 import { Avatar } from '@mui/material';
-import ImageList from '@mui/material/ImageList';
-import ImageListItem from '@mui/material/ImageListItem';
+
 import { doc, updateDoc} from "firebase/firestore";
 import { ScrollArea, ScrollBar  } from "@/components/ui/scroll-area"
+
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 
 
@@ -70,45 +77,28 @@ const style = {
 
 const ITEM_HEIGHT = 48;
 
-function generateFakeWeight(min, max) {
-  const fakeWeight = (Math.random() * (max - min) + min).toFixed(2); // Generates a random weight between min and max with 2 decimal places
-  return `${fakeWeight} kg`;
-}
 
 
 
 
-
-function ListOfDevice() {
+function ListOfDevice({setPositions}) {
 
   const [listOfData, setUserDataList] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [dog, setDog] = React.useState([]);
-  const [cat, setCat] = React.useState([]);
   const [name, setName] = React.useState('');
   const [lasname, setLname] = React.useState('');
   const [username, setUsername] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [device, setDevice] = React.useState('');
   const [gender, setGender] = React.useState('');
-  const [age, setAge] = React.useState('');
   const [petId, setPetId] = React.useState('');
   const [needUpdate, setNeedUpdate] = React.useState(false);
-  const [gendered, setGenders] = React.useState([{
-   gender:'Male',
-   val: 'male',
-  },
-  {
-    gender:'Female',
-    val: 'female',
-   }
-
-]);
-const [petname, setPetname] = React.useState('');
-const [weight, setWeight] = React.useState('');
-const [goalWeight, setGoalWeight] = React.useState('');
-const [suggestDelete, setDelete] = React.useState(false);
-const [search, setSearch] = React.useState('');
+  const [position, setPosition] = React.useState("")
+  const [suggestDelete, setDelete] = React.useState(false);
+  const [search, setSearch] = React.useState('');
+  const [lives, setLiveList] = React.useState([]);
+  const [apiky, setApiKy] = React.useState('');
+  const [channel, setChannel] = React.useState('');
 
 
 
@@ -132,36 +122,67 @@ const suggestDeleting = () => {
 
 
 
-const handleNeedupdate = () => {
-  setNeedUpdate((prev) => !prev);
-}
 
 
 const [opens, setOpens] = React.useState(false);
 
-  const handleClickOpen = () => {
-    setOpens(true);
-  };
 
   const handleClose2 = () => {
     setOpens(false);
   };
+
+  const handleOpen2 = () => {
+    setOpens(true);
+  };
+
 
 
 
 
   
 
-  const handleChange = (event) => {
-    setGender(event.target.value);
-  };
-
   const [choose, setChoose] = React.useState('');
 
 
+  const liveStreamDetails = () => {
+
+    const q = query(collection(db, "Livestream"));
+    const data = [];  
+    onSnapshot(q, (querySnapshot) => {
+   querySnapshot.forEach((docing) => {
+      data.push({dt: docing.data(), id: docing.id});
+   });
+    setLiveList(data)
+   });
+  }
+
+  const getLiveStreamData = async (device) => {
+
+
+   const res = lives.find(l => l.dt.DeviceName === device);
+   const a = doc(db, "Livestream", res.id);
+      await updateDoc(a, {
+       ApiKey:apiky,
+       ChannelID:channel
+      }).then(()=>{
+        Alert('Sumitted successfully!');
+      });
+
+
+  }
+
+  useEffect(()=>{
+    liveStreamDetails();
+    setPosition("WITHDEVICE")
+  
+  },[])
+
+
   useEffect(()=> {
+   
 
-
+    if(search.length === 0){
+      
       const q = query(collection(db, "users"), where("isAdmin", "==", false), where("hasDevice", "==", true));
       const data = [];  
       onSnapshot(q, (querySnapshot) => {
@@ -169,49 +190,52 @@ const [opens, setOpens] = React.useState(false);
         data.push({dt: docing.data(), id: docing.id});
 
      });
-    setUserDataList(data);
+     
+      if(position === "WITHDEVICE" ){
+        setPositions("WITHDEVICE")
+        setUserDataList(data);
+      }else{
+        setPositions("WITHOUTDEVICE");
+        const q = query(collection(db, "users"), where("isAdmin", "==", false),where("hasDevice", "==", false));
+            const data = [];  
+            onSnapshot(q, (querySnapshot) => {
+           querySnapshot.forEach((docing) => {
+              data.push({dt: docing.data(), id: docing.id});
+      
+           });
+            setUserDataList(data);
+        
+         });
+      }
+     
+     
+   
+   
     
    });
 
+   return;
+
+    };
 
 
-  
+
+    
+    const userData = [...listOfData];
+    const result = userData.filter((ds) => {
+      if(ds.dt.username.trim().toLowerCase().includes(search.toLowerCase().trim())){
+        return ds;
+      }
+    })
+
+    
+
+    setUserDataList(result);
    
-     
-  
-    // if(search.length === 0){
-    //   const user = localStorage.getItem("credentials");
-    //   const datas = JSON.parse(user);
-    //   if(user){
-        
-    //     return;
-    //   }
 
     
-     
-    // };
+  },[search, position, listOfData])
 
-
-    // const pets = [...listOfPet];
-    // const result = pets.filter((ds) => {
-    //   if(ds.dt.Petname.trim().toLowerCase().includes(search.toLowerCase().trim())){
-    //     return ds;
-    //   }
-    // })
-
-    // setListOfPet(result);
-    
-
-    
-  },[])
-
-
-
-
-
-
-
-  
 
 
     const openTime = (type) => {
@@ -250,25 +274,8 @@ const [opens, setOpens] = React.useState(false);
 
 
     
-    
-  React.useEffect(()=>{
-    const dog = petsData.filter(item => item.category === 'Dog');
-    const cat = petsData.filter(item => item.category === 'Cat');
-
-    setDog(dog);
-    setCat(cat);
-    setChoose('/Image/anyaCuttie.jpg');
-  },[])
-
-
-  const handleFakeWeight = () => {
-    setTimeout(() => {
-      const fakeWeight = generateFakeWeight(15, 25);
-      setWeight(fakeWeight)
-    }, 3000);
-
-  }
-
+  
+ 
 
   const handleUpdate = async () => {
     const docUpdate = {
@@ -316,21 +323,36 @@ const [opens, setOpens] = React.useState(false);
         fontWeight:'bold',
       
         color:'#FAB1A0'
-       }}>List of Users
+       }}>{position ==='WITHDEVICE'? "List of Users with Device" : "List of Users without Device"}
        </label>
       </div>
-   
+       <div className='flex gap-2 justify-center items-center'>
+
+      <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">FILTER BY USER'S</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+          <DropdownMenuRadioItem value="WITHDEVICE">USER WITH DEVICE</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="WITHOUTDEVICE">USER WITHOUT DEVICE</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
        <Paper
       component="form"
       value={search}
       onChange={(e)=> setSearch(e.target.value)}
-      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
+      className='border '
+      sx={{ p: ' 4px', display: 'flex', alignItems: 'center', width: 400, height:40, boxShadow:'none' }}
     >
     
       <InputBase
        
         sx={{ ml: 1, flex: 1 }}
-        placeholder="SEARCH PET HERE ..."
+        placeholder="SEARCH USER HERE ..."
         inputProps={{ 'aria-label': 'search google maps' }}
     
       
@@ -342,6 +364,8 @@ const [opens, setOpens] = React.useState(false);
 
    
     </Paper>
+    </div>
+
       </div>
   
 
@@ -352,13 +376,14 @@ const [opens, setOpens] = React.useState(false);
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">EMAIL</div>
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">Device</div>
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">OPTIONS</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] "></div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] ">STATUS</div>
       </div>
 
       <div className=' h-[350px] overflow-auto  p-2 '>
      
         {listOfData && listOfData.map((item, index) => {
           return (
+
             <div class="flex " key={index}>
 
        
@@ -375,7 +400,7 @@ const [opens, setOpens] = React.useState(false);
             </div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80 text-sm">{item.dt.username}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center text-[12px]">{item.dt.email}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-sm text-red-500 font-bold text-[12px]">{item.dt.Devicename}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-sm text-red-500 font-bold text-[12px]">{item.dt.Devicename ? item.dt.Devicename : "NO DEVICE"}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">
 
             <div>
@@ -426,9 +451,57 @@ const [opens, setOpens] = React.useState(false);
       </Menu>
     </div>
             </div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-sm text-red-500 font-bold">
-              <span className='text-[10px] p-2 bg-red-500 text-white rounded-sm'>OFFLINE</span>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-sm  font-bold">
+              <span className={`text-[10px] p-2 ${item.dt.isActive ? "bg-green-500":"bg-red-500"} opacity-80 text-white rounded-sm w-[100px]`}>{item.dt.isActive ? 'ACTIVE' : 'OFFLINE'}</span>
             </div>
+            <Modal
+        open={opens}
+        onClose={handleClose2}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+        <div className='flex justify-between '>
+          <div>
+          <Typography variant="h5" className='font-bold'>YOUTUBE API & KEY</Typography>
+          
+        <Typography variant="caption" className=' opacity-75'>Fill out the inputs below.</Typography>
+          </div>
+          <BiX size={30} onClick={()=> handleClose2(false)} color='red' className='cursor-pointer'/>
+          
+        </div>
+        
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="petname" className="text-right">
+              API KEY
+            </Label>
+            <Input id="petname" placeholder='API KEY HERE'  className="col-span-3" value={apiky} onChange={(e)=> setApiKy(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="age" className="text-right">
+              ID
+            </Label>
+            <Input id="age" placeholder="CHANNEL ID HERE"  className="col-span-3"  value={channel} onChange={(e)=> setChannel(e.target.value)}   />
+          </div>
+
+        
+
+          <div className="grid grid-cols items-center gap-4">
+           <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2' onClick={()=> getLiveStreamData(item.dt.Devicename)}>
+            <BiSave size={20} color='white'/>
+            <span>
+              SUBMIT
+            </span>
+           </div>
+          </div>
+       
+          
+         
+          
+        </div>
+        </Box>
+      </Modal>
            </div>
            
      
@@ -466,35 +539,7 @@ const [opens, setOpens] = React.useState(false);
     </div>
     
    
-    <Modal
-        open={opens}
-        onClose={handleClose2}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-        <div className='flex justify-between '>
-          <div>
-          <Typography variant="h5" className='font-bold'>CHOOSE PET IMAGE</Typography>
-          
-        <Typography variant="caption" className=' opacity-75'>Feel free to choose it your favorite image here.</Typography>
-          </div>
-          <BiX size={30} onClick={()=> handleClose2(false)} color='red' className='cursor-pointer'/>
-      
-        </div>
-        <div className="grid gap-4 py-4">
-        
 
-
-  
-  
-
-   
-         
-         
-        </div>
-        </Box>
-      </Modal>
 
   
 
@@ -536,7 +581,7 @@ const [opens, setOpens] = React.useState(false);
           </div>
 
           <div className="grid grid-cols items-center gap-4">
-           <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2'>
+           <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2' onClick={handleOpen2}>
             <BiSolidKey size={20} color='white'/>
             <span>
               ADD YOUTUBE KEY

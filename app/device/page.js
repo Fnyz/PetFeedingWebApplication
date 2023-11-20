@@ -41,6 +41,7 @@ function page() {
     const [deviceList, setDeviceList] = useState([]);
     const [email, setEmail] = useState('');
     const [show, setShow] = useState(false);
+    const [listUser, setUserList] = useState([]);
     
     const [showPassword, setShowPassword] = React.useState(false);
 
@@ -62,6 +63,25 @@ function page() {
     },[])
 
 
+     
+    const getListUser = () => {
+      const q = query(collection(db, "users"));
+     onSnapshot(q, (querySnapshot) => {
+    const dt = [];
+    querySnapshot.forEach((doc) => {
+        dt.push({data:doc.data(), id:doc.id});
+    });
+    setUserList(dt);
+
+  });
+  
+    }
+
+
+
+
+
+
     
     const getListDevice = () => {
       const q = query(collection(db, "Device_Authorization"));
@@ -76,7 +96,7 @@ function page() {
         const data = JSON.parse(user);
         const res = dt.find(d => d.data.Email === data.email);
         if(!res) {
-          setShow(true);
+          setShow(true); 
           return;
         };
 
@@ -94,7 +114,8 @@ function page() {
   
 
     useEffect(()=>{
-      getListDevice()
+      getListDevice();
+      getListUser();
     },[])
 
 
@@ -114,7 +135,7 @@ await updateDoc(devicess, {
 const q = query(collection(db, "users"), where("email", "==", email.trim()));
 const querySnapshot = await getDocs(q);
 querySnapshot.forEach(async (docss) => {
-
+   
   const devicesss = doc(db, "users", docss.id);
   await updateDoc(devicesss, {
     hasDevice: true,
@@ -194,12 +215,20 @@ querySnapshot.forEach(async (docss) => {
 
 
       if(res.data.Password.trim() === hashPass.trim() && res.data.Email === data.email) {
-    
-        setPassword('')
-        localStorage.setItem("credentials", JSON.stringify(credentials));
-        alert('Welcome user, please wait for a moment.');
-        window.location.href = '/dashboard';
-        return;
+        
+        const a = listUser.find(d => d.data.email === res.data.Email);
+        if(!a) return;
+        const devicesss = doc(db, "users", a.id);
+        await updateDoc(devicesss, {
+          isActive:true
+        }).then(()=> {
+          setPassword('')
+          localStorage.setItem("credentials", JSON.stringify(credentials));
+          alert('Welcome user, please wait for a moment.');
+          window.location.href = '/dashboard';
+          return;
+        })
+       
       }
 
       

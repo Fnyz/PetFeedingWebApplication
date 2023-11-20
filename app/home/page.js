@@ -2,15 +2,12 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { BiSolidHand, BiLogOutCircle} from "react-icons/bi";
-import ListOfPet from '@/app/component/ListOfPet';
 import Notifications from '@/app/component/Notifications';
 import SideBarAdmin from '../component/SideBarAdmin';
 import { ProfileAccount } from '../component/Profile';
 import { doc, onSnapshot} from "firebase/firestore";
 import { db, auth } from '../firebase';
-import TotalPets from '../component/TotalPets';
 import { signOut} from 'firebase/auth'
-import { useRouter } from 'next/navigation';
 import ListOfDevice from '../component/ListOfDevice';
 import {
     AlertDialog,
@@ -23,6 +20,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
+import TotalUser from '../component/TotalUser';
 
 
 
@@ -32,12 +30,14 @@ function page() {
 
 
     const [profile, setProfileData] = useState({});
+    const [position, setPosition1] = useState("WITHDEVICE");
   
 
-
+   
 
   
     useEffect(()=>{
+     
         const user = localStorage.getItem("credentials");
     
         
@@ -45,7 +45,7 @@ function page() {
             const datas = JSON.parse(user);
             onSnapshot(doc(db, "users", datas.userId), (doc) => {
                 setProfileData(doc.data())
-                console.log(doc.data())
+                
             });
         }
       },[])
@@ -77,7 +77,7 @@ function page() {
      
      <div className="w-[52px] h-[52px] rounded-full overflow-hidden relative ">
         <Image
-           src={profile.image || '/Image/anyaCuttie.jpg'}
+           src={profile?.image || '/Image/anyaCuttie.jpg'}
           fill
           alt='profile'
           
@@ -153,9 +153,9 @@ function page() {
                 
             </div>
             <div className=' w-[100%]'>
-            {/* <TotalPets  /> */}
+            <TotalUser position={position} />
             <div className='flex gap-5 mt-5 max-md:flex-col max-lg:flex-col'>
-            <ListOfDevice />
+            <ListOfDevice setPositions={setPosition1}/>
 
             <Notifications />
             </div>
