@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import {BiSolidInfoCircle, BiEditAlt, BiSolidTrashAlt, BiSave, BiSolidFolderOpen, BiEdit, BiSolidLike, BiSolidKey} from "react-icons/bi";
+import {BiSolidInfoCircle, BiEditAlt, BiSolidTrashAlt, BiSave, BiLogoYoutube , BiEdit, BiSolidLike, BiLogOut } from "react-icons/bi";
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
@@ -51,12 +51,27 @@ const options = [
   color:'text-green-700'
  },
  {
+  val:'REMOVE DEVICE',
+  icon: <BiLogOut size={25} color='red' opacity={0.6}/>,
+  color:'text-red-700'
+ }
+
+];
+
+const options2 = [
+  {
+  val:'VIEW',
+  icon: <BiSolidInfoCircle size={25} color='green' opacity={0.6}/>,
+  color:'text-green-700'
+ },
+ {
   val:'DELETE',
   icon: <BiSolidTrashAlt size={25} color='red' opacity={0.6}/>,
   color:'text-red-700'
  }
 
 ];
+
 
 
 
@@ -90,7 +105,6 @@ function ListOfDevice({setPositions}) {
   const [username, setUsername] = React.useState('');
   const [email, setEmail] = React.useState('');
   const [device, setDevice] = React.useState('');
-  const [gender, setGender] = React.useState('');
   const [petId, setPetId] = React.useState('');
   const [needUpdate, setNeedUpdate] = React.useState(false);
   const [position, setPosition] = React.useState("")
@@ -99,20 +113,65 @@ function ListOfDevice({setPositions}) {
   const [lives, setLiveList] = React.useState([]);
   const [apiky, setApiKy] = React.useState('');
   const [channel, setChannel] = React.useState('');
+  const [jsonFile, setJSONFile] = React.useState("");
+  const [hasD, setHasD] = React.useState(false);
+  const [allDevice, setALLDevice] = React.useState([]);
 
 
 
 
+
+const getAllDeviceHere = () => {
+  const q = query(collection(db, "Device_Authorization"));
+  const data = [];  
+  onSnapshot(q, (querySnapshot) => {
+ querySnapshot.forEach((docing) => {
+    data.push({dt: docing.data(), id: docing.id});
+ });
+
+ setALLDevice(data);
+
+});
+}
 
 const HandleDelete = async () => {
 
-  try {
-    await deleteDoc(doc(db, "List_of_Pets", petId));
-    alert('Pet is deleted successfully');
-  } catch (error) {
-    console.log('Something went wrong!');
-    
+  if(hasD){
+    const res = allDevice.find(d => d.dt.Email === email);
+    const a = doc(db, "Device_Authorization", res.id);
+    const b = doc(db, "user", petId);
+    await updateDoc(a, {
+      Email:"",
+      Token:0,
+    }).then( async ()=>{
+      await updateDoc(b, {
+        Devicename:"",
+       }).then(()=>{
+         alert('Device removed successfully!');
+       });
+    });
+
+    return;
   }
+
+
+  try {
+      await deleteDoc(doc(db, "users", petId)).then( async ()=>{
+        const res = allDevice.find(d => d.dt.Email === email);
+        const a = doc(db, "Device_Authorization", res.id);
+        await updateDoc(a, {
+        Email:"",
+        Token:0,
+       }).then( async ()=>{
+        alert('User deleted successfully!');
+       });
+      });
+  
+    } catch (error) {
+      console.log('Something went wrong!');
+      
+    }
+ 
 }
 
 const suggestDeleting = () => {
@@ -158,20 +217,26 @@ const [opens, setOpens] = React.useState(false);
 
   const getLiveStreamData = async (device) => {
 
-
+    const jFile = JSON.parse(jsonFile);
+   
    const res = lives.find(l => l.dt.DeviceName === device);
    const a = doc(db, "Livestream", res.id);
       await updateDoc(a, {
        ApiKey:apiky,
-       ChannelID:channel
+       ChannelID:channel,
+       jsonKeyFile: jFile.installed,
       }).then(()=>{
-        Alert('Sumitted successfully!');
+        setJSONFile({})
+        setApiKy("")
+        setChannel("");
+        alert('Sumitted successfully!');
       });
 
 
   }
 
   useEffect(()=>{
+    getAllDeviceHere()
     liveStreamDetails();
     setPosition("WITHDEVICE")
   
@@ -180,39 +245,67 @@ const [opens, setOpens] = React.useState(false);
 
   useEffect(()=> {
    
-
+    let unsubscribe;
     if(search.length === 0){
       
       const q = query(collection(db, "users"), where("isAdmin", "==", false), where("hasDevice", "==", true));
       const data = [];  
-      onSnapshot(q, (querySnapshot) => {
+     unsubscribe = onSnapshot(q, (querySnapshot) => {
      querySnapshot.forEach((docing) => {
         data.push({dt: docing.data(), id: docing.id});
 
      });
-     
-      if(position === "WITHDEVICE" ){
-        setPositions("WITHDEVICE")
-        setUserDataList(data);
-      }else{
-        setPositions("WITHOUTDEVICE");
-        const q = query(collection(db, "users"), where("isAdmin", "==", false),where("hasDevice", "==", false));
-            const data = [];  
-            onSnapshot(q, (querySnapshot) => {
-           querySnapshot.forEach((docing) => {
-              data.push({dt: docing.data(), id: docing.id});
-      
-           });
-            setUserDataList(data);
-        
-         });
-      }
-     
-     
-   
-   
     
-   });
+    
+    
+     if(position === "WITHDEVICE" ){
+    
+      setPositions("WITHDEVICE")
+      setUserDataList(data);
+
+      return;
+    }
+    
+    
+    if(position === "WITHOUTDEVICE"){
+      setPositions("WITHOUTDEVICE");
+
+    
+      const q = query(collection(db, "users"), where("isAdmin", "==", false),where("hasDevice", "==", false));
+          const data = [];  
+          onSnapshot(q, (querySnapshot) => {
+         querySnapshot.forEach((docing) => {
+            data.push({dt: docing.data(), id: docing.id});
+    
+         });
+          setUserDataList(data);
+      
+       });
+       return;
+    }
+
+    if(position === "ALLUSER"){
+      setPositions("ALLUSER");
+
+    
+      const q = query(collection(db, "users"), where("isAdmin", "==", false));
+          const data = [];  
+          onSnapshot(q, (querySnapshot) => {
+         querySnapshot.forEach((docing) => {
+            data.push({dt: docing.data(), id: docing.id});
+    
+         });
+          setUserDataList(data);
+      
+       });
+       return;
+    }
+    
+    
+    });
+
+
+     
 
    return;
 
@@ -232,7 +325,9 @@ const [opens, setOpens] = React.useState(false);
 
     setUserDataList(result);
    
-
+    return () => {
+      unsubscribe();
+    }
     
   },[search, position, listOfData])
 
@@ -260,6 +355,15 @@ const [opens, setOpens] = React.useState(false);
       }
 
       const res = listOfData.find(d => d.id === petId);
+
+      if(res.dt.hasDevice){
+        setHasD(true);
+        setEmail(res.dt.email);
+        suggestDeleting();
+        return;
+      }
+      setHasD(false);
+      
       if(!res) return;   
       suggestDeleting();
     }
@@ -276,27 +380,6 @@ const [opens, setOpens] = React.useState(false);
     
   
  
-
-  const handleUpdate = async () => {
-    const docUpdate = {
-      Petname:petname,
-      Weight:weight,
-      Gender:gender,
-      GoalWeight:goalWeight,
-      Age:age,
-      image:choose,
-      Updated_at: serverTimestamp(),
-    }
-    try {
-      const collects = doc(db, "List_of_Pets", petId);
-      await updateDoc(collects, docUpdate);
-      alert('Data updated successfully');
-      setNeedUpdate(false);      
-   
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
 
 
@@ -323,7 +406,10 @@ const [opens, setOpens] = React.useState(false);
         fontWeight:'bold',
       
         color:'#FAB1A0'
-       }}>{position ==='WITHDEVICE'? "List of Users with Device" : "List of Users without Device"}
+       }}>
+       {position ==='ALLUSER' && "List of Users" }
+       {position ==='WITHDEVICE' && "List of Users with Device" }
+       {position ==='WITHOUTDEVICE' && "List of Users without Device" }
        </label>
       </div>
        <div className='flex gap-2 justify-center items-center'>
@@ -333,11 +419,12 @@ const [opens, setOpens] = React.useState(false);
         <Button variant="outline">FILTER BY USER'S</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Panel Position</DropdownMenuLabel>
+        <DropdownMenuLabel>Choose option</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
           <DropdownMenuRadioItem value="WITHDEVICE">USER WITH DEVICE</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="WITHOUTDEVICE">USER WITHOUT DEVICE</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="ALLUSER">ALL USERS</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -413,6 +500,7 @@ const [opens, setOpens] = React.useState(false);
         onClick={(e)=> {
           setAnchorEl(e.currentTarget)
           setPetId(item.id)
+          setDevice(item.dt.Devicename)
         }}
         style={{
           color:'red',
@@ -433,12 +521,12 @@ const [opens, setOpens] = React.useState(false);
         PaperProps={{
           style: {
             maxHeight: ITEM_HEIGHT * 4.5,
-            width: '15ch',
+            width: !item.dt.Devicename ? '15ch' : '22ch',
             
           },
         }}
       >
-        {options.map((option) => (
+        { device && options.map((option) => (
           <MenuItem key={option.val}  onClick={handleClose}>
             <div className='flex justify-between items-center w-[100%]' onClick={()=> openTime(option.val)}>
               <label className = {option.color}> {option.val} </label>
@@ -446,6 +534,20 @@ const [opens, setOpens] = React.useState(false);
             </div>
           </MenuItem>
         ))}
+
+        { !device && options2.map((option) => (
+          <MenuItem key={option.val}  onClick={handleClose}>
+            <div className='flex justify-between items-center w-[100%]' onClick={()=> openTime(option.val)}>
+              <label className = {option.color}> {option.val} </label>
+              {option.icon}
+            </div>
+          </MenuItem>
+        ))}
+
+
+     
+
+      
 
         
       </Menu>
@@ -484,6 +586,14 @@ const [opens, setOpens] = React.useState(false);
             </Label>
             <Input id="age" placeholder="CHANNEL ID HERE"  className="col-span-3"  value={channel} onChange={(e)=> setChannel(e.target.value)}   />
           </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="age" className="text-right">
+              JSON FILE
+            </Label>
+            <Input id="age" placeholder="JSON FILE HERE"  className="col-span-3"  value={jsonFile} onChange={(e)=> setJSONFile(e.target.value)}   />
+          </div>
+
 
         
 
@@ -577,18 +687,20 @@ const [opens, setOpens] = React.useState(false);
             <Label htmlFor="age" className="text-right">
               Device
             </Label>
-            <Input id="age" placeholder="15" className="col-span-3 " value={device} disabled={!needUpdate}  />
+            <Input id="age" placeholder="15" className="col-span-3 " value={!device? 'No Device' : device} disabled={!needUpdate}  />
           </div>
+          {device && (
+ <div className="grid grid-cols items-center gap-4">
+ <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2' onClick={handleOpen2}>
+  <BiLogoYoutube size={20} color='white'/>
+  <span>
+    ADD YOUTUBE KEY
+  </span>
+ </div>
+</div>
 
-          <div className="grid grid-cols items-center gap-4">
-           <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2' onClick={handleOpen2}>
-            <BiSolidKey size={20} color='white'/>
-            <span>
-              ADD YOUTUBE KEY
-            </span>
-           </div>
-          </div>
-       
+          )}
+         
           
          
           
@@ -605,7 +717,7 @@ const [opens, setOpens] = React.useState(false);
       >
         <Box sx={style}>
         <Typography variant="h6" gutterBottom className='text-center'>
-        Do you want to delete this pet?
+        {hasD ? 'Do you want to remove the device connected from this user?' : 'Do you want to delete this user?'}
       </Typography>
       <div className='flex gap-2 mt-4'>
          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={HandleDelete}>

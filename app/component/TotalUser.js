@@ -29,8 +29,24 @@ function TotalUser({position}) {
 
     if(position === "WITHDEVICE" ){
       setListOfUser(data);
-    }else{
+      return;
+    }
+    
+    if(position === "WITHOUTDEVICE"){
       const q = query(collection(db, "users"), where("isAdmin", "==", false),where("hasDevice", "==", false));
+          const data = [];  
+          onSnapshot(q, (querySnapshot) => {
+         querySnapshot.forEach((docing) => {
+            data.push({dt: docing.data(), id: docing.id});
+    
+         });
+          setListOfUser(data);
+      
+       });
+    }
+
+    if(position === "ALLUSER"){
+      const q = query(collection(db, "users"), where("isAdmin", "==", false));
           const data = [];  
           onSnapshot(q, (querySnapshot) => {
          querySnapshot.forEach((docing) => {
@@ -73,7 +89,7 @@ function TotalUser({position}) {
             </div>
         </div>
         <div className=' w-[170px] border h-20 rounded-md  shadow-sm '>
-        <h1 className='pl-2 text-[10px] pt-1'>{listOfUser.length > 0 ? 'USERS': 'USER'}</h1>
+        <h1 className='pl-2 text-[10px] pt-1'>{listOfUser.length -1 > 0 ? "User's": "User"}</h1>
             <div className='flex'>
                 <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {listOfUser.length}</span>
                 <div className=' flex-1 relative h-[50px] w-[210px] '>
