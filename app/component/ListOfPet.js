@@ -25,6 +25,26 @@ import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import { doc, updateDoc} from "firebase/firestore";
 import { ScrollArea, ScrollBar  } from "@/components/ui/scroll-area"
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import Swal from 'sweetalert2'
+import { styled } from '@mui/material/styles';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+
+
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
 
 
 
@@ -104,12 +124,14 @@ const [weight, setWeight] = React.useState('');
 const [goalWeight, setGoalWeight] = React.useState('');
 const [suggestDelete, setDelete] = React.useState(false);
 const [search, setSearch] = React.useState('');
+const [click, setClick] = React.useState(false);
+const [click1, setClick1] = React.useState(false);
 
 const HandleDelete = async () => {
-
+  setClick(true)
   try {
     await deleteDoc(doc(db, "List_of_Pets", petId));
-    alert('Pet is deleted successfully');
+    setClick(false)
   } catch (error) {
     console.log('Something went wrong!');
     
@@ -183,7 +205,7 @@ const [opens, setOpens] = React.useState(false);
     })
 
     setListOfPet(result);
-    console.log(result);
+  
 
     
   },[search, listOfPet])
@@ -244,7 +266,9 @@ const [opens, setOpens] = React.useState(false);
 
 
   const handleFakeWeight = () => {
+    setClick1(true)
     setTimeout(() => {
+      setClick1(false)
       const fakeWeight = generateFakeWeight(15, 25);
       setWeight(fakeWeight)
     }, 3000);
@@ -253,6 +277,7 @@ const [opens, setOpens] = React.useState(false);
 
 
   const handleUpdate = async () => {
+    setClick(true)
     const docUpdate = {
       Petname:petname,
       Weight:weight,
@@ -265,7 +290,7 @@ const [opens, setOpens] = React.useState(false);
     try {
       const collects = doc(db, "List_of_Pets", petId);
       await updateDoc(collects, docUpdate);
-      alert('Data updated successfully');
+      setClick(false)
       setNeedUpdate(false);      
    
     } catch (error) {
@@ -338,8 +363,8 @@ const [opens, setOpens] = React.useState(false);
       </div>
 
       <div className=' h-[350px] overflow-auto  p-2 '>
-     
-        {listOfPet && listOfPet.map((item, index) => {
+        
+        {listOfPet.length > 0 ? listOfPet.map((item, index) => {
           return (
             <div class="flex " key={index}>
 
@@ -411,7 +436,20 @@ const [opens, setOpens] = React.useState(false);
            </div>
      
           )
-        })}
+        }): (
+          
+          <div className='w-full border h-full flex flex-col justify-center items-center'>
+             <Image
+        width={160}
+        height={160}
+        src="/Image/KawaiDog.png"
+        contentFit="cover"
+       
+      />
+           <label className='text-md font-bold opacity-60'>No pets found.</label>
+            
+          </div>
+        )}
 
 
        <Modal
@@ -503,11 +541,13 @@ const [opens, setOpens] = React.useState(false);
       ))}
     </ImageList>
 
-     <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer'>
-     <BiSolidFolderOpen size={22} color='white'/>
-      <label className='text-white font-bold cursor-pointer'>UPLOAD IMAGE</label>
-   
-     </div>
+    <Button component="label" variant="contained" className='opacity-60' startIcon={<CloudUploadIcon />} >
+      Upload file
+      <VisuallyHiddenInput type="file" onChange={(event)=> {
+       const file = event.target.files[0]
+       setChoose(URL.createObjectURL(file));
+      }}/>
+    </Button>
 
      <div onClick={()=> setOpens(false)} className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  border-[#FAB1A0] hover:shadow-md transition-all ease-in cursor-pointer w-full'>
      <BiSave size={22} color='#FAB1A0'/>
@@ -583,15 +623,45 @@ const [opens, setOpens] = React.useState(false);
           {needUpdate && (
 
 <div className="flex items-center gap-2 border p-2 justify-center rounded-md border-[#FAB1A0] cursor-pointer hover:border-[coral] transition-all ease-in" onClick={handleFakeWeight}>
-          <FaBalanceScale size={20} className='hover:text-[coral] text-[#FAB1A0]'/>
+        
+            {click1 ?
+ <>
+ 
+  <span className='text-sm text-[#FAB1A0] font-bold' >
+   PLEASE WAIT ..
+  </span>
+ </>
+          : 
+            <>
+           
+           <FaBalanceScale size={20} className='hover:text-[coral] text-[#FAB1A0]'/>
             <span className='text-[#FAB1A0] hover:text-[coral] font-bold' >GENERATE WEIGHT</span>
+            </>
+           
+         }
+         
           </div>
           )}
           {needUpdate ?
           <div className='flex gap-2'>
           <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleUpdate}>
-          <BiSave size={25} color='white'/>
+          {click ?
+ <>
+ 
+  <span className='text-sm text-white font-bold' >
+   PLEASE WAIT ..
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiSave size={25} color='white'/>
            <span className='text-white font-bold'>SUBMIT</span>
+            </>
+           
+         }
+         
+       
           </div>
           <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleNeedupdate}>
           <BiX size={25} color='white'/>

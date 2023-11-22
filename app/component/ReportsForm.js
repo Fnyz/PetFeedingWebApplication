@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { collection, doc, updateDoc, addDoc, getDocs, serverTimestamp, query, orderBy, onSnapshot, getDoc} from "firebase/firestore"; 
+import { collection, doc, updateDoc, addDoc,  query, orderBy, onSnapshot, getDoc} from "firebase/firestore"; 
 import { db } from '../firebase';
-import Image from 'next/image';
+import Swal from 'sweetalert2'
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 
@@ -29,14 +30,14 @@ function ReportsForm() {
     const [email, setEmail] = React.useState('');
     const [message, setMessage] = React.useState('');
     const [deviceName, setDeviceName] = useState('');
-    const [visible, setVisible] = useState(false);
-    const [openMessage, setOpenMessage] = useState(false);
     const [data, setData] = useState({})
     const [messageSend, setSendMessage] = useState('');
     const [messageData, setDataMessage] = useState([]);
     const [userImage, setUserImage] = useState('');
     const [userName, setUserName] = useState('');
     const [reportsData, setReportsDataData] = useState([]);
+    const [click, setClick] = useState(false);
+    
     
   
 
@@ -99,60 +100,9 @@ function ReportsForm() {
 
   
 
-    const handleSubmit = async () => {
-        const initialMessage = [
-            {
-              message: messageSend,
-              username: userName,
-              image: userImage,
-              type: 'User',
-              messagedate: new Date(),
-            }
-          ]
-      
-      
-      
-      
-          const message = {
-            deviceName: deviceName.trim(),
-            sender: data.email,
-            message:initialMessage,
-            createdAt: serverTimestamp(),
-          }
-      
-      
-          
-          const dts = messageData.find((d) => d.dt.deviceName === deviceName && d.dt.sender === data.email);
-          
-          if(!dts){
-            addDoc(collection(db, "Messages"),message)
-            .then((docs)=> {
-              if(docs.id){
-                setSendMessage('')
-                console.log('send new message success')
-              }
-            });
-      
-            return;
-          }
-              
-              const currentMessage  = dts.dt.message || [];
-              const updatedMessages = [...currentMessage, ...initialMessage];
-              const docRef = doc(db, 'Messages', dts.id);
-              updateDoc(docRef, {
-                message:updatedMessages,
-             }).then(()=>{
-               setSendMessage('')
-               console.log('update send message success')
-             });
-      
-      
-             return;
-    }
-
     const handleSubmitReports = async  () => {
 
- 
+        setClick(true);
         const initialMessages = [
           { message, timestamp: new Date() }
         ];
@@ -166,6 +116,21 @@ function ReportsForm() {
        }
 
 
+       if(!message) {
+        setClick(false)
+        Swal.fire({
+          title: "Warning?",
+          text: "Please input all fields.",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Yes, I will.",
+          
+         
+        })
+          return;
+      }
+
+
 
 
 
@@ -175,10 +140,18 @@ function ReportsForm() {
         addDoc(collection(db, "Reports"),reports)
         .then((docs)=> {
           if(docs.id){
-    
+            setClick(false);
             setMessage('');
-            alert('Add new report');
-   
+            Swal.fire({
+              title: "Success?",
+              text: "Report added successfully.",
+              icon: "success",
+              confirmButtonColor: "#FAB1A0",
+              confirmButtonText: "Yes, I will.",
+              
+             
+            })
+
           }
         });
 
@@ -193,10 +166,17 @@ function ReportsForm() {
        updateDoc(docRef, {
          Message:updatedMessages,
       }).then(()=>{
-
+        setClick(false);
         setMessage('');
-        alert('Update reports existed');
-
+        Swal.fire({
+          title: "Success?",
+          text: "Report added successfully.",
+          icon: "success",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Yes, I will.",
+          
+         
+        })
       });
 
 
@@ -254,9 +234,24 @@ function ReportsForm() {
     <CardFooter className="flex justify-between">
      <Button variant="outline">CLEAR</Button>
     
-     <div onClick={handleSubmitReports} className='flex transition-all ease-in  justify-center items-center gap-1 border p-2 rounded-md bg-[#FAB1A0] text-white shadow-sm cursor-pointer hover:bg-[coral]'>
-      <BiMailSend size={20} />
+     <div onClick={handleSubmitReports} className='flex transition-all ease-in  justify-center items-center gap-2 border px-4 py-2 rounded-md bg-[#FAB1A0] text-white shadow-sm cursor-pointer hover:bg-[coral]'>
+     {click ?
+ <>
+  <CircularProgress color='inherit' size={15}/>
+  <span className='text-sm font-bold '>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiMailSend size={20} />
       <label className=' cursor-pointer font-bold  w-11'>SEND</label>
+            </>
+           
+         }
+         
+
         
       </div>
     </CardFooter>

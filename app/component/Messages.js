@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useRef } from 'react'
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import { BiMessageRoundedDots, BiMailSend } from "react-icons/bi";
@@ -14,15 +14,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import Divider from '@mui/material/Divider';
  
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Separator } from "@/components/ui/separator"
+
 import { useState, useEffect, useMemo } from 'react';
 import { collection, doc, updateDoc, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDoc} from "firebase/firestore"; 
 import { db } from '../firebase';
-import Image from 'next/image';
+import Image from 'next/image'
+import Badge from '@mui/material/Badge';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 const tags = Array.from({ length: 50 }).map(
@@ -41,11 +41,33 @@ function Messages() {
     const [username, setUsername] = useState('');
     const [email, setSenderEmail] = useState('');
     const [messageData, setMessageData] = useState([]);
+    const messagesContainerRef = useRef(null);
+    const [click, setClick] = useState(false);
+
+
+    useEffect(() => {
+      // Scroll to the bottom when messages change
+      scrollToBottom();
+  
+    }, [mess]);
+
+    
+    const scrollToBottom = () => {
+      // Check if the container reference exists
+      if (messagesContainerRef.current) {
+        // Scroll to the bottom of the container
+        messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      }
+    };
+
 
 
 
 
  
+     
+
+     
 
       useEffect(()=>{
 
@@ -56,11 +78,15 @@ function Messages() {
            dt.push({data:doc.data(), id:doc.id});
        });
        setMessageData(dt);
+    
    
      });
      
 
       },[])
+
+
+     
 
 
     
@@ -90,7 +116,7 @@ function Messages() {
 
 
     const handleSendMessage = async () => {
-
+         setClick(true)
         const initialMessage = [
           {
             message: mess,
@@ -98,17 +124,29 @@ function Messages() {
             image: images,
             type: 'User',
             messagedate: new Date(),
+         
           }
         ]
+
+
+        const notification = {
+          User:email,
+          Messages: `${username} is send you a message please check it to chat.`,
+          image: images,
+          createdAt: serverTimestamp()
+        }
     
     
     
     
         const message = {
+          hasDevice:true,
+          Image:images,
           deviceName: dvName.trim(),
           sender: email,
           message:initialMessage,
           createdAt: serverTimestamp(),
+          hasSeen: false,
         }
     
     
@@ -119,8 +157,13 @@ function Messages() {
           addDoc(collection(db, "Messages"),message)
           .then((docs)=> {
             if(docs.id){
+              addDoc(collection(db, "Notifications"),notification)
+              .then((docs)=> {
+              if(docs.id){
               setMess('')
-              alert('Message sent successfully');
+              setClick(false)
+              }
+          });
             }
           });
     
@@ -131,10 +174,12 @@ function Messages() {
             const updatedMessages = [...currentMessage, ...initialMessage];
             const docRef = doc(db, 'Messages', dts.id);
             updateDoc(docRef, {
+              hasSeen: false,
               message:updatedMessages,
            }).then(()=>{
+            addDoc(collection(db, "Notifications"),notification);
              setMess('')
-             console.log('update send message success')
+             setClick(false)
            });
            return;
       }
@@ -155,16 +200,52 @@ function Messages() {
   return (
 
 
-    <Dialog>
-    <DialogTrigger asChild>
-    <Box sx={{ '& > :not(style)': { m: 1, position:'absolute', right:20, bottom:25, } }}>
-    <Fab aria-label="add">
-      <BiMessageRoundedDots size={25} className='hover:text-red-600' />
+    <Dialog >
+    <DialogTrigger asChild >
+    <Box sx={{ '& > :not(style)': { m: 1, position:'absolute', right:20, bottom:25} }}>
+    <Fab aria-label="add" >
+    <Badge badgeContent={dMessage?.data?.adminSend === false ? dMessage.data.message.filter(a => a.type === "Admin" && a.unseen === false).length: 0} color="primary">
+    <BiMessageRoundedDots size={25} className='hover:text-red-600' onClick={()=>{
+  
+       const b = dMessage.data.message.map(d =>{
+        return d.unseen === false ? { ...d, unseen: true } : d
+       })
+   
+  
+   const dts = messageData.find((d) => d.data.deviceName === dvName && d.data.sender === email);
+      if(dts.data.adminSend === false){
+              const docRef = doc(db, 'Messages', dts.id);
+        updateDoc(docRef, {
+        adminSend:true,
+        message:b
+    }).then(()=>{
+      console.log('seen now!')
+    });
+ 
+    return;
+      }
+ 
+  
+   
+
+  
+
+    }} />
+    </Badge>
     </Fab>
     
   </Box>
     </DialogTrigger>
-    <DialogContent className="w-full ">
+    <DialogContent className="w-full" onClick={()=> {
+          const dts = messageData.find((d) => d.data.deviceName === dvName && d.data.sender === email);
+          const docRef = doc(db, 'Messages', dts.id);
+          updateDoc(docRef, {
+            adminSend:true,
+         }).then(()=>{
+           console.log('update send message success')
+         });
+    
+    }} >
       <DialogHeader>
         <DialogTitle>Message</DialogTitle>
         <DialogDescription>
@@ -172,8 +253,8 @@ function Messages() {
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-4 py-4">
-      <ScrollArea className="h-72 w-[100%] rounded-md border">
-      <div className="p-4">
+      <div className="element-with-scroll h-72 w-[100%] rounded-md border p-3" ref={messagesContainerRef}>
+   
 
       {!dMessage && (
               <label style={{
@@ -182,12 +263,12 @@ function Messages() {
             )}
             {dMessage && dMessage?.data.message.map((data, i) => {
                return (
-               <div  className= {`space-y-2 flex items-center  ${data.type === 'User' &&  "pl-[130px]" } w-[100%] `}>
+               <div  className= {`space-y-2 flex  ${data.type === 'User' && " ml-[127px]" } mt-1 ${data.type === 'User' ? " w-[70%]": "w-full" }  items-center  ${data.type === 'User' && " justify-end" } `}>
                 <div>
                 <Image 
           src={data.image}
-          width={50}
-          height={50}
+          width={60}
+          height={60}
           objectFit='contain'
           className='p-2'
 
@@ -201,8 +282,8 @@ function Messages() {
               )
             })}
        
-      </div>
-    </ScrollArea>
+   
+    </div>
       </div>
       <Divider />
       <DialogFooter className='flex max-sm:flex-col gap-2'>
@@ -210,9 +291,23 @@ function Messages() {
           <div className='w-full' >
           <Input value={mess} placeholder='Input message here' className='w-full' onChange={(e)=> setMess(e.target.value)}  />
          </div>
-         <div className=' rounded-md w-full p-2 gap-1 justify-center font-bold flex items-center text-white bg-[#FAB1A0] cursor-pointer hover:bg-[coral]' onClick={handleSendMessage}>
-         <BiMailSend size={20} color='white'/>
+         <div className=' rounded-md w-full p-2 gap-2 justify-center font-bold flex items-center text-white bg-[#FAB1A0] cursor-pointer hover:bg-[coral]' onClick={handleSendMessage}>
+         {click ?
+ <>
+  <CircularProgress color='inherit' size={15}/>
+  <span className='text-sm font-bold '>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiMailSend size={20} color='white'/>
           <span>SEND</span>
+            </>
+           
+         }
+    
          </div>
       
       </DialogFooter>

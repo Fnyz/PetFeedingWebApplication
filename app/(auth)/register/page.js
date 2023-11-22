@@ -14,7 +14,8 @@ import { auth, db } from '@/app/firebase'
 import { setDoc , doc} from 'firebase/firestore';
 import { createUserWithEmailAndPassword , sendEmailVerification} from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-
+import Swal from 'sweetalert2'
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 
@@ -27,6 +28,7 @@ function page() {
     const [username, setUsername] = useState('');
     const router = useRouter()
     const [isclient, setIsClient] = useState(false);
+    const [click, setClick] = useState(false);
  
 
     const [showPassword, setShowPassword] = React.useState(false);
@@ -41,12 +43,19 @@ function page() {
 
     const handleSubmit = () => {
 
-   
+      setClick(true);
     
         
     
         if(!firstName || !lastName || !username || !password){
-          alert('Please input all required fields!')
+          setClick(false);
+          Swal.fire({
+            title: "Warning?",
+            text: "Please input all fields.",
+            icon: "warning",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Yes, I will",
+          })
           return;
         }
     
@@ -84,12 +93,22 @@ function page() {
               setEmail('')
               setUsername('')
               setPassword('')
-
-     
-              alert('Account created successfully, please check your email to verify immediately.');
-              setTimeout(() => {
-                 router.push('/login');
-              }, 3000);
+              setClick(false);
+              Swal.fire({
+                title: "Warning?",
+                text: "Account created successfully, please check your email to verify immediately.",
+                icon: "success",
+                confirmButtonColor: "#FAB1A0",
+                confirmButtonText: "Okay, Thank you!",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  setTimeout(() => {
+                    router.push('/login');
+                 }, 3000);
+                }
+              });
+             
+             
             })
     
               
@@ -115,7 +134,16 @@ function page() {
               }
     
               if(errorMessage){
-               alert(errorMessage);
+                setClick(false);
+                Swal.fire({
+                  title: "Warning?",
+                  text: errorMessage,
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#3085d6",
+                  cancelButtonColor: "#d33",
+                  confirmButtonText: "Try again",
+                })
               }
         
          
@@ -171,10 +199,10 @@ function page() {
         <label className='text-sm opacity-[0.7]'>Fill out this form.</label>
          <div className='flex flex-col gap-3 mt-5'>
 
-         <TextField id="outlined-basic" label="Firstname" variant="outlined" className='w-full' placeholder='John' value={firstName} onChange={(e)=> setFirstname(e.target.value)}/>
-        <TextField id="outlined-basic" label="Lastname" variant="outlined" className='w-full' placeholder='Doe' value={lastName} onChange={(e)=> setLastname(e.target.value)}/>
-        <TextField id="outlined-basic" label="Username" variant="outlined" className='w-full' placeholder='PeanutButter' value={username} onChange={(e)=> setUsername(e.target.value)}/>
-        <TextField id="outlined-basic" label="Email" variant="outlined" className='w-full'placeholder='noonenero@gmail.com' value={email} onChange={(e)=> setEmail(e.target.value)} />
+         <TextField id="outlined-basic1" label="Firstname" variant="outlined" className='w-full' placeholder='John' value={firstName} onChange={(e)=> setFirstname(e.target.value)}/>
+        <TextField id="outlined-basic2" label="Lastname" variant="outlined" className='w-full' placeholder='Doe' value={lastName} onChange={(e)=> setLastname(e.target.value)}/>
+        <TextField id="outlined-basic3" label="Username" variant="outlined" className='w-full' placeholder='PeanutButter' value={username} onChange={(e)=> setUsername(e.target.value)}/>
+        <TextField id="outlined-basic4" label="Email" variant="outlined" className='w-full'placeholder='noonenero@gmail.com' value={email} onChange={(e)=> setEmail(e.target.value)} />
         <FormControl className='w-full' variant="outlined" >
           <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
           <OutlinedInput
@@ -196,7 +224,26 @@ function page() {
             label="Password"
           />
         </FormControl>
-        <button type="button" onClick={handleSubmit}  className='shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 hover:bg-[coral] ease-in' >REGISTER</button>
+        <button type="button" onClick={handleSubmit}  className=' flex justify-center items-center gap-2 shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 hover:bg-[coral] ease-in' >
+        {click ?
+ <>
+  <CircularProgress color='inherit' size={20}/>
+  <span>
+   PLEASE WAIT...
+  </span>
+ </>
+          : 
+            <>
+           
+            <span>
+            LOGIN
+            </span>
+            </>
+           
+         }
+         
+
+        </button>
         <div className='flex justify-end   mt-5'>
             <span className='mr-1 text-sm opacity-50 font-semibold '>HAVE AN ACCOUNT? </span>
             <Link href="/login" className='text-red-700 font-bold text-sm opacity-70'>SIGN-IN.</Link>

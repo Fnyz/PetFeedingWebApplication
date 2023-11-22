@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input"
 import moment from 'moment';
 import { ScrollArea  } from "@/components/ui/scroll-area"
-
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 
@@ -52,7 +52,7 @@ import { collection, addDoc, query, onSnapshot, serverTimestamp, where, deleteDo
 import { db } from '../firebase';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
- 
+import Swal from 'sweetalert2'
 
 
 
@@ -107,6 +107,8 @@ function ScheduleForm() {
     const [cups2, setCups2] = useState('');
     const [currentTime, setCurrentTime] = useState('');
     const [isClient, setIsclient] = useState(false);
+    const [click, setClick] = useState(false);
+    const [click1, setClick1] = useState(false);
 
 
     useEffect(()=>{
@@ -184,6 +186,7 @@ function ScheduleForm() {
   }
 
   const handleUpdateTimeHere = (days, parameters) => {
+    setClick1(true);
     const a = petSchesData.find((d) => d.dts.Days === days && d.dts.DeviceName === credential.DeviceName)
     const b = a?.dts.ScheduleTime.find((d) => d.time === currentTime);
     
@@ -201,7 +204,17 @@ function ScheduleForm() {
      updateDoc(docRef, {
       ScheduleTime:updateSched,
    }).then(()=>{
-     alert('Time is updated successfully');
+    setClick1(false);
+     Swal.fire({
+      title: "Success?",
+      text: `Time is updated successfully`,
+      icon: "success",
+      confirmButtonColor: "#FAB1A0",
+      confirmButtonText: "Close",
+      
+    }).then(()=>{
+      Swal.close();
+    })
    });
 
 
@@ -272,9 +285,17 @@ function ScheduleForm() {
 
 
   const addFoodItem = () => {
-
+  
     if(!twelveHourTime || !caps){
-      alert('Please fill out all fields');
+      setClick(false);
+          Swal.fire({
+            title: "Warning?",
+            text: "Please fill out all fields",
+            icon: "warning",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Try again",
+            
+          })
       return;
     }
 
@@ -284,7 +305,16 @@ function ScheduleForm() {
     const exist  = res?.data.ScheduleTime.find(s => s.time === militaryTime.trim() && s.parameters === parameters)
     
     if(exist){
-          alert(`Schedule ${exist.time} time is already set please try again.`);
+      
+          setClick(false);
+          Swal.fire({
+            title: "Warning?",
+            text: `Schedule ${exist.time} time is already set, please try again.`,
+            icon: "warning",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Set time again",
+            
+          })
       return;
     }
 
@@ -298,7 +328,17 @@ function ScheduleForm() {
     const existingItem = scheds1.find((item) => item.time === militaryTime.trim() && item.parameters === parameters);
    
     if (existingItem) {
-      alert(`Time ${existingItem.time} already exists. Remove the existing entry first.`);
+      
+      setClick(false);
+      Swal.fire({
+        title: "Warning?",
+        text: `Time ${existingItem.time} already exists, Remove the existing entry first.`,
+        icon: "warning",
+        confirmButtonColor: "#FAB1A0",
+        confirmButtonText: "Set time again",
+        
+      })
+     
       return;
     }
 
@@ -311,7 +351,16 @@ function ScheduleForm() {
     const existingItem2 = scheds2.find((item) => item.time === militaryTime2.trim() && item.parameters2 === parameters2);
     if (existingItem2) {
       // You can handle the duplicate time case here
-      alert(`Time ${existingItem2.time} already exists. Remove the existing entry first.`);
+      setClick(false);
+      Swal.fire({
+        title: "Warning?",
+        text: `Time ${existingItem2.time} already exists. Remove the existing entry first.`,
+        icon: "warning",
+        confirmButtonColor: "#FAB1A0",
+        confirmButtonText: "Set time again",
+        
+      })
+   
       return;
     }
 
@@ -399,6 +448,7 @@ function ScheduleForm() {
     }
 
     const handleSubmit = async () => {
+      setClick(true);
       const petSchedule = {
         DeviceName: credential.DeviceName,
         Petname: name,
@@ -412,7 +462,16 @@ function ScheduleForm() {
    
   
       if(!name || !chooseDay || !scheds1.length) {
-       alert('Feel out all fields.')
+        setClick(false);
+        Swal.fire({
+          title: "Warning?",
+          text: "Please input all fields.",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Yes, I will.",
+          
+        })
+      
         return;
       }
   
@@ -431,7 +490,17 @@ function ScheduleForm() {
             document_id: docRef.id,
             request:null,
           });
-          alert('Schedule added successfully');
+
+          setClick(false);
+          Swal.fire({
+            title: "Success?",
+            text: "Schedule added successfully",
+            icon: "success",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Okay, Thank you.",
+            
+          })
+        
         }
         return;
        }
@@ -443,7 +512,15 @@ function ScheduleForm() {
        updateDoc(docRef, {
          ScheduleTime:updatedSched,
       }).then(()=>{
-        alert('Pet Schedule updated successfully');
+        setClick(false);
+          Swal.fire({
+            title: "Success?",
+            text: "Schedule added successfully",
+            icon: "success",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Okay, Thank you.",
+            
+          })
         setSchedules([])
         setSchedules2([])
         setName('')
@@ -654,8 +731,23 @@ function ScheduleForm() {
         </div>
         <DialogFooter className=' flex  max-md:items-end'>
           <div className='flex justify-center items-center gap-2 p-2 w-[60%]  text-center rounded-md font-bold bg-[#FAB1A0] text-white cursor-pointer hover:bg-[coral] transition-all ease-in' onClick={()=> handleUpdateTimeHere(d.dts.Days, s.parameters)}>
-            <BiSave size={20}/>
+          {click1 ?
+ <>
+ <CircularProgress color='inherit' size={15} />
+  <span className='text-sm font-bold text-white'>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiSave size={20}/>
             <span>SAVE CHANGES</span>
+            </>
+           
+         }
+        
+          
           </div>
         </DialogFooter>
       </DialogContent>
@@ -740,10 +832,31 @@ function ScheduleForm() {
     </CardContent>
     <CardFooter className="flex justify-between">
     
-     <Button variant="outline">CLEAR</Button>
-     <div onClick={handleSubmit} className='flex transition-all ease-in  justify-center items-center gap-1 border p-2 rounded-md bg-[#FAB1A0] text-white shadow-sm cursor-pointer hover:bg-[coral]'>
-      <BiTimeFive size={20} className='ml-2'/>
+     <Button variant="outline" onClick={()=>{
+      setName("");
+      setCaps("");
+      setSchedules([]);
+      setSchedules2([]);
+      setChooseDay("Everyday");
+     }}>CLEAR</Button>
+     <div onClick={handleSubmit} className='flex transition-all ease-in  justify-center items-center gap-2 border px-4 py-2 rounded-md bg-[#FAB1A0] text-white shadow-sm cursor-pointer hover:bg-[coral]'>
+    
+
+      {click ?
+ <>
+  <CircularProgress color='inherit' size={15} />
+  <span className='text-sm font-bold text-white'>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiTimeFive size={20} className='ml-2'/>
       <label className=' cursor-pointer font-bold  w-11'>SET</label>
+            </>
+           
+         }
         
       </div>
     </CardFooter>

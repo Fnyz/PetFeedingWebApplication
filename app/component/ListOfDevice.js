@@ -33,6 +33,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+import Swal from 'sweetalert2'
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 
 
@@ -116,7 +119,8 @@ function ListOfDevice({setPositions}) {
   const [jsonFile, setJSONFile] = React.useState("");
   const [hasD, setHasD] = React.useState(false);
   const [allDevice, setALLDevice] = React.useState([]);
-
+  const [click, setClick] = useState(false);
+  const [opens, setOpens] = React.useState(false);
 
 
 
@@ -183,7 +187,7 @@ const suggestDeleting = () => {
 
 
 
-const [opens, setOpens] = React.useState(false);
+
 
 
   const handleClose2 = () => {
@@ -216,7 +220,24 @@ const [opens, setOpens] = React.useState(false);
   }
 
   const getLiveStreamData = async (device) => {
-
+    setOpens(false);
+    setClick(true);
+    if(!apiky || !channel || !jsonFile) {
+      setClick(false)
+      Swal.fire({
+        title: "Warning?",
+        text: "Please input all fields.",
+        icon: "warning",
+        confirmButtonColor: "#FAB1A0",
+        confirmButtonText: "Yes, I will.",
+        
+       
+      }).then(()=>{
+        setOpens(true);
+      })
+        return;
+    }
+ 
     const jFile = JSON.parse(jsonFile);
    
    const res = lives.find(l => l.dt.DeviceName === device);
@@ -229,7 +250,17 @@ const [opens, setOpens] = React.useState(false);
         setJSONFile({})
         setApiKy("")
         setChannel("");
-        alert('Sumitted successfully!');
+        setClick(false);
+        Swal.fire({
+          title: "Success?",
+          text: "Youtube live key is sumitted successfully!",
+          icon: "success",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Close",
+          
+         
+        })
+      
       });
 
 
@@ -529,7 +560,7 @@ const [opens, setOpens] = React.useState(false);
         { device && options.map((option) => (
           <MenuItem key={option.val}  onClick={handleClose}>
             <div className='flex justify-between items-center w-[100%]' onClick={()=> openTime(option.val)}>
-              <label className = {option.color}> {option.val} </label>
+              <label className = {`${option.color} font-bold`}> {option.val} </label>
               {option.icon}
             </div>
           </MenuItem>
@@ -538,7 +569,7 @@ const [opens, setOpens] = React.useState(false);
         { !device && options2.map((option) => (
           <MenuItem key={option.val}  onClick={handleClose}>
             <div className='flex justify-between items-center w-[100%]' onClick={()=> openTime(option.val)}>
-              <label className = {option.color}> {option.val} </label>
+              <label className = {`${option.color} font-bold`}> {option.val} </label>
               {option.icon}
             </div>
           </MenuItem>
@@ -599,10 +630,25 @@ const [opens, setOpens] = React.useState(false);
 
           <div className="grid grid-cols items-center gap-4">
            <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2' onClick={()=> getLiveStreamData(item.dt.Devicename)}>
-            <BiSave size={20} color='white'/>
+          
+            {click ?
+ <>
+  <CircularProgress color='inherit' size={15}/>
+  <span className='text-md font-bold'>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiSave size={20} color='white'/>
             <span>
               SUBMIT
             </span>
+            </>
+           
+         }
+         
            </div>
           </div>
        
@@ -696,6 +742,7 @@ const [opens, setOpens] = React.useState(false);
   <span>
     ADD YOUTUBE KEY
   </span>
+  
  </div>
 </div>
 

@@ -23,6 +23,9 @@ import {
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
 
+  import Lottie from 'react-lottie-player'
+   import dsdds from "../../public/Image/dsdds.json"
+   import line from "../../public/Image/lineAnimation.json"
 
 
 
@@ -57,6 +60,7 @@ function page() {
  
 
   if(!isclient){
+   
     return;
   }
 

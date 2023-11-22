@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react';
 import { BiEditAlt, BiSave, BiSolidPencil, BiX, BiSolidFolderOpen} from "react-icons/bi";
-import { Button } from "@/components/ui/button"
+import Button from '@mui/material/Button';
 import Image from 'next/image';
 import {
   Dialog,
@@ -31,9 +31,22 @@ import { userPpl } from '../userProfileImage';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import { reauthenticateWithCredential, updatePassword, EmailAuthProvider, getAuth} from 'firebase/auth';
+import CircularProgress from '@mui/material/CircularProgress';
+import { styled } from '@mui/material/styles';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import Swal from 'sweetalert2'
 
-
-
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 
 export function ProfileAccount() {
@@ -49,7 +62,8 @@ export function ProfileAccount() {
   const [password, setPassword] = React.useState('');
   const [disables, setDisabled] = React.useState(true);
   const [userData, setUserData] = React.useState([]);
-
+  const [click, setClick] = React.useState(false);
+  const [click1, setClick1] = React.useState(false);
 
   React.useEffect(() => {
     const getAllUsers  = async () => {
@@ -74,16 +88,32 @@ export function ProfileAccount() {
 
   const handleSubmitMe = () => {
  
-   
+    setClick(true)
         const res = userData.find(dt => dt.datas.email.trim().toLowerCase() === email.trim().toLowerCase());
         if(!res){
             updateEmail(auth.currentUser, email.trim()).then(() => {
-                alert('Update email!')
+              setClick(false)
+              Swal.fire({
+                title: "Success!",
+                text: "Successfully updated email address.",
+                icon: "success",
+                confirmButtonColor: "#FAB1A0",
+                confirmButtonText: "Okay",
+               
+              })
               }).catch((error) => {
+                
                 console.log('Something went wrong!')
               });
         }else{
-          alert('Email is already used!')
+          Swal.fire({
+            title: "Warning!",
+            text: "Email is already used!.",
+            icon: "warning",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Okay",
+          })
+         
         }
 
     
@@ -93,6 +123,7 @@ export function ProfileAccount() {
 
 
   const updatePasswordInFirebase = async () => {
+    setClick1(true)
     try {
       
       const user = auth.currentUser;
@@ -101,11 +132,26 @@ export function ProfileAccount() {
         const credential = EmailAuthProvider.credential(user.email, current);
         await reauthenticateWithCredential(user, credential);
         await updatePassword(user, password);
-        alert('Password updated successfully!')
+        setClick(false)
+        Swal.fire({
+          title: "Success!",
+          text: "Password updated successfully!",
+          icon: "success",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Okay",
+        })
+     
         setCurrent('');
         setPassword('');
       } else {
-        alert('no users found!')
+        setClick1(false)
+        Swal.fire({
+          title: "Warning!",
+          text: "No users found!",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Okay",
+        })
       }
     } catch (error) {
         let errorMessage = null;
@@ -128,15 +174,23 @@ export function ProfileAccount() {
         }
    
         if(errorMessage){
+          setClick1(false)
           setPassword('')
-          alert(errorMessage);
+          Swal.fire({
+            title: "Warning!",
+            text: errorMessage,
+            icon: "warning",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Try Again",
+          })
+       
         }
     }
   };
 
 
   const handleUpdateProfile = async () => {
- 
+    setClick(true)
      const userDt = {
         email:email,
         firstname: name.split(' ')[0].trim(),
@@ -146,8 +200,11 @@ export function ProfileAccount() {
      }
 
      const dt1 = doc(db, "users", profile.userId );
-     await updateDoc(dt1, userDt);
-      alert('Updated success!');
+     await updateDoc(dt1, userDt).then(()=>{
+      setClick(false)
+      
+     });
+     
 
    }
 
@@ -253,11 +310,17 @@ export function ProfileAccount() {
 
    
      
-     <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer'>
-     <BiSolidFolderOpen size={22} color='white'/>
-      <label className='text-white font-bold cursor-pointer'>UPLOAD IMAGE</label>
+  
+  
+     <Button component="label" variant="contained" className='opacity-60' startIcon={<CloudUploadIcon />} >
+      Upload file
+      <VisuallyHiddenInput type="file" onChange={(event)=> {
+       const file = event.target.files[0]
+       setChoose(URL.createObjectURL(file));
+      }}/>
+    </Button>
    
-     </div>
+
 
    
          
@@ -266,9 +329,9 @@ export function ProfileAccount() {
         <SheetFooter>
           <SheetClose asChild>
          
-            <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  border-[#FAB1A0] hover:shadow-md transition-all ease-in cursor-pointer w-full'>
-     <BiSave size={22} color='#FAB1A0'/>
-<label className='text-[#FAB1A0] font-bold cursor-pointer'>SAVE CHANGES</label>
+            <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  bg-[#FAB1A0] hover:shadow-md transition-all ease-in cursor-pointer w-full'>
+     <BiSave size={22} color='white'/>
+<label className='text-white font-bold cursor-pointer'>SAVE CHANGES</label>
 
 </div>
           </SheetClose>
@@ -344,7 +407,25 @@ export function ProfileAccount() {
      </div>
    </div>
    <DialogFooter>
-     <Button type="submit" onclick={updatePasswordInFirebase}>Save changes</Button>
+     <div  className=' transition-all ease-in cursor-pointer text-white px-4 py-2 rounded-md flex justify-center items-center gap-2 bg-[#FAB1A0] hover:bg-[coral]' onclick={updatePasswordInFirebase}>
+     {click1 ?
+ <>
+  <CircularProgress color='inherit' size={15}/>
+  <span>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+            <span>
+           SAVE CHANGES
+            </span>
+            </>
+           
+         }
+         
+     </div>
    </DialogFooter>
  </DialogContent>
 </Dialog>
@@ -354,8 +435,45 @@ export function ProfileAccount() {
         
         </div>
         <DialogFooter>
-          {disables ? <Button type="submit" onClick={handleUpdateProfile}>Update Profile</Button> : 
-          <Button type="submit" onClick={handleSubmitMe}>Update Email</Button>
+          {disables ? <div  className=" transition-all ease-in cursor-pointer text-white px-4 py-2 rounded-md flex justify-center items-center gap-2 bg-[#FAB1A0] hover:bg-[coral]" onClick={handleUpdateProfile}>
+          {click ?
+ <>
+  <CircularProgress color='inherit' size={15}/>
+  <span>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+            <span>
+            UPDATE PROFILE
+            </span>
+            </>
+           
+         }
+         
+            </div> : 
+          <div  className="  transition-all ease-in cursor-pointer text-white px-4 py-2 rounded-md flex justify-center items-center gap-2 bg-[#FAB1A0] hover:bg-[coral]"  onClick={handleSubmitMe}>
+{click ?
+ <>
+  <CircularProgress color='inherit' size={15}/>
+  <span>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+            <span>
+            UPDATE EMAIL
+            </span>
+            </>
+           
+         }
+         
+
+          </div>
           }
           
         </DialogFooter>

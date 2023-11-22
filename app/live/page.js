@@ -38,31 +38,104 @@ function page() {
     const [visible, setVisible] = React.useState(false);
     const [message, setMessage] = React.useState('');
     const [credential, setCredential] = React.useState({});
-    const [youtubeUrl, setYoutubeUrl] = React.useState('https://www.youtube.com/watch?v=EF8C4v7JIbA&ab_channel=BBCEarth');
     const [loading, setLoading] = React.useState(false);
-    const [liveStreamUrl, setLiveStreamUrl] = useState('');
+    const [liveStreamUrl, setLiveStreamUrl] = useState('https://www.youtube.com/watch?v=RNprQYHenNI&ab_channel=DisneyMusicVEVO');
+    const [apiKey1, setApiKey] = useState('');
+    const [channel, setChannel] = useState('');
+    const [visible1, setVisible1] = useState(false);
+    const [liveiD, setLiveId] = useState("");
 
-        useEffect(() => {
-      const apiKey = 'AIzaSyAswYUBVDRW-TQaMlXy2eCaq1VEQjDWk4Y';
-      const channelId = 'UCfz2mEXrgNp1WUgiKsiscWg';
-  
-      const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&eventType=live&type=video&channelId=${channelId}&key=${apiKey}`;
-  
-      fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-          const liveVideo = data.items[0];
-          const videoId = liveVideo.id.videoId;
-          const url = `https://www.youtube.com/watch?v=${videoId}`;
-          setLiveStreamUrl(url);
-          console.log(url);
+
+    const handleRefetch =async () => {
+
+    
+      try {
+        // Step 1: Get live broadcasts associated with the channel
+        const liveBroadcastsResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?key=${apiKey1}&channelId=${channel}&eventType=live&type=video&part=snippet,id`
+        );
+    
+        const liveBroadcastsData = await liveBroadcastsResponse.json();
+      
+        // Step 2: Extract video IDs from the live broadcasts
+        const videoIds = liveBroadcastsData.items.map((item) => item.id.videoId);
+        console.log(videoIds);
+
+          if(!videoIds[0]){
+            setVisible1(true);
+            setVisible(false);
+            return;
+          }
          
-        })
-        .catch(error => {
-          console.error('Error fetching live stream data:', error);
-        });
-    }, []);
+          setVisible(false);
+          const url = `https://www.youtube.com/watch?v=${videoIds[0]}`;
+          setLiveStreamUrl(url);
 
+          const docRef = doc(db, 'Livestream', liveiD);
+            updateDoc(docRef, {
+              Youtube_Url:url,
+           }).then(()=>{
+             console.log("Updated Database");
+           });
+
+        // You can use the video IDs for further processing
+      } catch (error) {
+        console.error('Error fetching live streams:', error);
+      }
+
+    }
+
+  
+
+
+
+    const fetchLiveStreams = async (apiKey, channelId, id) => {
+      setApiKey(apiKey);
+      setChannel(channelId);
+      setLiveId(id);
+ 
+      try {
+        // Step 1: Get live broadcasts associated with the channel
+        const liveBroadcastsResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&eventType=live&type=video&part=snippet,id`
+        );
+    
+        const liveBroadcastsData = await liveBroadcastsResponse.json();
+      
+        // Step 2: Extract video IDs from the live broadcasts
+        const videoIds = liveBroadcastsData.items.map((item) => item.id.videoId);
+
+          if(!videoIds[0]){
+            setVisible1(true);
+            setVisible(false);
+            return;
+          }
+          setVisible(false);
+          const url = `https://www.youtube.com/watch?v=${videoIds[0]}`;
+          setLiveStreamUrl(url);
+
+          const docRef = doc(db, 'Livestream', id);
+            updateDoc(docRef, {
+              Youtube_Url:url,
+           }).then(()=>{
+             console.log("Updated Database");
+           });
+      
+    
+        
+        
+        // You can use the video IDs for further processing
+      } catch (error) {
+        console.error('Error fetching live streams:', error);
+      }
+
+     
+
+
+    };
+    
+   
+  
 
     useEffect(()=> {
 
@@ -72,11 +145,17 @@ function page() {
             const q = query(collection(db, "Livestream"), where("DeviceName", "==", datas.DeviceName.trim()));
             onSnapshot(q, (snapshot) => {
             snapshot.docChanges().forEach((change) => {
+              setLiveId(change.doc.id)
             
             if (change.type == "modified" && change.doc.data().isliveNow === true) {
-                setMessage('The video is change , click continue to watch.');
-                setYoutubeUrl(change.doc.data().Youtube_Url);
+             
+                setMessage('Please wait for a minute, proccessing youtube url.');
+                fetchLiveStreams(change.doc.data().ApiKey,change.doc.data().ChannelID, change.doc.id);
+  
+   
             }
+           
+         
            
           });
         
@@ -101,7 +180,7 @@ function page() {
 
     useEffect(()=>{
      setisClient(true);
-     setVisible(false);
+     setVisible(true);
      setMessage('Hello, do you want to watch the live video?');
      handleShowCredData();
     },[])
@@ -117,20 +196,15 @@ function page() {
 
     const startVideoLive = async () => {
 
-        const jsonKeyFile =  {
-          "client_id":"85076363562-calnoh5d29tju3sohoucghqqiij0np0o.apps.googleusercontent.com",
-          "project_id":"norse-habitat-403110",
-          "auth_uri":"https://accounts.google.com/o/oauth2/auth",
-          "token_uri":"https://oauth2.googleapis.com/token",
-          "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
-          "client_secret":"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","redirect_uris":["http://localhost"]
-        }
+        
     
         const request = {
           DeviceName:credential.DeviceName.trim(),
-          Youtube_Url:'',
           isliveNow: false,
-          jsonKeyFile,
+          Youtube_Url:"",
+          ApiKey:"",
+          ChannelID:"",
+          jsonKeyFile:{}
         }
     
         const docRef = await addDoc(collection(db, "Livestream"),request);
@@ -161,15 +235,15 @@ function page() {
          snapshot.docChanges().forEach((change) => {
           const {DeviceName,Youtube_Url, isliveNow } = change.doc.data()
     
-          if(!Youtube_Url){
+          if(!isliveNow && !Youtube_Url){
             setMessage('Please wait a minute to see the live?');
             setLoading(true);
             return;
           }
      
-          if(DeviceName == datas.DeviceName.trim() && isliveNow == true){
+          if(DeviceName == datas.DeviceName.trim() && isliveNow == true && Youtube_Url){
             setMessage('Do you want to continue watching the live?');
-            setYoutubeUrl(Youtube_Url);
+            liveStreamUrl(Youtube_Url);
             setLoading(false);
             return;
           }
@@ -181,7 +255,7 @@ function page() {
           }
     
         } catch (e) {
-          // error reading value
+         
         }
       };
     
@@ -237,11 +311,40 @@ function page() {
           {message}
           </Typography>
           <div className='grid gap-2'>
-          <div className='w-full  p-1 grid justify-center items-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer' onClick={startVideoLive}>
+          <div className={`w-full  p-1 grid justify-center items-center rounded-md bg-[#FAB1A0]    ${!loading && "cursor-pointer hover:bg-[coral] transition-all ease-in"}`} disabled={loading} onClick={startVideoLive}>
            <span className='text-white font-bold'>{loading ? 'WAIT': 'YES'}</span>
           </div>
-          <div className='w-full  p-1 grid justify-center items-center border-[#FAB1A0] rounded-md  hover:border-[coral] transition-all ease-in cursor-pointer' onClick={handleGoback}>
-           <span className='text-[#FAB1A0] font-bold hover:text-[coral]'>NO</span>
+          <div className='w-full  p-1 grid justify-center items-center border-[#FAB1A0] rounded-md border  hover:border-[coral] transition-all ease-in cursor-pointer' onClick={handleGoback}>
+           <span className='text-[#FAB1A0] font-bold hover:text-[coral] '>NO</span>
+          </div>
+          </div>
+        
+          </div>
+          
+        </Box>
+      </Modal>
+
+      <Modal
+        open={visible1}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style} >
+        <Image
+        width={160}
+        height={160}
+        src="/Image/KawaiDog.png"
+        contentFit="cover"
+       
+      />
+          <div className='grid gap-1 justify-center '>
+         
+          <Typography id="modal-modal-description" >
+          Something went wrong, please click the bottom to request again.
+          </Typography>
+          <div className='grid gap-2'>
+          <div className='w-full  p-1 grid justify-center items-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer' onClick={handleRefetch}>
+           <span className='text-white font-bold'>Reload</span>
           </div>
           </div>
         

@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Button } from "@/components/ui/button"
 import { FaBalanceScale } from "react-icons/fa";
 import { BiEditAlt, BiSave, BiSolidFolderOpen} from "react-icons/bi";
 import {
@@ -39,7 +38,21 @@ import ImageListItem from '@mui/material/ImageListItem';
 import Image from 'next/image';
 import { collection, addDoc, query, onSnapshot, serverTimestamp } from "firebase/firestore";
 import { db } from '../firebase';
-
+import Swal from 'sweetalert2'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 function generateFakePassword(length) {
   const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -77,6 +90,9 @@ function AddPetsForm() {
     const [goalWeight, SetGoalWeight] = React.useState('');
     const [petDatas, setPetDatas] = React.useState([]);
     const [credential, setCredential] = React.useState({});
+    const [click1, setClick1] = useState(false);
+    const [click, setClick] = useState(false);
+    const [click2, setClick2] = useState(false);
 
 
     const getAllDatas = () => {
@@ -110,10 +126,20 @@ function AddPetsForm() {
 
     const handleSubmit = async () => {
 
-    
+      setClick2(true)
   
       if(!petname || !genders || !rfid || !weight || !goalWeight || !age){
-        alert('Please input all fields.')
+        setClick2(false)
+        Swal.fire({
+          title: "Warning?",
+          text: "Please input all fields.",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Yes, I will.",
+          
+         
+        })
+      
         return;
       }
   
@@ -136,6 +162,7 @@ function AddPetsForm() {
         });
   
         if(addListPet.id){
+          setClick2(false)
           await addDoc(collection(db, "Task"), {
             type:'refresh_pet',
             deviceName:credential.DeviceName.trim(),
@@ -149,16 +176,41 @@ function AddPetsForm() {
           SetPetAge('');
           SetRfid('');
           SetWeight('');
-          alert('Successfully added new pet!');
+          Swal.fire({
+            title: "Warning?",
+            text: "Please input all fields.",
+            icon: "warning",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Yes, I will.",
+            
+           
+          })
+          Swal.fire({
+            title: "Success?",
+            text: "Successfully added new pet!",
+            icon: "success",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Okay",
+          })
+        
         }
+
+        setClick2(false)
   
         return;
        }
   
        if(res.Petname.toLowerCase().trim() === petname.toLowerCase().trim()){
-      
+        setClick2(false)
         setPetName('');
-        alert('Pet is already exists!');
+   
+        Swal.fire({
+          title: "Warning?",
+          text: "Pet is already exists!",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Try again",
+        })
        }
         
     }
@@ -166,17 +218,21 @@ function AddPetsForm() {
 
 
     const handleFakeRFID = () => {
+      setClick1(true);
       setTimeout(() => {
         const fakePassword = generateFakePassword(20);
+        setClick1(false);
         SetRfid(fakePassword)
       }, 3000);
   
     }
   
     const handleFakeWeight = () => {
+      setClick(true);
       setTimeout(() => {
         const fakeWeight = generateFakeWeight(15, 25);
         SetWeight(fakeWeight)
+        setClick(false);
       }, 3000);
   
     }
@@ -268,11 +324,14 @@ function AddPetsForm() {
       ))}
     </ImageList>
 
-     <div className='border p-2 flex justify-center items-center gap-2 shadow-sm rounded-md  bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer'>
-      <BiSolidFolderOpen size={20} color='white'/>
-      <label className='text-white font-bold cursor-pointer'>UPLOAD IMAGE</label>
-   
-     </div>
+    
+    <Button component="label" variant="contained" className='opacity-60' startIcon={<CloudUploadIcon />} >
+      Upload file
+      <VisuallyHiddenInput type="file" onChange={(event)=> {
+       const file = event.target.files[0]
+       setChoose(URL.createObjectURL(file));
+      }}/>
+    </Button>
          
          
         </div>
@@ -329,8 +388,22 @@ function AddPetsForm() {
             }}/>
          </div>
          <div className=' gap-2 h-[40px] mt-5 flex justify-center items-center w-full rounded-sm cursor-pointer   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={handleFakeRFID}>
-            <BiRfid size={20} color='white' className='max-md:hidden block'/>
+         {click1 ?
+ <>
+
+  <span className='text-sm font-bold text-white'>
+   PLEASE WAIT...
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiRfid size={20} color='white' className='max-md:hidden block'/>
              <label className='text-white font-bold cursor-pointer'>Set RFID</label>
+            </>
+           
+         }
+          
          </div>
     
         
@@ -346,12 +419,28 @@ function AddPetsForm() {
             }}  />
     </div>
     <div className='gap-2 cursor-pointer h-[40px] mt-5 flex justify-center items-center w-full rounded-sm   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={handleFakeWeight}>
-        <FaBalanceScale size={20} color='white' className=' max-md:hidden block'/>
+    {click ?
+ <>
+
+  <span className='text-sm font-bold text-white'>
+   PLEASE WAIT...
+  </span>
+ </>
+          : 
+            <>
+           
+           <FaBalanceScale size={20} color='white' className=' max-md:hidden block'/>
     <label className='text-white font-bold cursor-pointer'>Weight PET</label>
+            </>
+           
+         }
+         
+
     </div>
      </div>
     
      <div className="flex flex-col space-y-1.5">
+
            <Label htmlFor="goalWeight">Goal Weight</Label>
            <Input id="goalWeight" placeholder="Input goal weight of pet"  value={goalWeight} onChange={(e)=>{
               SetGoalWeight(e.target.value);
@@ -362,10 +451,30 @@ function AddPetsForm() {
      </form>
     </CardContent>
     <CardFooter className="flex justify-between">
-     <Button variant="outline">CLEAR</Button>
-     <div onClick={handleSubmit} className='flex transition-all ease-in  justify-center items-center gap-1 border p-2 rounded-md bg-[#FAB1A0] text-white shadow-sm cursor-pointer hover:bg-[coral]'>
-      <BiSave size={20} />
+     <div className='border px-4 py-2 rounded-md  border-[#FAB1A0] text-[#FAB1A0] font-bold cursor-pointer hover:border-[coral] hover:text-[coral] ' onClick={()=>{
+      setPetName("")
+      SetPetAge("");
+      SetRfid("");
+      SetWeight("");
+      SetGoalWeight("");
+     }}>CLEAR</div>
+     <div onClick={handleSubmit} className='flex transition-all ease-in  justify-center items-center gap-1 border py-2 px-4 rounded-md bg-[#FAB1A0] text-white shadow-sm cursor-pointer hover:bg-[coral]'>
+     {click2 ?
+ <>
+
+  <span className='text-sm font-bold text-white'>
+   PLEASE WAIT...
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiSave size={20} />
       <label className=' cursor-pointer font-bold '>SUBMIT</label>
+            </>
+           
+         }
+      
       </div>
    
     </CardFooter>

@@ -30,7 +30,8 @@ import { Label } from "@/components/ui/label"
 import CryptoJS, { SHA256 } from 'crypto-js'
 import { BiSolidDevices } from "react-icons/bi";
 import { FaConnectdevelop } from "react-icons/fa6";
-
+import Swal from 'sweetalert2'
+import CircularProgress from '@mui/material/CircularProgress';
 function page() {
 
     const router = useRouter();
@@ -42,6 +43,8 @@ function page() {
     const [email, setEmail] = useState('');
     const [show, setShow] = useState(false);
     const [listUser, setUserList] = useState([]);
+    const [isClient, setClient] = useState(false);
+    const [click, setClick] = useState(false);
     
     const [showPassword, setShowPassword] = React.useState(false);
 
@@ -53,6 +56,7 @@ function page() {
 
 
     useEffect(()=>{
+      setClient(true);
         const user = localStorage.getItem("user");
         if(user){
             const data = JSON.parse(user);
@@ -164,6 +168,7 @@ querySnapshot.forEach(async (docss) => {
    const handleSubmitAuth = async (e) => {
 
     e.preventDefault();
+    setClick(true);
 
 
  
@@ -175,16 +180,30 @@ querySnapshot.forEach(async (docss) => {
 
 
       if(!deviceName || !password){
-      
+        setClick(false);
         setPassword('')
-        alert('Please input all fields?');
+        Swal.fire({
+          title: "Warning?",
+          text: "Please input all fields.",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Yes, I will.",
+          
+        })
       
        return;
       }
 
       if(password.length < 4) {
-        alert('Password must be at least 4 to 6 characters long!')
-     
+        setClick(false);
+        Swal.fire({
+          title: "Warning?",
+          text: "Password must be at least 4 to 6 characters long!",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Yes, I will.",
+          
+        })
         setPassword('')
         return;
       }
@@ -200,15 +219,29 @@ querySnapshot.forEach(async (docss) => {
  
 
       if(!res){
-         alert('Email is dont have a device');
+        setClick(false);
+         Swal.fire({
+          title: "Warning?",
+          text: "Email is dont have a device",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Okay, Thank you..",
+          
+        })
          setShow(true);
         return;
       }
 
      
       if(res.data.Password.trim() !== hashPass.trim() || res.data.Email !== data.email) {
-        alert('Invalid Credentials, please try again.')
-    
+        setClick(false);
+        Swal.fire({
+          title: "Warning?",
+          text: "Invalid Credentials, please try again.",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Try again",
+        })
         setPassword('');
         return;
       }
@@ -223,8 +256,14 @@ querySnapshot.forEach(async (docss) => {
           isActive:true
         }).then(()=> {
           setPassword('')
+          setClick(false);
+          Swal.fire({
+            title: "Welcome user!",
+            text: "Your account is logged in successfully.",
+            icon: "success",
+            showCancelButton: false,
+          })
           localStorage.setItem("credentials", JSON.stringify(credentials));
-          alert('Welcome user, please wait for a moment.');
           window.location.href = '/dashboard';
           return;
         })
@@ -252,6 +291,11 @@ querySnapshot.forEach(async (docss) => {
           }).catch((error) => {
             console.log(error);
           });
+    }
+
+
+    if(!isClient){
+      return;
     }
 
  
@@ -348,8 +392,22 @@ querySnapshot.forEach(async (docss) => {
 
                  {!show && (
                    <a onClick={handleSubmitAuth} className='shadow text-sm font-bold rounded flex justify-center items-center gap-2 text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 cursor-pointer hover:bg-[coral] ease-in text-center'>
-                    <FaConnectdevelop size={20} color='white'/>
+                    {click ?
+ <>
+  <CircularProgress color='inherit' size={20}/>
+  <span>
+   PLEASE WAIT...
+  </span>
+ </>
+          : 
+            <>
+           
+        
+           <FaConnectdevelop size={20} color='white'/>
                     CONNECT
+            </>
+           
+         }
                     </a>
 
                  )}

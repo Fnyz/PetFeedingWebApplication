@@ -21,6 +21,7 @@ import {
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
 import TotalUser from '../component/TotalUser';
+import AdminNotifications from '../component/adminNotifications';
 
 
 
@@ -31,7 +32,7 @@ function page() {
 
     const [profile, setProfileData] = useState({});
     const [position, setPosition1] = useState("WITHDEVICE");
-  
+    
 
    
 
@@ -157,7 +158,7 @@ function page() {
             <div className='flex gap-5 mt-5 max-md:flex-col max-lg:flex-col'>
             <ListOfDevice setPositions={setPosition1}/>
 
-            <Notifications />
+            <AdminNotifications />
             </div>
 
             

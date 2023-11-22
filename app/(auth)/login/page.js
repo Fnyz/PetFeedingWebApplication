@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { auth} from '@/app/firebase';
 import { getDocs , collection} from 'firebase/firestore';
 import { db } from '@/app/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification  } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import FormControl from '@mui/material/FormControl';
 import Visibility from '@mui/icons-material/Visibility';
@@ -18,8 +18,30 @@ import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import IconButton from '@mui/material/IconButton';
 import { useEffect } from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Modal from '@mui/material/Modal';
+import { BiX, BiMailSend  } from "react-icons/bi";
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Swal from 'sweetalert2'
+import CircularProgress from '@mui/material/CircularProgress';
 
 
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
 
 
 function page() {
@@ -27,13 +49,17 @@ function page() {
     const router = useRouter()
 
     const [email, setEmail] = useState('');
+    const [email1, setEmail1] = useState('');
     const [password, setPassword] = useState('');
-
     const [showPassword, setShowPassword] = React.useState(false);
-
     const [allUserData, setUserData] = useState([]);
-  
     const [isclient, setIsClient] = useState(false);
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+    const [click, setClick] = useState(false);
+
+  
   
     useEffect(()=>{
       setIsClient(true);
@@ -59,10 +85,20 @@ function page() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setClick(true)
 
 
         if(!email || !password) {
-            alert('Please input all fields?');
+          setClick(false)
+          Swal.fire({
+            title: "Warning?",
+            text: "Please input all fields.",
+            icon: "warning",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Yes, I will.",
+            
+           
+          })
             return;
         }
     
@@ -89,22 +125,66 @@ function page() {
               email:user.email,
               userId:user.uid,
             }
+            setClick(false)
+            Swal.fire({
+              title: "Welcome Admin!",
+              text: "Your account is logged in successfully.",
+              icon: "success",
+              showCancelButton: false,
+            })
             router.push('/home');
             localStorage.setItem("credentials", JSON.stringify(credentials));
             return;
             }
             
             
-            
+           
             if(!user.emailVerified){
-              alert('ACCOUNT is not verified yet!');
+              setClick(false)
+                Swal.fire({
+                  title: "Warning?",
+                  text: "Account not verified yet.",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonColor: "#3085d6",
+                  cancelButtonColor: "#d33",
+                  confirmButtonText: "Send email verification",
+                }).then((result) => {
+                  if (result.isConfirmed) {
+                    sendEmailVerification(user)
+                   .then(() => {
+                    setEmail("");
+                    setPassword("")
+                    Swal.fire({
+                      title: "Success",
+                      icon: "success",
+                      text: "Email verification sent successfully, please check your email.",
+                      confirmButtonColor: "#FAB1A0",
+                      cancelButtonColor: "#d33",
+                       confirmButtonText: "Close",
+                    });
+                })
+                  
+                 
+                  }
+                });
+  
+  
               return;
             }
       
-  
+            
+
+
+            setClick(false)
             setEmail('');
             setPassword('');
-
+            Swal.fire({
+              title: "Welcome user!",
+              text: "Your account is logged in successfully.",
+              icon: "success",
+              showCancelButton: false,
+            })
             router.push('/device');
             localStorage.setItem("user", JSON.stringify(profile));
             return;
@@ -137,7 +217,7 @@ function page() {
               errorMessage = "Email is not registered!";
             break;
             case 'auth/invalid-login-credentials':
-              errorMessage = "Account is not registered yet.";
+              errorMessage = "Invalid login credentials";
             break;
             case 'auth/too-many-requests':
               errorMessage = "Access to this account is temporarily disabled due to many failed login attemps. You can immediately restore it by resetting your password or you can try again later.";
@@ -147,15 +227,39 @@ function page() {
           }
       
           if(errorMessage){
-            alert(errorMessage);
-      
+
+              Swal.fire({
+                title: "Warning?",
+                text: errorMessage,
+                icon: "warning",
+                showCancelButton: false,
+                confirmButtonColor: "#FAB1A0",
+                confirmButtonText: "Try again",
+              })
           }
       
       
         });
     }
 
+
+
+
+  const handleresetPassword =() => {
+    sendPasswordResetEmail(auth, email1)
+    .then(() => {
+      alert("Password reset sent successfully!");
+      setEmail1("")
+    })
+    .catch((error) => {
+      const errorMessage = error.message;
+      console.log(errorMessage)
+      // ..
+    });
+  }
+
   if(!isclient) return;
+
 
 
   return (
@@ -212,11 +316,27 @@ function page() {
           />
         </FormControl>
         <div className='flex gap-2'>
-        <button type="button" onClick={handleLogin} className=' shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 hover:bg-[coral] ease-in' >
-           LOGIN
+        <button type="button" onClick={handleLogin} className=' flex justify-center items-center gap-2 shadow text-sm font-bold rounded text-white w-full bg-[#FAB1A0] hover:text-white transition-all hover:bg-coral  p-4 hover:bg-[coral] ease-in' >
+           {click ?
+ <>
+  <CircularProgress color='inherit' size={20}/>
+  <span>
+   PLEASE WAIT...
+  </span>
+ </>
+          : 
+            <>
+           
+            <span>
+            LOGIN
+            </span>
+            </>
+           
+         }
+         
           </button>
       
-        <button type="button" className='text-sm w-full p-4 border rounded text-[#FAB1A0] gap-2 border-rose-200 font-semibold hover:text-[coral] '>
+        <button type="button" className='text-sm w-full p-4 border rounded text-[#FAB1A0] gap-2 border-rose-200 font-semibold hover:text-[coral] ' onClick={handleOpen}>
     
           FORGET PASSWORD</button>
         </div> 
@@ -224,6 +344,8 @@ function page() {
             <span className=' text-sm opacity-50 font-semibold'>NEW USER?</span>
             <Link href="/register" className='text-red-700 font-bold text-sm opacity-70'>SIGN-UP.</Link>
         </div>
+
+   
         </div>
       
         
@@ -233,6 +355,50 @@ function page() {
         </div>
        
         </div>
+
+        <div>
+    
+      <Modal
+        open={open}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+        <div className='flex justify-between '>
+          <div>
+          <Typography variant="h5" className='font-bold'>RESET PASSWORD</Typography>
+          
+        <Typography variant="caption" className=' opacity-75'>Enter the email associated with your account below.</Typography>
+          </div>
+          <BiX color='red' className='cursor-pointer' onClick={handleClose}/>
+        </div>
+        <div className="flex flex-col mt-4  gap-2">
+            <Label htmlFor="petname" >
+              Email address
+            </Label>
+            <Input id="petname" placeholder='@youremailhere'  className="col-span-3" value={email1} onChange={(e)=> setEmail1(e.target.value)} />
+          </div>
+          <div className='flex justify-center mt-4 items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2' onClick={handleresetPassword} >
+  <BiMailSend size={20} color='white'/>
+  <span>
+    SUBMIT REQUEST
+  </span>
+ </div>
+        </Box>
+      </Modal>
+      <ToastContainer
+position="top-right"
+autoClose={5000}
+hideProgressBar={false}
+newestOnTop={false}
+closeOnClick
+rtl={false}
+pauseOnFocusLoss
+draggable
+pauseOnHover
+theme="dark"
+/>
+    </div>
        
 
     </div>
