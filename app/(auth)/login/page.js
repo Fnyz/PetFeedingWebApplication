@@ -58,6 +58,7 @@ function page() {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const [click, setClick] = useState(false);
+    const [click2, setClick2] = useState(false);
 
   
   
@@ -227,7 +228,7 @@ function page() {
           }
       
           if(errorMessage){
-
+            setClick(false)
               Swal.fire({
                 title: "Warning?",
                 text: errorMessage,
@@ -236,6 +237,9 @@ function page() {
                 confirmButtonColor: "#FAB1A0",
                 confirmButtonText: "Try again",
               })
+
+              setEmail('');
+              setPassword('');
           }
       
       
@@ -246,14 +250,35 @@ function page() {
 
 
   const handleresetPassword =() => {
+    setClick2(true)
     sendPasswordResetEmail(auth, email1)
     .then(() => {
-      alert("Password reset sent successfully!");
+      setClick2(false)
+      Swal.fire({
+        title: "Success?",
+        text: "Password reset sent successfully, please check your email address!",
+        icon: "success",
+        showCancelButton: false,
+        confirmButtonColor: "#FAB1A0",
+        confirmButtonText: "Try again",
+      })
+
       setEmail1("")
     })
     .catch((error) => {
+      
       const errorMessage = error.message;
-      console.log(errorMessage)
+ 
+      Swal.fire({
+        title: "Warning?",
+        text: errorMessage,
+        icon: "warning",
+        showCancelButton: false,
+        confirmButtonColor: "#FAB1A0",
+        confirmButtonText: "Try again",
+      })
+      setClick2(false)
+      setEmail1("")
       // ..
     });
   }
@@ -320,8 +345,8 @@ function page() {
            {click ?
  <>
   <CircularProgress color='inherit' size={20}/>
-  <span>
-   PLEASE WAIT...
+  <span className='font-bold'>
+   PLEASE WAIT
   </span>
  </>
           : 
@@ -379,10 +404,25 @@ function page() {
             <Input id="petname" placeholder='@youremailhere'  className="col-span-3" value={email1} onChange={(e)=> setEmail1(e.target.value)} />
           </div>
           <div className='flex justify-center mt-4 items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2' onClick={handleresetPassword} >
-  <BiMailSend size={20} color='white'/>
+ 
+  {click2 ?
+ <>
+  <CircularProgress color='inherit' size={15}/>
+  <span className='font-bold text-sm'>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiMailSend size={20} color='white'/>
   <span>
     SUBMIT REQUEST
   </span>
+            </>
+           
+         }
+         
  </div>
         </Box>
       </Modal>

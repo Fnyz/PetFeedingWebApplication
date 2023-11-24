@@ -13,9 +13,33 @@ import { BiHome, BiListPlus, BiTimeFive, BiTv, BiSolidReport} from "react-icons/
 import Image from 'next/image';
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-
+import { collection, query,onSnapshot, where} from "firebase/firestore";
+import { db } from '../firebase'; 
+import { useState, useEffect } from 'react';
+import Badge from '@mui/material/Badge';
 function SideBar() {
   const pathname = usePathname()
+  const [messages, setAllMessages] = useState([]);
+
+  useEffect(()=>{
+    const user = localStorage.getItem("credentials")
+    
+    if(user){
+        const datas = JSON.parse(user);
+       
+        const q = query(collection(db, "Messages"), where("deviceName", "==", datas.DeviceName), where("adminSend", "==", false));
+        onSnapshot(q, (querySnapshot) => {
+       const dt = [];
+       querySnapshot.forEach((doc) => {
+           dt.push({data:doc.data(), id:doc.id});
+       });
+       setAllMessages(dt);
+       });
+      
+    }
+   
+  
+  },[])
  
     const [state, setState] = React.useState({
         top: false,
@@ -48,7 +72,10 @@ function SideBar() {
         {
           name: 'Reports',
           link: '/reports',
-          icon: <BiSolidReport size={24}/>,
+          icon: messages.length > 0 ? <Badge badgeContent={messages.length} color="secondary">
+          <BiSolidReport size={24}/>
+            </Badge> :  <BiSolidReport size={24}/>
+       
         },
       ]
     

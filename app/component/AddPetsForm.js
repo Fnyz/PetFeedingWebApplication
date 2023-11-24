@@ -42,6 +42,8 @@ import Swal from 'sweetalert2'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
+import { BiX  } from "react-icons/bi";
+
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
   clipPath: 'inset(50%)',
@@ -53,6 +55,7 @@ const VisuallyHiddenInput = styled('input')({
   whiteSpace: 'nowrap',
   width: 1,
 });
+
 
 function generateFakePassword(length) {
   const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -75,6 +78,8 @@ function generateFakeWeight(min, max) {
 
 function AddPetsForm() {
 
+
+    const [specified, setSpecifiedPet] = useState(false);
     const [dog, setDog] = React.useState([]);
     const [cat, setCat] = React.useState([]);
     const [choose, setChoose] = React.useState('');
@@ -84,6 +89,12 @@ function AddPetsForm() {
       {val: 'male', label: 'Male' },
       {val: 'female', label: 'Female' },
     ]
+    const kindPet = [
+      {val: 'dog', label: 'Dog' },
+      {val: 'cat', label: 'Cat' },
+      {val: 'specified', label: 'Specified type' },
+    ]
+    const [petKind, setPetKind] = React.useState('');
     const [genders, setGenders] = React.useState('');
     const [rfid, SetRfid] = React.useState('');
     const [weight, SetWeight] = React.useState('');
@@ -157,6 +168,7 @@ function AddPetsForm() {
           Age:age,
           image:choose || null,
           synced:false,
+          petType:petKind,
           Created_at: serverTimestamp(),
           Updated_at: serverTimestamp(),
         });
@@ -249,7 +261,7 @@ function AddPetsForm() {
     setCat(cat);
     setChoose('/Image/anyaCuttie.jpg');
   },[])
-
+console.log(petKind);
   return (
     <Card className="w-full">
     <CardHeader>
@@ -379,6 +391,68 @@ function AddPetsForm() {
              </SelectContent>
            </Select>
          </div>
+         {specified ? (
+               <div className='flex justify-between  items-center  gap-2'>
+    
+               <div className="flex flex-col w-full space-y-1.5 ">
+                 <Label htmlFor="rfid">Input type of pet</Label>
+                 <Input id="rfid" placeholder="Set type pet here"   value={petKind} onChange={(e)=>{
+                   
+                    if(e.target.value.toLowerCase().trim() === "dog" || e.target.value.toLowerCase().trim()=== "cat"){
+                      Swal.fire({
+                        title: "Warning?",
+                        text: "Type of pet is already exist.",
+                        icon: "warning",
+                        confirmButtonColor: "#FAB1A0",
+                        confirmButtonText: "Try another one type",
+                        
+                       
+                      })
+
+                      setPetKind("")
+                    
+                    }else{
+                      setPetKind(e.target.value.toLowerCase().trim())
+                    }
+                  }}/>
+               </div>
+               <div className=' gap-2 h-[40px] mt-5  flex justify-center items-center w-[10%] max-md:w-[20%] rounded-sm cursor-pointer   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={()=>{
+                setSpecifiedPet(false);
+               }}>
+                 <BiX size={25} color='white' className='block'/>
+    
+               </div>
+          
+              
+             
+               </div>
+         ): (
+          <div className="flex flex-col space-y-1.5">
+          <Label htmlFor="gender">What type of pet?</Label>
+          <Select  onValueChange={(e)=> {
+           if(e === "specified"){
+            setPetKind("")
+             setSpecifiedPet(true);
+             return;
+           }
+           setPetKind(e)
+          }}  >
+            <SelectTrigger id="gender">
+              <SelectValue placeholder="Select here" />
+            </SelectTrigger>
+            <SelectContent position="popper ">
+             {kindPet.map((d, i)=> {
+               return (
+                 <SelectItem value={d.val} key={i}>{d.label}</SelectItem>
+               )
+             })}
+        
+           
+            </SelectContent>
+          </Select>
+        </div>
+         )}
+        
          <div className='flex justify-between  items-center  gap-2'>
     
          <div className="flex flex-col w-full space-y-1.5 ">

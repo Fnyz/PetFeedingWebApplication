@@ -258,8 +258,8 @@ querySnapshot.forEach(async (docss) => {
           setPassword('')
           setClick(false);
           Swal.fire({
-            title: "Welcome user!",
-            text: "Your account is logged in successfully.",
+            title: "Success!",
+            text: "Your account with your device is logged in successfully.",
             icon: "success",
             showCancelButton: false,
           })

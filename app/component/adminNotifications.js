@@ -8,10 +8,13 @@ import { useState,useEffect } from 'react';
 import moment from 'moment';
 import { BiSolidInfoCircle } from "react-icons/bi";
 import { useRouter } from 'next/navigation';
+import { AiFillEye } from "react-icons/ai";
 function AdminNotifications() {
 
     const router = useRouter();
     const [notifications, setNotifications] = useState([]);
+
+    
 
     useEffect(()=>{
         const q = query(collection(db, "Notifications"), where("type", "==", "User"));
@@ -20,6 +23,8 @@ function AdminNotifications() {
        querySnapshot.forEach((doc) => {
            dt.push({data:doc.data(), id:doc.id});
        });
+       dt.sort((a,b) =>b.data.createdAt -  a.data.createdAt);
+    
        setNotifications(dt);
 
        });
@@ -41,9 +46,11 @@ function AdminNotifications() {
                 <ScrollArea className='border p-1 rounded-sm w-full no-scrollbar h-[450px]'>
                 { notifications.length &&  notifications.map((item, i) => {
                     return (
-                        <div key={i} className='w-[100%] border mb-2 h-[100px] border-l-4 border-red-300 rounded-sm shadow-md  p-2 '>
+                        <div key={i} className={`w-[100%] border mb-2 h-[100px] border-l-4   rounded-sm shadow-md  p-2 ${item.data.hasSeen ? "opacity-50 " : "opacity-95 border-red-300"}  `}>
                             <div className='flex items-center ml-2 gap-1 mt-2'>
-                                <BiSolidInfoCircle size={15} color='green'/>
+                           
+                             
+                                {item.data.hasSeen ?   <AiFillEye  size={15} color='gray'/>: <BiSolidInfoCircle size={15} color='green'/>}
                                 <h1 className='text-[10px] font-bold'>{item.data.User} * </h1>
                                 <span className='text-[8px]'>{moment(item.data.createdAt.toDate()).calendar()}</span>
                             </div>

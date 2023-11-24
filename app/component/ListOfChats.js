@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { collection, doc, updateDoc, addDoc, getDocs, serverTimestamp, query, orderBy, onSnapshot, where} from "firebase/firestore"; 
+import { collection, doc, updateDoc, addDoc, getDocs, serverTimestamp, query, orderBy, onSnapshot, where, connectFirestoreEmulator} from "firebase/firestore"; 
 import { db } from '../firebase';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar } from '@mui/material';
@@ -71,7 +71,7 @@ function ListOfChats() {
     
 
 
-   
+    
     const handleOpen = (device) => {
 
         const res =  allMessages.find(d => d.data.deviceName === device);
@@ -80,6 +80,10 @@ function ListOfChats() {
         setDeviceName(device)
         setEmail(res.data.sender)
         setOpen(true)
+
+       
+ 
+
        
     };
     const handleClose = () => {
@@ -239,9 +243,29 @@ function ListOfChats() {
            }).then(()=>{
              console.log('seen now!')
            });
+
+           const q = query(collection(db, "Notifications"), where("User", "==", res.data.sender), where("hasSeen", "==", false));
+             onSnapshot(q, (querySnapshot) => {
+            const dt = [];
+            querySnapshot.forEach((doc) => {
+                dt.push({data:doc.data(), id:doc.id});
+            });
+           
+            dt.map(a => {
+             const docRef = doc(db, 'Notifications', a.id);
+           updateDoc(docRef, {
+             hasSeen:true,
+          }).then(()=>{
+            console.log('update notification success')
+          });
+            })
+     
+            });
         
            return;
              }
+
+             
 
              return;
 

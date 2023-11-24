@@ -224,6 +224,7 @@ const suggestDeleting = () => {
     setClick(true);
     if(!apiky || !channel || !jsonFile) {
       setClick(false)
+      setVisible(false);
       Swal.fire({
         title: "Warning?",
         text: "Please input all fields.",
@@ -232,8 +233,6 @@ const suggestDeleting = () => {
         confirmButtonText: "Yes, I will.",
         
        
-      }).then(()=>{
-        setOpens(true);
       })
         return;
     }
@@ -276,12 +275,12 @@ const suggestDeleting = () => {
 
   useEffect(()=> {
    
-    let unsubscribe;
+  
     if(search.length === 0){
       
       const q = query(collection(db, "users"), where("isAdmin", "==", false), where("hasDevice", "==", true));
       const data = [];  
-     unsubscribe = onSnapshot(q, (querySnapshot) => {
+     onSnapshot(q, (querySnapshot) => {
      querySnapshot.forEach((docing) => {
         data.push({dt: docing.data(), id: docing.id});
 
@@ -292,6 +291,7 @@ const suggestDeleting = () => {
      if(position === "WITHDEVICE" ){
     
       setPositions("WITHDEVICE")
+      data.sort((a, b) => b.dt.createdAt - a.dt.createdAt )
       setUserDataList(data);
 
       return;
@@ -309,6 +309,7 @@ const suggestDeleting = () => {
             data.push({dt: docing.data(), id: docing.id});
     
          });
+          data.sort((a, b) => b.dt.createdAt - a.dt.createdAt )
           setUserDataList(data);
       
        });
@@ -326,6 +327,7 @@ const suggestDeleting = () => {
             data.push({dt: docing.data(), id: docing.id});
     
          });
+         data.sort((a, b) => b.dt.createdAt - a.dt.createdAt )
           setUserDataList(data);
       
        });
@@ -355,10 +357,7 @@ const suggestDeleting = () => {
     
 
     setUserDataList(result);
-   
-    return () => {
-      unsubscribe();
-    }
+  
     
   },[search, position, listOfData])
 
@@ -497,9 +496,9 @@ const suggestDeleting = () => {
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] ">STATUS</div>
       </div>
 
-      <div className=' h-[350px] overflow-auto  p-2 '>
+      <ScrollArea className=' h-[350px] overflow-auto  p-2 '>
      
-        {listOfData && listOfData.map((item, index) => {
+        {listOfData.length > 0 ?  listOfData.map((item, index) => {
           return (
 
             <div class="flex " key={index}>
@@ -662,7 +661,21 @@ const suggestDeleting = () => {
            
      
           )
-        })}
+        }): (
+
+<div className='w-full  h-full flex flex-col justify-center items-center mt-16'>
+             <Image
+        width={160}
+        height={160}
+        src="/Image/KawaiDog.png"
+        contentFit="cover"
+       
+      />
+           <label className='text-md font-bold opacity-60'>No users found.</label>
+            
+          </div>
+
+        )}
 
 
 
@@ -789,7 +802,7 @@ const suggestDeleting = () => {
 
     
       
-       </div>
+       </ScrollArea>
     
        
     </ScrollArea>

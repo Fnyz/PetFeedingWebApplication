@@ -307,7 +307,7 @@ function page() {
       />
           <div className='grid gap-1 justify-center '>
          
-          <Typography id="modal-modal-description" >
+          <Typography id="modal-modal-description" className='font-bold opacity-60' >
           {message}
           </Typography>
           <div className='grid gap-2'>
@@ -315,7 +315,7 @@ function page() {
            <span className='text-white font-bold'>{loading ? 'WAIT': 'YES'}</span>
           </div>
           <div className='w-full  p-1 grid justify-center items-center border-[#FAB1A0] rounded-md border  hover:border-[coral] transition-all ease-in cursor-pointer' onClick={handleGoback}>
-           <span className='text-[#FAB1A0] font-bold hover:text-[coral] '>NO</span>
+           <span className='text-[#FAB1A0] font-bold hover:text-[coral] '>GO HOME</span>
           </div>
           </div>
         

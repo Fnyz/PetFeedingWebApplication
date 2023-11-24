@@ -11,9 +11,20 @@ function TotalUser({position}) {
 
     
   const [listOfUser, setListOfUser] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
+  useEffect(()=>{
+    const q = query(collection(db, "Notifications"), where("type", "==", "User"),  where("hasSeen", "==", false));
+    onSnapshot(q, (querySnapshot) => {
+   const dt = [];
+   querySnapshot.forEach((doc) => {
+       dt.push({data:doc.data(), id:doc.id});
+   });
+   setNotifications(dt);
+   });
 
-  
+ 
+},[])
 
   
   useEffect(()=>{
@@ -73,9 +84,9 @@ function TotalUser({position}) {
     <div className='w-4/5  flex '>
     <div className='flex flex-row gap-2 '>
         <div className=' w-[170px] border h-20 rounded-md  shadow-sm'>
-            <h1 className='pl-2 text-[10px] pt-1'>Notifications</h1>
+            <h1 className='pl-2 text-[10px] pt-1'> {notifications.length - 1 > 0 ? "Notifications": "Notification"}</h1>
             <div className='flex'>
-                <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> 100</span>
+                <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {notifications.length}</span>
                 
                 <div className=' flex-1 relative h-[40px] opacity-[0.7]'>
                 <Image

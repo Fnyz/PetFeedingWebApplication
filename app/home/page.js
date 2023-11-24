@@ -26,19 +26,28 @@ import AdminNotifications from '../component/adminNotifications';
 
 
 
-
 function page() {
 
 
     const [profile, setProfileData] = useState({});
     const [position, setPosition1] = useState("WITHDEVICE");
-    
+    const [isclient, setIsclient] = useState(false);
 
-   
+    useEffect(()=>{
+      setIsclient(true);
+    },[])
+  
+
+
+
+
+ 
+
+  
 
   
     useEffect(()=>{
-     
+    
         const user = localStorage.getItem("credentials");
     
         
@@ -52,7 +61,11 @@ function page() {
       },[])
  
 
+   
 
+      if(!isclient){
+        return;
+      }
 
 
     
@@ -72,7 +85,7 @@ function page() {
             <div className='flex justify-between '>
             <SideBarAdmin />
         
-            <div className='flex items-center gap-2 mt-2 '>
+            <div className='flex  items-center gap-2 mt-2 '>
      
      <div className='w-[60px] h-[60px] p-[2px] rounded-full border-[#FAB1A0] border  justify-center items-center'>
      

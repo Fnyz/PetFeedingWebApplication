@@ -1,6 +1,6 @@
-'use client'
 
-import React, { useEffect } from 'react'
+
+import React from 'react'
 import Image from 'next/image'
 import SideBar from '../component/SideBar';
 import ScheduleForm from '../component/ScheduleForm';

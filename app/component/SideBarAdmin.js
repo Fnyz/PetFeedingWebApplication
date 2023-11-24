@@ -5,17 +5,51 @@ import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
+import { collection, query,onSnapshot, where} from "firebase/firestore"; 
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { BiMenu} from "react-icons/bi";
-import { BiHome, BiListPlus, BiTimeFive, BiChat, BiBell} from "react-icons/bi";
+import { BiHome, BiChat, BiBell} from "react-icons/bi";
 import Image from 'next/image';
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Badge from '@mui/material/Badge';
+import { useState, useEffect } from 'react';
+import { db } from '../firebase';
+
 
 function SideBarAdmin() {
   const pathname = usePathname()
+  const [messages, setAllMessages] = useState([]);
+  const [notifications, setAllNotifications] = useState([]);
+
+
+  useEffect(()=>{
+    const q = query(collection(db, "Messages"), where("hasDevice", "==", true), where("hasSeen", "==", false));
+    onSnapshot(q, (querySnapshot) => {
+   const dt = [];
+   querySnapshot.forEach((doc) => {
+       dt.push({data:doc.data(), id:doc.id});
+   });
+   setAllMessages(dt);
+   });
+
+ 
+},[])
+
+useEffect(()=>{
+  const q = query(collection(db, "Notifications"), where("type", "==", "User"), where("hasSeen", "==", false));
+  onSnapshot(q, (querySnapshot) => {
+ const dt = [];
+ querySnapshot.forEach((doc) => {
+     dt.push({data:doc.data(), id:doc.id});
+ });
+ setAllNotifications(dt);
+ });
+
+
+},[])
+
  
     const [state, setState] = React.useState({
         top: false,
@@ -33,12 +67,16 @@ function SideBarAdmin() {
         {
           name: 'Notifications',
           link: '/notifications',
-          icon: <BiBell size={24}/>,
+          icon: notifications.length > 0 ? <Badge badgeContent={notifications.length} color="secondary">
+        <BiBell size={24}/>
+          </Badge> : <BiBell size={24}/>
         },
         {
           name: 'Chats',
           link: '/chats',
-          icon: <BiChat size={24}/>,
+          icon:  messages.length > 0 ? <Badge badgeContent={messages.length} color="secondary">
+          <BiChat size={24}/>
+          </Badge> : <BiChat size={24}/>
         },
        
       ]
@@ -79,7 +117,20 @@ function SideBarAdmin() {
                 <Link href={text.link} className={`flex w-[100%] p-2 rounded-lg ${text.link === pathname ? 'none' : 'border'}`} style={{
                   backgroundColor: text.link === pathname ? '#FAB1A0' : 'white',
            
-                }}>
+                }} onClick={()=>{
+                  if("/notifications" === text.link){
+              
+                    setAllNotifications([]);
+                    return;
+                  }else if("/chats" === text.link){
+                    setAllNotifications([]);
+          
+                    return;
+                  }else{
+                    return;
+                  }
+                }} >
+                
                   <ListItemIcon className='flex justify-center items-center ml-2' style={{
                     color: text.link === pathname ? 'white' : 'gray', 
                   }}>

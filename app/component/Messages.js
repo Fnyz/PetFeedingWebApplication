@@ -23,7 +23,9 @@ import { db } from '../firebase';
 import Image from 'next/image'
 import Badge from '@mui/material/Badge';
 import CircularProgress from '@mui/material/CircularProgress';
-
+import Swal from 'sweetalert2'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const tags = Array.from({ length: 50 }).map(
     (_, i, a) => `v1.2.0-beta.${a.length - i}`
@@ -43,6 +45,7 @@ function Messages() {
     const [messageData, setMessageData] = useState([]);
     const messagesContainerRef = useRef(null);
     const [click, setClick] = useState(false);
+  
 
 
     useEffect(() => {
@@ -117,6 +120,24 @@ function Messages() {
 
     const handleSendMessage = async () => {
          setClick(true)
+
+
+      
+         if(!mess) {
+          setClick(false)
+          toast.error('Please input the message.', {
+            position: "top-right",
+            autoClose: 1700,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            });
+            return;
+        }
+    
         const initialMessage = [
           {
             message: mess,
@@ -133,7 +154,9 @@ function Messages() {
           User:email,
           Messages: `${username} is send you a message please check it to chat.`,
           image: images,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          type:"User",
+          hasSeen:false,
         }
     
     
@@ -199,14 +222,14 @@ function Messages() {
 
   return (
 
-
+    <>
     <Dialog >
     <DialogTrigger asChild >
     <Box sx={{ '& > :not(style)': { m: 1, position:'absolute', right:20, bottom:25} }}>
     <Fab aria-label="add" >
     <Badge badgeContent={dMessage?.data?.adminSend === false ? dMessage.data.message.filter(a => a.type === "Admin" && a.unseen === false).length: 0} color="primary">
     <BiMessageRoundedDots size={25} className='hover:text-red-600' onClick={()=>{
-  
+   
        const b = dMessage.data.message.map(d =>{
         return d.unseen === false ? { ...d, unseen: true } : d
        })
@@ -235,6 +258,7 @@ function Messages() {
     </Fab>
     
   </Box>
+  
     </DialogTrigger>
     <DialogContent className="w-full" onClick={()=> {
           const dts = messageData.find((d) => d.data.deviceName === dvName && d.data.sender === email);
@@ -311,11 +335,26 @@ function Messages() {
          </div>
       
       </DialogFooter>
+
     </DialogContent>
   </Dialog>
+
+  <ToastContainer
+position="top-right"
+autoClose={1500}
+hideProgressBar={false}
+newestOnTop={false}
+closeOnClick
+rtl={false}
+pauseOnFocusLoss
+draggable
+pauseOnHover
+theme="dark"
+className="opacity-80"
+/>
     
   
-    
+ </>
   )
 }
 

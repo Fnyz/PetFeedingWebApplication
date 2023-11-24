@@ -106,14 +106,11 @@ function ScheduleForm() {
     const [time2 , setTime2] = useState('');
     const [cups2, setCups2] = useState('');
     const [currentTime, setCurrentTime] = useState('');
-    const [isClient, setIsclient] = useState(false);
+;
     const [click, setClick] = useState(false);
     const [click1, setClick1] = useState(false);
 
 
-    useEffect(()=>{
-       setIsclient(true);
-    },[])
 
 
     
@@ -548,7 +545,7 @@ function ScheduleForm() {
 
 
 
-    if(!isClient) return;
+  
  
 
 
@@ -617,8 +614,8 @@ function ScheduleForm() {
           }}
           
           ampm={true}  
-          value={twelveHourTime}      
-          onChange={(e) =>  setTwelveHourTime(`${e.$H}:${e.$m}`)}
+            
+          onChange={(e) =>  setTwelveHourTime(`${e?.$H}:${e?.$m}` || "")}
           autoFocus={false}
         />
       </DemoContainer>

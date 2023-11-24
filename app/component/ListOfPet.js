@@ -26,10 +26,19 @@ import ImageListItem from '@mui/material/ImageListItem';
 import { doc, updateDoc} from "firebase/firestore";
 import { ScrollArea, ScrollBar  } from "@/components/ui/scroll-area"
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import Swal from 'sweetalert2'
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useMemo } from 'react';
+
 
 
 
@@ -102,12 +111,14 @@ function generateFakeWeight(min, max) {
 function ListOfPet() {
 
   const [listOfPet, setListOfPet] = useState([]);
+  const [listOfPet1, setListOfPet1] = useState([]);
   const [visible, setVisible] = useState(false);
   const [dog, setDog] = React.useState([]);
   const [cat, setCat] = React.useState([]);
   const [gender, setGender] = React.useState('');
   const [age, setAge] = React.useState('');
   const [petId, setPetId] = React.useState('');
+  const [position, setPosition] = React.useState("")
   const [needUpdate, setNeedUpdate] = React.useState(false);
   const [gendered, setGenders] = React.useState([{
    gender:'Male',
@@ -170,12 +181,11 @@ const [opens, setOpens] = React.useState(false);
   };
 
   const [choose, setChoose] = React.useState('');
-
+  
 
   useEffect(()=> {
-  
-    if(search.length === 0){
-      const user = localStorage.getItem("credentials");
+    setPosition("ALL")
+    const user = localStorage.getItem("credentials");
       const datas = JSON.parse(user);
       if(user){
         const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName.trim()), orderBy("Created_at", "desc"));
@@ -185,8 +195,40 @@ const [opens, setOpens] = React.useState(false);
            data.push({dt:docs.data(), id: docs.id});
        });
        
+       setListOfPet1(data);
+       
+     });
+        return;
+      }
+  }, [])
+
+  useEffect(()=> {
+  
+    if(search.length === 0){
+      const user = localStorage.getItem("credentials");
+      const datas = JSON.parse(user);
+      if(user){
+        if(position === "ALL"){
+          const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName.trim()), orderBy("Created_at", "desc"));
+          onSnapshot(q, (querySnapshot) => {
+         const data = [];
+         querySnapshot.forEach((docs) => {
+             data.push({dt:docs.data(), id: docs.id});
+         });
+         
+         setListOfPet(data);
+         
+       });
+          return;
+        }
+        const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName.trim()),where("petType", "==", position.toLowerCase().trim()) , orderBy("Created_at", "desc"));
+        onSnapshot(q, (querySnapshot) => {
+       const data = [];
+       querySnapshot.forEach((docs) => {
+           data.push({dt:docs.data(), id: docs.id});
+       });
+       
        setListOfPet(data);
-   
        
      });
         return;
@@ -208,7 +250,7 @@ const [opens, setOpens] = React.useState(false);
   
 
     
-  },[search, listOfPet])
+  },[search, listOfPet, position])
 
 
 
@@ -245,9 +287,7 @@ const [opens, setOpens] = React.useState(false);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
-    const handleClick = (event) => {
-      
-    };
+  
     const handleClose = () => {
       setAnchorEl(null);
     };
@@ -300,6 +340,18 @@ const [opens, setOpens] = React.useState(false);
 
 
 
+  const dataSetnew = (m) => {
+     return [ "All", ...Array.from(new Set(m.map(d => d.dt.petType)))];
+  }
+
+ 
+
+
+  const dMessage = useMemo(()=> dataSetnew(listOfPet1), [listOfPet1]);
+  
+
+
+  
 
     
     
@@ -327,17 +379,42 @@ const [opens, setOpens] = React.useState(false);
        </label>
       </div>
    
+      <div className='flex gap-2 justify-center items-center'>
+      <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <div className=' cursor-pointer border px-4 py-2 rounded-md'>
+          <span className='font-bold opacity-70'>FILTER BY TYPE</span>
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Choose option</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
+          {dMessage.length - 1 > 0 ? dMessage.map((d , i)=> {
+            return  (
+              <DropdownMenuRadioItem value={d.toUpperCase()}>{d.toUpperCase()}</DropdownMenuRadioItem>
+         )
+          }): (
+             <label>No type found!</label>
+          )}
+         
+        
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+   
        <Paper
       component="form"
+      className='border '
       value={search}
       onChange={(e)=> setSearch(e.target.value)}
-      sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 400 }}
+      sx={{ p: ' 4px', display: 'flex', alignItems: 'center', width: 400, height:40, boxShadow:'none' }}
     >
     
       <InputBase
        
         sx={{ ml: 1, flex: 1 }}
-        placeholder="SEARCH PET HERE ..."
+        placeholder="SEARCH PET HERE"
         inputProps={{ 'aria-label': 'search google maps' }}
     
       
@@ -350,12 +427,14 @@ const [opens, setOpens] = React.useState(false);
    
     </Paper>
       </div>
+      </div>
   
 
        
        <div class="flex mt-5">
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">IMAGE</div>
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">PETNAME</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">PETTYPE</div>
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">WEIGHT</div>
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">AGE</div>
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">GENDER</div>
@@ -381,6 +460,7 @@ const [opens, setOpens] = React.useState(false);
              </div>
             </div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80">{item.dt.Petname}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80">{item.dt.petType}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.Weight}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.Age}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80">{item.dt.Gender}</div>
