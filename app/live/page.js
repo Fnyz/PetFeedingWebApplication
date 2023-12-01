@@ -11,8 +11,8 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { collection, addDoc, query, where, onSnapshot, getDocs,updateDoc, doc, deleteDoc} from 'firebase/firestore';
 import { db } from '../firebase';
-
-
+import CircularProgress from '@mui/material/CircularProgress';
+import { BiHome } from "react-icons/bi";
 
 
 
@@ -36,15 +36,34 @@ function page() {
 
     const [isClient , setisClient] = useState(false);
     const [visible, setVisible] = React.useState(false);
-    const [message, setMessage] = React.useState('');
+    const [message, setMessage] = React.useState('Hello, do you want to watch the live video?');
     const [credential, setCredential] = React.useState({});
     const [loading, setLoading] = React.useState(false);
-    const [liveStreamUrl, setLiveStreamUrl] = useState('https://www.youtube.com/watch?v=RNprQYHenNI&ab_channel=DisneyMusicVEVO');
+    const [liveStreamUrl, setLiveStreamUrl] = useState('');
     const [apiKey1, setApiKey] = useState('');
     const [channel, setChannel] = useState('');
     const [visible1, setVisible1] = useState(false);
     const [liveiD, setLiveId] = useState("");
+    const [liveStreamList, setLiveStreamList] = useState([]);
 
+
+    const handleVideoEnd = () => {
+   
+    
+     const docRef = doc(db, 'Livestream', liveiD);
+     updateDoc(docRef, {
+       Youtube_Url:'',
+       isliveNow:false,
+       ended:true,
+    }).then(()=>{
+      console.log("Updated Database");
+      setLiveStreamUrl("");
+      setMessage("Live video ended, do you want to watch live again?");
+      setVisible(true);
+      setLoading(false);
+    });
+      // You can perform additional actions here when the video ends
+    };
 
     const handleRefetch =async () => {
 
@@ -64,19 +83,29 @@ function page() {
           if(!videoIds[0]){
             setVisible1(true);
             setVisible(false);
+            
             return;
           }
          
-          setVisible(false);
+   
           const url = `https://www.youtube.com/watch?v=${videoIds[0]}`;
-          setLiveStreamUrl(url);
-
-          const docRef = doc(db, 'Livestream', liveiD);
+          
+          if(url){
+            const docRef = doc(db, 'Livestream', liveiD);
             updateDoc(docRef, {
               Youtube_Url:url,
            }).then(()=>{
              console.log("Updated Database");
+             setLiveStreamUrl(url);
+             setTimeout(() => {
+              setVisible1(false);
+              setVisible(false);
+             }, 6000);
+        
            });
+          }
+
+          
 
         // You can use the video IDs for further processing
       } catch (error) {
@@ -108,18 +137,26 @@ function page() {
           if(!videoIds[0]){
             setVisible1(true);
             setVisible(false);
+      
+            console.log(videoIds[0]);
             return;
           }
-          setVisible(false);
+         
           const url = `https://www.youtube.com/watch?v=${videoIds[0]}`;
-          setLiveStreamUrl(url);
-
-          const docRef = doc(db, 'Livestream', id);
+          if(url){
+            const docRef = doc(db, 'Livestream', liveiD);
             updateDoc(docRef, {
               Youtube_Url:url,
            }).then(()=>{
              console.log("Updated Database");
+             setLiveStreamUrl(url);
+             setTimeout(() => {
+              setVisible1(false);
+              setVisible(false);
+             }, 6000);
+        
            });
+          }
       
     
         
@@ -133,7 +170,29 @@ function page() {
 
 
     };
-    
+
+
+
+    useEffect(()=> {
+
+ 
+          const q = query(collection(db, "Livestream"));
+          onSnapshot(q, (snapshot) => {
+            const data = [];
+          snapshot.docChanges().forEach((change) => {
+
+            data.push({data: change.doc.data(), id: change.doc.id})
+        });
+
+        setLiveStreamList(data);
+      
+      });
+
+
+  },[])
+  
+  
+  
    
   
 
@@ -151,7 +210,7 @@ function page() {
              
                 setMessage('Please wait for a minute, proccessing youtube url.');
                 fetchLiveStreams(change.doc.data().ApiKey,change.doc.data().ChannelID, change.doc.id);
-  
+      
    
             }
            
@@ -181,12 +240,12 @@ function page() {
     useEffect(()=>{
      setisClient(true);
      setVisible(true);
-     setMessage('Hello, do you want to watch the live video?');
+
      handleShowCredData();
     },[])
 
     const handleGoback = () => {
-        setVisible(false);
+   
         window.location.href = '/dashboard';
     }
 
@@ -195,20 +254,45 @@ function page() {
   
 
     const startVideoLive = async () => {
-
+      setLoading(true);
+        if(!liveStreamUrl){
+          const request = {
+            DeviceName:credential.DeviceName.trim(),
+            isliveNow: false,
+            Youtube_Url:"",
+            ApiKey:"",
+            ChannelID:"",
+            Streamkey:""
+          }
+          
+          const user = localStorage.getItem("credentials")
+          const datas = JSON.parse(user);
+          const res = liveStreamList.find(e => e.data.DeviceName.trim() === datas.DeviceName.trim())
+          if(!res){
+           
+            const docRef = await addDoc(collection(db, "Livestream"),request);
+            if(docRef.id) {
+              await addDoc(collection(db, "Task"),{
+                type:'Livestream',
+                deviceName:credential.DeviceName.trim(),
+                document_id: docRef.id,
+                request:'Start',
+              }).then(()=>{
+                setLoading(true);
+              })
+              console.log('Sending request to live video!');
+             return;
+            }
         
-    
-        const request = {
-          DeviceName:credential.DeviceName.trim(),
-          isliveNow: false,
-          Youtube_Url:"",
-          ApiKey:"",
-          ChannelID:"",
-          jsonKeyFile:{}
-        }
-    
-        const docRef = await addDoc(collection(db, "Livestream"),request);
-        if(docRef.id) {
+          return;
+         }
+
+
+         const docRef = doc(db, 'Livestream', res.id);
+         updateDoc(docRef, {
+           ended:false,
+        }).then(async()=>{
+          console.log("Updated Database");
           await addDoc(collection(db, "Task"),{
             type:'Livestream',
             deviceName:credential.DeviceName.trim(),
@@ -216,15 +300,30 @@ function page() {
             request:'Start',
           });
           console.log('Sending request to live video!');
-         return;
+          setLoading(true);
+         })
+
+
+       return;
+
+
         }
+
+        
+
+
+        setVisible(false);
+
+        
+    
+       
       }
 
 
       const getData = async () => {
    
         try {
-          setMessage('Hello, do you want to watch the live video?');
+        
           const user = localStorage.getItem("credentials")
           if(user){
             const datas = JSON.parse(user);
@@ -233,18 +332,25 @@ function page() {
           const q = collection(db, "Livestream");
           onSnapshot(q, (snapshot) => {
          snapshot.docChanges().forEach((change) => {
-          const {DeviceName,Youtube_Url, isliveNow } = change.doc.data()
+          const {DeviceName,Youtube_Url, isliveNow, ApiKey, ChannelID, ended } = change.doc.data()
     
-          if(!isliveNow && !Youtube_Url){
+          if(DeviceName == datas.DeviceName.trim() && !isliveNow && !Youtube_Url && !ended){
             setMessage('Please wait a minute to see the live?');
+            setLoading(true);
+            return;
+          }
+
+          if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
+            setMessage('Please wait for a minute, proccessing youtube url.');
+            fetchLiveStreams(ApiKey ,ChannelID, change.doc.id);
             setLoading(true);
             return;
           }
      
           if(DeviceName == datas.DeviceName.trim() && isliveNow == true && Youtube_Url){
             setMessage('Do you want to continue watching the live?');
-            liveStreamUrl(Youtube_Url);
-            setLoading(false);
+            setLiveStreamUrl(Youtube_Url);
+            setVisible1(false)
             return;
           }
       
@@ -262,10 +368,9 @@ function page() {
     
       useEffect(()=> {
         getData();
+    
       },[])
 
-
-    
 
 
     return (
@@ -284,7 +389,7 @@ function page() {
                  </div>
 
                  <div className=' max-h-min mt- 2'>
-                {isClient && <VideoFrame  youtubeUrl={liveStreamUrl} /> }
+                {isClient && <VideoFrame  youtubeUrl={liveStreamUrl} handleVideoEnd={handleVideoEnd}/> }
                  
                  </div>
                   
@@ -296,6 +401,9 @@ function page() {
         open={visible}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+        sx={{
+          backgroundColor: 'black',
+        }}
       >
         <Box sx={style} >
         <Image
@@ -311,10 +419,18 @@ function page() {
           {message}
           </Typography>
           <div className='grid gap-2'>
-          <div className={`w-full  p-1 grid justify-center items-center rounded-md bg-[#FAB1A0]    ${!loading && "cursor-pointer hover:bg-[coral] transition-all ease-in"}`} disabled={loading} onClick={startVideoLive}>
-           <span className='text-white font-bold'>{loading ? 'WAIT': 'YES'}</span>
+          <div className={`w-full  p-1 flex gap-2  justify-center items-center rounded-md bg-[#FAB1A0]    ${!loading && "cursor-pointer hover:bg-[coral] transition-all ease-in"}`} disabled={loading} onClick={startVideoLive}>
+          {loading && (
+            <CircularProgress  style={{
+            color:'white'
+          }} size={15} />  
+          )}
+           <span className='text-white font-bold'>{loading ? 'Please wait..': 'Yes'}</span>
           </div>
-          <div className='w-full  p-1 grid justify-center items-center border-[#FAB1A0] rounded-md border  hover:border-[coral] transition-all ease-in cursor-pointer' onClick={handleGoback}>
+
+          
+          <div className='w-full  p-1 flex gap-2 justify-center items-center border-[#FAB1A0] rounded-md  border  hover:border-[coral] transition-all ease-in cursor-pointer' onClick={handleGoback}>
+          <BiHome color='#FAB1A0' size={20}/>
            <span className='text-[#FAB1A0] font-bold hover:text-[coral] '>GO HOME</span>
           </div>
           </div>
@@ -328,6 +444,9 @@ function page() {
         open={visible1}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+        sx={{
+          backgroundColor: 'black',
+        }}
       >
         <Box sx={style} >
         <Image

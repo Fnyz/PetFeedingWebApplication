@@ -12,7 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import Stack from '@mui/material/Stack';
-import { BiXCircle, BiAddToQueue, BiShowAlt, BiTimeFive, BiX, BiEdit ,BiSolidTrash, BiSave   } from "react-icons/bi";
+import { BiXCircle, BiAddToQueue, BiShowAlt, BiTimeFive, BiX, BiEdit ,BiSolidTrash, BiSave, BiEditAlt    } from "react-icons/bi";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +26,6 @@ import { Input } from "@/components/ui/input"
 import moment from 'moment';
 import { ScrollArea  } from "@/components/ui/scroll-area"
 import CircularProgress from '@mui/material/CircularProgress';
-
 
 
 
@@ -106,9 +105,10 @@ function ScheduleForm() {
     const [time2 , setTime2] = useState('');
     const [cups2, setCups2] = useState('');
     const [currentTime, setCurrentTime] = useState('');
-;
+;   const [time3, setTime3] = useState('');
     const [click, setClick] = useState(false);
     const [click1, setClick1] = useState(false);
+    const [showMe, setShowMe] = useState(false);
 
 
 
@@ -192,7 +192,7 @@ function ScheduleForm() {
      const newArray =  [
       {cups: cups2,
        parameters:parameters,
-       time:time2,
+       time:time3,
       }
      ]
     
@@ -455,6 +455,8 @@ function ScheduleForm() {
         created_at: serverTimestamp(),
       }
 
+    
+
 
    
   
@@ -473,8 +475,10 @@ function ScheduleForm() {
       }
   
       const res = listSched.find(d => d.data.Days.toLowerCase().trim() === chooseDay.toLowerCase().trim());
+
   
       if(!res){
+    
         const docRef = await addDoc(collection(db, "feeding_schedule"), petSchedule);
   
         if(docRef.id){
@@ -500,33 +504,34 @@ function ScheduleForm() {
         
         }
         return;
-       }
+      }else{
+      
+          const currentSched  = res.data.ScheduleTime || [];
+          const updatedSched = [...currentSched, ...scheds1];
+          const docRef = doc(db, 'feeding_schedule', res.id);
+          updateDoc(docRef, {
+            ScheduleTime:updatedSched,
+         }).then(()=>{
+           setClick(false);
+             Swal.fire({
+               title: "Success?",
+               text: "Schedule added successfully",
+               icon: "success",
+               confirmButtonColor: "#FAB1A0",
+               confirmButtonText: "Okay, Thank you.",
+               
+             })
+           setSchedules([])
+           setSchedules2([])
+           setName('')
+           setTwelveHourTime('')
+         });
+         return;
+     
+      }
   
 
-       const currentSched  = res.data.ScheduleTime || [];
-       const updatedSched = [...currentSched, ...scheds1];
-       const docRef = doc(db, 'feeding_schedule', res.id);
-       updateDoc(docRef, {
-         ScheduleTime:updatedSched,
-      }).then(()=>{
-        setClick(false);
-          Swal.fire({
-            title: "Success?",
-            text: "Schedule added successfully",
-            icon: "success",
-            confirmButtonColor: "#FAB1A0",
-            confirmButtonText: "Okay, Thank you.",
-            
-          })
-        setSchedules([])
-        setSchedules2([])
-        setName('')
-        setTwelveHourTime('')
-      });
-      return;
-   
-
-
+      
     
         
     }
@@ -703,7 +708,7 @@ function ScheduleForm() {
                 
                  <Dialog>
       <DialogTrigger asChild>
-      <BiEdit size={20}  className='hover:text-blue-600 cursor-pointer text-blue-400 ' onClick={()=> handleUpdateTimeManage(s.time, s.cups)} />
+      <BiEdit size={20}  className='hover:text-blue-600 cursor-pointer text-blue-400 ' onClick={()=> handleUpdateTimeManage(`${s.time} ${s.parameters}`, s.cups)} />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -712,14 +717,49 @@ function ScheduleForm() {
             Make changes to the schedule time here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+        <div className="grid gap-4 py-4 ">
+     
+          {showMe ? (
+      <div className='flex justify-end items-center gap-2 '>
+<LocalizationProvider dateAdapter={AdapterDayjs}   >
+   <DemoContainer components={['TimePicker']}  >
+
+     <TimePicker
+       
+       label="Select Time"
+     
+       viewRenderers={{
+         hours: renderTimeViewClock,
+         minutes: renderTimeViewClock,
+         seconds: renderTimeViewClock,
+       }}
+       
+       ampm={true}  
+         
+       onChange={(e) =>  setTime3(`${e?.$H}:${e?.$m}` || "")}
+       autoFocus={false}
+     />
+   </DemoContainer>
+ </LocalizationProvider>
+ <div className='opacity-50 cursor-pointer bg-[red] h-[54px] w-[50px] rounded-md flex justify-center items-center mt-2' onClick={()=> setShowMe(false)}>
+            <BiX  size={22}  color='white'/>
+            </div>
+      </div>
+   
+
+          ): (
+            <div className="flex flex-row justify-end items-center gap-2 ">
             <Label htmlFor="name" className="text-right">
               Time
             </Label>
-            <Input id="name" value={time2} className="col-span-3" onChange={(e)=> setTime2(e.target.value)} />
+            <Input id="name" value={time2} className="col-span-3 w-[59%]" onChange={(e)=> setTime2(e.target.value)} disabled />
+            <div className='opacity-50 cursor-pointer bg-[blue] h-[39px] w-[50px] rounded-md flex justify-center items-center' onClick={()=> setShowMe(true)}>
+            <BiEditAlt  size={22}  color='white'/>
+            </div>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
+          )}
+         
+          <div className="grid grid-cols-4 items-center gap-2">
             <Label htmlFor="username" className="text-right">
               Cups
             </Label>

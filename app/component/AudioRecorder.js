@@ -17,7 +17,11 @@ export default class AudioRecorder extends Component {
         recordedFileBase64:'',
         credential: {},
         click:false,
+        isAddPet: false,
       }
+
+
+    
 
 
        handleShowCredData = () => {
@@ -30,11 +34,12 @@ export default class AudioRecorder extends Component {
 
       componentDidMount(){
         this.handleShowCredData();
+        this.setState({isAddPet : this.props.isAddPet})
       }
 
       start = () => {
         if (this.state.isBlocked) {
-          console.log('Permission Denied');
+         
         } else {
           Mp3Recorder
             .start()
@@ -58,13 +63,19 @@ export default class AudioRecorder extends Component {
               });
 
              const Base64 = await this.audioToBase64(file)
+
+             if(this.state.isAddPet){
+              this.props.setBase64(Base64);
+              return;
+             }
              if(Base64){
                 const request = {
                     DeviceName:this.state.credential.DeviceName.trim(),
                     RecordingFile:Base64,
                     response: false,
                   }
-              
+                  
+                  
                   const docRef = await addDoc(collection(db, "Speak_To_Device"),request);
                   if(docRef.id) {
                     await addDoc(collection(db, "Task"),{
@@ -96,13 +107,13 @@ export default class AudioRecorder extends Component {
       
   render() {
     return (
-      <div className='flex gap-2 justify-center items-center max-md:flex-col  p-2'>
+      <div className='flex gap-2 justify-center items-center max-md:flex-col  '>
         <div onClick={this.start} disabled={this.state.isRecording} className={`rounded-md transition-all ease-in ${this.state.isRecording ? "opacity-50 ": "opacity-100 cursor-pointer hover:shadow-md"} hover:bg-[coral] flex border justify-center items-center w-[100%] p-2 gap-2 cursor-pointer bg-[#FAB1A0]`}>
             {this.state.click ? <BiPause size={25} color='white'/> : <BiMicrophone size={20} color='white'/>}
             <span className='text-white font-bold'>{this.state.click ? 'RECORDING....': 'START RECORDING'}</span>
         </div>
 
-        <div onClick={this.stop} disabled={!this.state.isRecording} className={`rounded-md transition-all ease-in  flex border justify-center items-center w-[100%] p-2 gap-2  border-[#FAB1A0] ${!this.state.isRecording ? "opacity-50 ": "opacity-100 cursor-pointer hover:shadow-md"}`}>
+        <div onClick={this.stop} disabled={!this.state.isRecording} className={`  rounded-md transition-all ease-in  flex border justify-center items-center w-[100%] p-2 gap-2  border-[#FAB1A0] ${!this.state.isRecording ? "opacity-50 pointer-events-none": "opacity-100 cursor-pointer hover:shadow-md"}`}>
             <BiStop size={25} color='#FAB1A0'/>
             <span className='text-[#FAB1A0] font-bold'>STOP RECORDING</span>
         </div>

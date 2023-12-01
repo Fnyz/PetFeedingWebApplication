@@ -43,6 +43,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import { BiX  } from "react-icons/bi";
+import AudioRecorder from './AudioRecorder';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -104,6 +105,7 @@ function AddPetsForm() {
     const [click1, setClick1] = useState(false);
     const [click, setClick] = useState(false);
     const [click2, setClick2] = useState(false);
+    const [Base64, setBase64] = React.useState('')
 
 
     const getAllDatas = () => {
@@ -169,6 +171,7 @@ function AddPetsForm() {
           image:choose || null,
           synced:false,
           petType:petKind,
+          audioBase64:Base64,
           Created_at: serverTimestamp(),
           Updated_at: serverTimestamp(),
         });
@@ -248,6 +251,9 @@ function AddPetsForm() {
       }, 3000);
   
     }
+
+
+ 
 
 
  
@@ -358,9 +364,10 @@ console.log(petKind);
         </SheetFooter>
       </SheetContent>
     </Sheet>
-
+    
      <form>
        <div className="grid w-full items-center gap-4">
+
          <div className="flex flex-col space-y-1.5">
            <Label htmlFor="petname">Petname</Label>
            <Input id="petname" placeholder="Name of pet here" value={petname} onChange={(e)=>{
@@ -521,6 +528,10 @@ console.log(petKind);
             }} />
          </div>
     
+         <div className="flex flex-col space-y-1.5">
+       <Label htmlFor="petname">Add audio to call a pet</Label>
+          <AudioRecorder isAddPet={true} setBase64={setBase64}/>
+         </div>
        </div>
      </form>
     </CardContent>

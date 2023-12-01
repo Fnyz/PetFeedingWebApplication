@@ -395,7 +395,10 @@ const [opens, setOpens] = React.useState(false);
               <DropdownMenuRadioItem value={d.toUpperCase()}>{d.toUpperCase()}</DropdownMenuRadioItem>
          )
           }): (
-             <label>No type found!</label>
+            <div className='flex justify-center items-center p-2'>
+              <label >No types found!</label>
+            </div>
+            
           )}
          
         

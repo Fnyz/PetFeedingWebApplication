@@ -127,7 +127,7 @@ function page() {
 
 
     const handleNewDevice = async () => {
-      const res = deviceList.find(d => d.data.Email === '' && d.data.Token === 0);
+      const res = deviceList.find(d => d.data.Token === 0);
      
 const devicess = doc(db, "Device_Authorization", res.id);
 
