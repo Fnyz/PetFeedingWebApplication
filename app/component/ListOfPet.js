@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import {BiSolidInfoCircle, BiEditAlt, BiSolidTrashAlt, BiSave, BiSolidFolderOpen, BiEdit, BiSolidLike} from "react-icons/bi";
+import {BiSolidInfoCircle, BiEditAlt, BiSolidTrashAlt, BiSave, BiSolidFolderOpen, BiEdit, BiSolidLike, BiSolidTimeFive } from "react-icons/bi";
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
@@ -38,7 +38,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useMemo } from 'react';
-
+import { useSearchParams } from 'next/navigation'
+ 
 
 
 
@@ -88,12 +89,13 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
+
   width: 400,
   bgcolor: 'background.paper',
   boxShadow: 24,
   borderRadius:2,
   zIndex:0,
-  p: 4,
+  p: 2,
 };
 
 
@@ -137,17 +139,60 @@ const [suggestDelete, setDelete] = React.useState(false);
 const [search, setSearch] = React.useState('');
 const [click, setClick] = React.useState(false);
 const [click1, setClick1] = React.useState(false);
+const [petSchesData, setPetSchedDataset] = useState([]);
+const [scheduleOpens, setScheduleOpens] = useState(false);
+
 
 const HandleDelete = async () => {
   setClick(true)
   try {
-    await deleteDoc(doc(db, "List_of_Pets", petId));
+    await deleteDoc(doc(db, "List_of_Pets", petId)).then(()=>{
+      const user = localStorage.getItem("credentials");
+      const datas = JSON.parse(user);
+      const q = query(collection(db, "feeding_schedule"), where("Petname", "==", petname.trim()), where("DeviceName", "==", datas.DeviceName.trim()));
+      onSnapshot(q, (querySnapshot) => {
+       querySnapshot.forEach((docs) => {
+        deleteDoc(doc(db, "feeding_schedule", docs.id));
+       });
+      
+     });
+    });
     setClick(false)
   } catch (error) {
     console.log('Something went wrong!');
     
   }
 }
+
+useEffect(()=> {
+      
+  const user = localStorage.getItem("credentials")
+  if(user){
+      const datas = JSON.parse(user);
+      const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
+      onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+       if (change.doc.data().Weight && change.doc.data().Petname === petname && change.doc.data().Token === 1) {
+        setWeight(change.doc.data().Weight)
+        setClick1(false)
+
+        return;
+      }
+      // if (change.doc.data().Rfid && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
+      //   SetRfid(change.doc.data().Rfid)
+      //   setClick1(false);
+
+      //   return;
+      // }
+
+    });
+  
+  });
+
+
+  }
+},[ click1])
+
 
 const suggestDeleting = () => {
   setDelete((prev) => !prev);
@@ -305,13 +350,14 @@ const [opens, setOpens] = React.useState(false);
   },[])
 
 
-  const handleFakeWeight = () => {
+  const handleFakeWeight = async () => {
     setClick1(true)
-    setTimeout(() => {
-      setClick1(false)
-      const fakeWeight = generateFakeWeight(15, 25);
-      setWeight(fakeWeight)
-    }, 3000);
+    const petWeightss = doc(db, "List_of_Pets", petId);
+      await updateDoc(petWeightss, {
+        requestWeight: true,
+      }).then(()=>{
+        setClick1(true)
+      })
 
   }
 
@@ -326,6 +372,8 @@ const [opens, setOpens] = React.useState(false);
       Age:age,
       image:choose,
       Updated_at: serverTimestamp(),
+      Token:1,
+      requestWeight:false,
     }
     try {
       const collects = doc(db, "List_of_Pets", petId);
@@ -337,6 +385,20 @@ const [opens, setOpens] = React.useState(false);
       console.log(error)
     }
   }
+
+  const getSchedule = (name) => {
+    const q = query(collection(db, "feeding_schedule"), where("Petname", "==", petname));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const schedDatas = [];
+      querySnapshot.forEach((doc) => {
+          schedDatas.push({dts: doc.data(), id: doc.id});
+      });
+      setPetSchedDataset(schedDatas);
+     
+      
+    });
+    }
+
 
 
 
@@ -466,7 +528,7 @@ const [opens, setOpens] = React.useState(false);
             <div class="w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80">{item.dt.petType}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.Weight}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.Age}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80">{item.dt.Gender}</div>
+            <div class={`w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80 ${item.dt.Gender === 'female' ? "text-pink-500": "text-blue-500"}`}>{item.dt.Gender}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">
 
             <div>
@@ -506,7 +568,7 @@ const [opens, setOpens] = React.useState(false);
         {options.map((option) => (
           <MenuItem key={option.val}  onClick={handleClose}>
             <div className='flex justify-between items-center w-[100%]' onClick={()=> openTime(option.val)}>
-              <label className = {option.color}> {option.val} </label>
+              <label className = {`font-bold ${option.color}`}> {option.val} </label>
               {option.icon}
             </div>
           </MenuItem>
@@ -539,7 +601,7 @@ const [opens, setOpens] = React.useState(false);
         open={visible}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
-      >
+      > 
         <Box sx={style}>
         <div className='flex justify-between '>
           <div>
@@ -665,7 +727,7 @@ const [opens, setOpens] = React.useState(false);
               Gender
             </Label>
           <Box sx={{
-            width:245,
+            width:270,
             display: 'flex',
             gap:1,
           }} >
@@ -702,6 +764,16 @@ const [opens, setOpens] = React.useState(false);
             </Label>
             <Input id="age" placeholder="15" className="col-span-3 " value={weight} disabled={!needUpdate}  onChange={(e) => setWeight(e.target.value)} />
           </div>
+          {!needUpdate && (
+          <div className="flex justify-center items-center gap-1 ">
+            <span className='text-sm font-bold opacity-60'> See the pet schedule?</span>
+            <span className='text-red-500 italic text-sm cursor-pointer font-bold hover:opacity-100 opacity-60 transition-all ease-in' onClick={()=>{
+              setScheduleOpens(true);
+              getSchedule();
+            }}>Click here</span>     
+          </div>
+
+          )}
        
           {needUpdate && (
 
@@ -768,11 +840,22 @@ const [opens, setOpens] = React.useState(false);
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
+        
         <Box sx={style}>
-        <Typography variant="h6" gutterBottom className='text-center'>
-        Do you want to delete this pet?
+        <div className='w-full justify-center items-center flex flex-col px-5'>
+        <Image
+        width={160}
+        height={160}
+        src="/Image/KawaiDog.png"
+        contentFit="cover"
+       
+      />
+        <Typography variant="h9" gutterBottom className='text-center'>
+        Are you sure you want to delete this pet? This remove also the pet schedule.
       </Typography>
-      <div className='flex gap-2 mt-4'>
+          </div>
+       
+      <div className='flex gap-2 mt-4 '>
          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={HandleDelete}>
           <BiSolidLike size={20} color='white'/>
            <span className='text-white font-bold'>YES, PLEASE</span>
@@ -780,6 +863,73 @@ const [opens, setOpens] = React.useState(false);
           <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={suggestDeleting}>
           <BiSolidTrashAlt size={20} color='white' />
            <span className='text-white font-bold'>CANCEL</span>
+          </div>
+      </div>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={scheduleOpens}
+  
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+        <Typography variant="h6" gutterBottom className='text-center'>
+        <span className='font-bold text-[coral]'>{petname}</span> list of schedules.
+      </Typography>
+    
+      <ScrollArea className="flex p-2 flex-col h-[245px]  border rounded-md space-y-1.5 ">
+
+        {!petSchesData.length && <div className='text-[#FAB1A0] w-full h-full flex justify-center flex-col items-center font-bold '>
+      
+             <Image
+        width={160}
+        height={160}
+        src="/Image/KawaiDog.png"
+        contentFit="cover"
+       
+      />
+      <span className='font-bold '>No schedule found!</span>
+        
+          </div>}
+          {petSchesData && petSchesData.map((d, i) => {
+            return (
+              <>
+              <div className='h-full w-full mb-2' key={i}>
+              <div className=' w-full border shadow-md p-2 rounded-md flex flex-col'>
+                <span className='text-red-500 font-bold'>* {d.dts.Days}</span>
+                <label className='text-[13px]'>Schedule Time:</label>
+                {d.dts.ScheduleTime.map((s, b) =>{
+                  return (
+                    <div key={b}>
+                       <div className='flex  items-center gap-1 space-y-0'>
+                 <label className='text-[15px]'>{s.time} {s.parameters}</label>
+                 <label className='text-[15px] text-[#FAB1A0]'>/</label>
+                 <label  className='text-[15px]'>{s.cups} {s.cups > 1 ? 'CUPS': 'CUP'}</label>
+                 </div>
+                    </div>
+                  )
+                })}
+              </div>
+                </div>
+
+              </>
+            )
+          })}
+      </ScrollArea>
+      <div className='flex gap-2 mt-4'>
+         <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=>{
+          window.location.href =  `/schedules?petnames=${petname}`
+         }} >
+          <BiSolidTimeFive size={20} color='white'/>
+           <span className='text-white font-bold'>ADD CHEDULE</span>
+          </div>
+          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md border-[#FAB1A0] hover:opacity-100 opacity-50 transition-all ease-in cursor-pointer" onClick={()=>{
+            setScheduleOpens(false);
+          }}>
+          <BiX size={20} color='#FAB1A0' />
+           <span className='text-[#FAB1A0] font-bold'>CLOSE</span>
           </div>
       </div>
         </Box>

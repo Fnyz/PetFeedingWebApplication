@@ -237,16 +237,16 @@ const suggestDeleting = () => {
         return;
     }
  
-    const jFile = JSON.parse(jsonFile);
+ 
    
    const res = lives.find(l => l.dt.DeviceName === device);
    const a = doc(db, "Livestream", res.id);
       await updateDoc(a, {
        ApiKey:apiky,
        ChannelID:channel,
-       jsonKeyFile: jFile.installed,
+       jsonKeyFile: jsonFile,
       }).then(()=>{
-        setJSONFile({})
+        setJSONFile("")
         setApiKy("")
         setChannel("");
         setClick(false);
@@ -621,7 +621,7 @@ const suggestDeleting = () => {
             <Label htmlFor="age" className="text-right">
               JSON FILE
             </Label>
-            <Input id="age" placeholder="JSON FILE HERE"  className="col-span-3"  value={jsonFile} onChange={(e)=> setJSONFile(e.target.value)}   />
+            <Input id="age" placeholder="STREAM KEY"  className="col-span-3"  value={jsonFile} onChange={(e)=> setJSONFile(e.target.value)}   />
           </div>
 
 

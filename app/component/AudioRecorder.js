@@ -57,14 +57,20 @@ export default class AudioRecorder extends Component {
             const blobURL = URL.createObjectURL(blob)
             this.setState({ blobURL, isRecording: false, click:false });
 
+
+
             const file = new File(buffer, `audio.mp3`, {
                 type: blob.type,
                 lastModified: Date.now()
               });
 
+            
+
              const Base64 = await this.audioToBase64(file)
 
              if(this.state.isAddPet){
+              const player = new Audio(URL.createObjectURL(file));
+              this.props.setAudioRecord(player);
               this.props.setBase64(Base64);
               return;
              }
@@ -107,8 +113,8 @@ export default class AudioRecorder extends Component {
       
   render() {
     return (
-      <div className='flex gap-2 justify-center items-center max-md:flex-col  '>
-        <div onClick={this.start} disabled={this.state.isRecording} className={`rounded-md transition-all ease-in ${this.state.isRecording ? "opacity-50 ": "opacity-100 cursor-pointer hover:shadow-md"} hover:bg-[coral] flex border justify-center items-center w-[100%] p-2 gap-2 cursor-pointer bg-[#FAB1A0]`}>
+      <div className='flex gap-2 justify-center items-center max-md:flex-col w-full'>
+        <div onClick={this.start} disabled={this.state.isRecording} className={`rounded-md transition-all ease-in ${this.state.isRecording ? "opacity-50 ": "opacity-100 cursor-pointer hover:shadow-md flex items-center justify-center"} hover:bg-[coral]  w-[100%] p-2 gap-2 cursor-pointer bg-[#FAB1A0]`}>
             {this.state.click ? <BiPause size={25} color='white'/> : <BiMicrophone size={20} color='white'/>}
             <span className='text-white font-bold'>{this.state.click ? 'RECORDING....': 'START RECORDING'}</span>
         </div>

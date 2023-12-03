@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { TextField } from '@mui/material'
 import Link from 'next/link';
 import { auth} from '@/app/firebase';
-import { getDocs , collection} from 'firebase/firestore';
+import { getDocs , collection, query, onSnapshot, updateDoc, doc} from 'firebase/firestore';
 import { db } from '@/app/firebase';
 import { signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification  } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -24,7 +24,6 @@ import Modal from '@mui/material/Modal';
 import { BiX, BiMailSend  } from "react-icons/bi";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2'
@@ -59,10 +58,45 @@ function page() {
     const handleClose = () => setOpen(false);
     const [click, setClick] = useState(false);
     const [click2, setClick2] = useState(false);
+    const [deviceList, setDeviceList] = useState([]);
+    const [listUser, setUserList] = useState([]);
 
+
+    
+  const getListDevice = () => {
+    
+    const q = query(collection(db, "Device_Authorization"));
+   onSnapshot(q, async (querySnapshot) => {
+  const dt = [];
+  querySnapshot.forEach((doc) => {
+      dt.push({data:doc.data(), id:doc.id});
+  });
+      setDeviceList(dt);    
+   });
+
+  }
+
+  const getListUser = () => {
+    const q = query(collection(db, "users"));
+   onSnapshot(q, (querySnapshot) => {
+  const dt = [];
+  querySnapshot.forEach((doc) => {
+      dt.push({data:doc.data(), id:doc.id});
+  });
+  setUserList(dt);
+
+});
+
+  }
+
+
+
+    
   
   
     useEffect(()=>{
+      getListUser();
+      getListDevice();
       setIsClient(true);
       const gedDatas = async () => {
         const querySnapshot = await getDocs(collection(db, "users"));
@@ -174,21 +208,45 @@ function page() {
               return;
             }
       
-            
+         
+         
+
+            const res1 = deviceList.find(d => d.data.Email === user.email);
+            if(!res1){
+             
+             
+              router.push('/device');
+              localStorage.setItem("user", JSON.stringify(profile));
+              setTimeout(() => {
+                setClick(false)
+                setEmail('');
+                setPassword('');
+              }, 2000);
+              return;
+            }
+
+            const credentials = {
+              DeviceName: res1.data.DeviceName,
+              email:user.email,
+              userId:user.uid,
+            }
 
 
-            setClick(false)
-            setEmail('');
-            setPassword('');
-            Swal.fire({
-              title: "Welcome user!",
-              text: "Your account is logged in successfully.",
-              icon: "success",
-              showCancelButton: false,
+
+            const a = listUser.find(d => d.data.email === res1.data.Email);
+            if(!a) return;
+            const devicesss = doc(db, "users", a.id);
+            updateDoc(devicesss, {
+              isActive:true
+            }).then(()=> {
+              setClick(false)
+              setEmail('');
+              setPassword('');
+              localStorage.setItem("credentials", JSON.stringify(credentials));
+              window.location.href = '/dashboard';
+              return;
             })
-            router.push('/device');
-            localStorage.setItem("user", JSON.stringify(profile));
-            return;
+           
            
             
  

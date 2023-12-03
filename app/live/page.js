@@ -65,6 +65,25 @@ function page() {
       // You can perform additional actions here when the video ends
     };
 
+    const handleExitPAGE = () => {
+   
+    
+      const docRef = doc(db, 'Livestream', liveiD);
+      updateDoc(docRef, {
+        Youtube_Url:'',
+        isliveNow:false,
+        ended:true,
+     }).then(()=>{
+       console.log("Updated Database");
+       setLiveStreamUrl("");
+       setVisible(false);
+       setLoading(false);
+       window.location.href = "/dashboard"
+     });
+       // You can perform additional actions here when the video ends
+     };
+ 
+
     const handleRefetch =async () => {
 
     
@@ -458,12 +477,16 @@ function page() {
       />
           <div className='grid gap-1 justify-center '>
          
-          <Typography id="modal-modal-description" >
-          Something went wrong, please click the bottom to request again.
+          <Typography className='font-bold text-sm text-center'>
+          Something went wrong, please click the bottom to request again?
           </Typography>
           <div className='grid gap-2'>
           <div className='w-full  p-1 grid justify-center items-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer' onClick={handleRefetch}>
-           <span className='text-white font-bold'>Reload</span>
+           <span className='text-white font-bold' >Reload</span>
+          </div>
+          <div className='w-full gap-1  p-1 flex justify-center items-center rounded-md border-[#FAB1A0] border transition-all ease-in cursor-pointer' onClick={handleExitPAGE}>
+          <BiHome size={20} color='#FAB1A0' />
+           <span className='text-[#FAB1A0] font-bold text-[20px]'>Exit</span>
           </div>
           </div>
         

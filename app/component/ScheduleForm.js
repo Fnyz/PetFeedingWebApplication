@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input"
 import moment from 'moment';
 import { ScrollArea  } from "@/components/ui/scroll-area"
 import CircularProgress from '@mui/material/CircularProgress';
-
+import { useSearchParams } from 'next/navigation';
 
 
 
@@ -109,10 +109,54 @@ function ScheduleForm() {
     const [click, setClick] = useState(false);
     const [click1, setClick1] = useState(false);
     const [showMe, setShowMe] = useState(false);
+    const [petList, setPetList] = useState([]);
+    const [petSlots, setSlotPet] = useState({});
+    const [times, setAllTime] = useState([]);
+    
 
+    const searchParams = useSearchParams()
 
+    const petnames = searchParams.get('petnames') || null
 
+    
+  const getAllListofPet = () => {
+    const q = query(collection(db, "List_of_Pets"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const listOfPets = [];
+      querySnapshot.forEach((doc) => {
+          listOfPets.push({data: doc.data(), id: doc.id});
+      });
+      setPetList(listOfPets);
+     
+     
+      
+    });
+  }
 
+  
+
+    useEffect(()=>{
+      getAllListofPet();
+     setName(petnames)
+     if(petnames){
+      const q = query(collection(db, "feeding_schedule"), where("Petname", "==", petnames));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const schedDatas = [];
+        querySnapshot.forEach((doc) => {
+            schedDatas.push({dts: doc.data(), id: doc.id});
+        });
+        if(schedDatas.length > 0){
+         setShow(true);
+         return;
+        }else{
+         setShow(false)
+         return;
+        }
+       
+        
+      });
+     }
+    },[])
     
 
     function FormRow({days, setChooseDay, chooseDay}) {
@@ -224,8 +268,6 @@ function ScheduleForm() {
   }
 
 
-  
-
 
 
   const getSchedule = (name) => {
@@ -267,6 +309,9 @@ function ScheduleForm() {
   },[name])
 
 
+
+
+
   const removeFoodItem = (selectedTime, pr) => {
    
     setSchedules2(scheds2.filter((item) =>`${item.time} ${item.parameters2}` !== `${selectedTime} ${pr}`));
@@ -283,7 +328,7 @@ function ScheduleForm() {
 
   const addFoodItem = () => {
   
-    if(!twelveHourTime || !caps){
+    if(!caps){
       setClick(false);
           Swal.fire({
             title: "Warning?",
@@ -296,17 +341,17 @@ function ScheduleForm() {
       return;
     }
 
-
+   
     const res  = listSched.find(d => d.data.Days === chooseDay && d.data.DeviceName === credential.DeviceName && d.data.Petname === name);
     
-    const exist  = res?.data.ScheduleTime.find(s => s.time === militaryTime.trim() && s.parameters === parameters)
+    const exist  = res?.data.ScheduleTime.find(s => s.time === militaryTime.trim() && s.parameters === parameters )
     
     if(exist){
       
           setClick(false);
           Swal.fire({
             title: "Warning?",
-            text: `Schedule ${exist.time} time is already set, please try again.`,
+            text: `Schedule ${exist.time} time in ${exist.feedingSlot === "slot_two" ? "SLOT TWO" : "SLOT ONE"}  is already set, please try again.`,
             icon: "warning",
             confirmButtonColor: "#FAB1A0",
             confirmButtonText: "Set time again",
@@ -316,11 +361,7 @@ function ScheduleForm() {
     }
 
   
-    // Check if the time already exists in the list
 
-   
-
-   
 
     const existingItem = scheds1.find((item) => item.time === militaryTime.trim() && item.parameters === parameters);
    
@@ -339,8 +380,9 @@ function ScheduleForm() {
       return;
     }
 
+
     // Add the new food item and time to the list
-    setSchedules([...scheds1, { time: militaryTime.trim(), cups: caps, parameters }]);
+    setSchedules([...scheds1, { time: militaryTime.trim(), cups: caps, parameters}]);
      
     
 
@@ -375,7 +417,6 @@ function ScheduleForm() {
     const q = query(collection(db, "feeding_schedule"));
    onSnapshot(q, (querySnapshot) => {
   const dt = [];
-  const d = [];
   querySnapshot.forEach((doc) => {
       dt.push({data:doc.data(), id: doc.id});
   });
@@ -384,9 +425,6 @@ function ScheduleForm() {
 
  
 
- 
-  
-  
   
 });
   }
@@ -408,7 +446,11 @@ function ScheduleForm() {
 
 
     const getAllDatas = () => {
-      const q = query(collection(db, "List_of_Pets"));
+
+      const user = localStorage.getItem("credentials")
+      if(user){
+          const datas = JSON.parse(user);
+          const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
      onSnapshot(q, (querySnapshot) => {
     const dt = [];
     const dt2 = [];
@@ -424,6 +466,8 @@ function ScheduleForm() {
    
    
   });
+      }
+      
   
     }
   
@@ -474,7 +518,7 @@ function ScheduleForm() {
         return;
       }
   
-      const res = listSched.find(d => d.data.Days.toLowerCase().trim() === chooseDay.toLowerCase().trim());
+      const res = listSched.find(d => d.data.Days.toLowerCase().trim() === chooseDay.toLowerCase().trim() && d.data.DeviceName.trim() === credential.DeviceName.trim() && d.data.Petname.toLowerCase().trim() === name.toLowerCase().trim());
 
   
       if(!res){
@@ -485,11 +529,15 @@ function ScheduleForm() {
           setSchedules([])
           setSchedules2([])
           setName('')
-          await addDoc(collection(db, "Task"),{
+          addDoc(collection(db, "Task"),{
             type:'Schedule',
             deviceName: credential.DeviceName,
             document_id: docRef.id,
             request:null,
+          }).then(async()=>{
+            await addDoc(collection(db, "PetFeedingSlot"), {
+              Slot_One: scheds1,
+            })
           });
 
           setClick(false);
@@ -868,14 +916,20 @@ function ScheduleForm() {
    
     </CardContent>
     <CardFooter className="flex justify-between">
-    
-     <Button variant="outline" onClick={()=>{
-      setName("");
-      setCaps("");
-      setSchedules([]);
-      setSchedules2([]);
-      setChooseDay("Everyday");
-     }}>CLEAR</Button>
+    {petnames ? (
+      <Button variant="outline" onClick={()=>{
+       window.location.href = "/dashboard"
+       setName("");
+      }}>Go back to Dashboard</Button>
+    ): (
+      <Button variant="outline" onClick={()=>{
+       setName("");
+       setCaps("");
+       setSchedules([]);
+       setSchedules2([]);
+       setChooseDay("Everyday");
+      }}>CLEAR</Button>
+    )}
      <div onClick={handleSubmit} className='flex transition-all ease-in  justify-center items-center gap-2 border px-4 py-2 rounded-md bg-[#FAB1A0] text-white shadow-sm cursor-pointer hover:bg-[coral]'>
     
 

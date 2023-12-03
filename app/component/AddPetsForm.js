@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { FaBalanceScale } from "react-icons/fa";
-import { BiEditAlt, BiSave, BiSolidFolderOpen} from "react-icons/bi";
+import { BiEditAlt, BiSave, BiPlay, BiPause} from "react-icons/bi";
 import {
   Card,
   CardContent,
@@ -36,15 +36,16 @@ import { petsData } from '../animeData';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import Image from 'next/image';
-import { collection, addDoc, query, onSnapshot, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, query, onSnapshot, serverTimestamp , doc, updateDoc, where} from "firebase/firestore";
 import { db } from '../firebase';
 import Swal from 'sweetalert2'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
-import { BiX  } from "react-icons/bi";
 import AudioRecorder from './AudioRecorder';
-
+import { styled } from '@mui/material/styles';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import { BiX } from "react-icons/bi";
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
   clipPath: 'inset(50%)',
@@ -56,6 +57,21 @@ const VisuallyHiddenInput = styled('input')({
   whiteSpace: 'nowrap',
   width: 1,
 });
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+
+  width: 600,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  borderRadius:2,
+  zIndex:0,
+  p: 2,
+};
+
 
 
 function generateFakePassword(length) {
@@ -79,7 +95,7 @@ function generateFakeWeight(min, max) {
 
 function AddPetsForm() {
 
-
+    const [showVisibility, setShowVisibility] = React.useState(false);
     const [specified, setSpecifiedPet] = useState(false);
     const [dog, setDog] = React.useState([]);
     const [cat, setCat] = React.useState([]);
@@ -90,11 +106,17 @@ function AddPetsForm() {
       {val: 'male', label: 'Male' },
       {val: 'female', label: 'Female' },
     ]
+
+    const slot = [
+      {val: 'slot_one', label: 'Slot 1' },
+      {val: 'slot_two', label: 'Slot 2' },
+    ]
     const kindPet = [
       {val: 'dog', label: 'Dog' },
       {val: 'cat', label: 'Cat' },
       {val: 'specified', label: 'Specified type' },
     ]
+    const [placeSlot, setPetSlot] = React.useState('');
     const [petKind, setPetKind] = React.useState('');
     const [genders, setGenders] = React.useState('');
     const [rfid, SetRfid] = React.useState('');
@@ -106,6 +128,10 @@ function AddPetsForm() {
     const [click, setClick] = useState(false);
     const [click2, setClick2] = useState(false);
     const [Base64, setBase64] = React.useState('')
+    const [audioRecord, setAudioRecord] = React.useState(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [openModal, setOpenModal] = React.useState(false);
+    const [petId, setPetID] = React.useState('');
 
 
     const getAllDatas = () => {
@@ -129,6 +155,38 @@ function AddPetsForm() {
     },[])
 
 
+    
+    useEffect(()=> {
+      
+      const user = localStorage.getItem("credentials")
+      if(user){
+          const datas = JSON.parse(user);
+          const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
+          onSnapshot(q, (snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+           if (change.doc.data().Weight && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
+            SetWeight(change.doc.data().Weight)
+      
+
+            return;
+          }
+          if (change.doc.data().Rfid && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
+            SetRfid(change.doc.data().Rfid)
+            setClick1(false);
+
+            return;
+          }
+
+        });
+      
+      });
+
+
+      }
+  },[click, click1])
+  
+
+
     const handleShowCredData = () => {
       const user = localStorage.getItem("credentials")
       if(user){
@@ -141,7 +199,7 @@ function AddPetsForm() {
 
       setClick2(true)
   
-      if(!petname || !genders || !rfid || !weight || !goalWeight || !age){
+      if(!petname || !genders || !age){
         setClick2(false)
         Swal.fire({
           title: "Warning?",
@@ -171,42 +229,29 @@ function AddPetsForm() {
           image:choose || null,
           synced:false,
           petType:petKind,
-          audioBase64:Base64,
+          audioBase64:Base64 || null,
+          petFeedingSlot:placeSlot,
+          requestWeight: false,
+          requestRfid: false,
+          Token:0,
           Created_at: serverTimestamp(),
           Updated_at: serverTimestamp(),
         });
   
         if(addListPet.id){
-          setClick2(false)
-          await addDoc(collection(db, "Task"), {
+        
+           addDoc(collection(db, "Task"), {
             type:'refresh_pet',
             deviceName:credential.DeviceName.trim(),
             document_id:addListPet.id,
             request:null,
+          }).then(()=>{
+            setClick2(false)
+            setOpenModal(true);
+            setPetID(addListPet.id);
+
           });
-    
-          setPetName('');
-          setGenders('');
-          SetGoalWeight('');
-          SetPetAge('');
-          SetRfid('');
-          SetWeight('');
-          Swal.fire({
-            title: "Warning?",
-            text: "Please input all fields.",
-            icon: "warning",
-            confirmButtonColor: "#FAB1A0",
-            confirmButtonText: "Yes, I will.",
-            
-           
-          })
-          Swal.fire({
-            title: "Success?",
-            text: "Successfully added new pet!",
-            icon: "success",
-            confirmButtonColor: "#FAB1A0",
-            confirmButtonText: "Okay",
-          })
+
         
         }
 
@@ -224,33 +269,99 @@ function AddPetsForm() {
           text: "Pet is already exists!",
           icon: "warning",
           confirmButtonColor: "#FAB1A0",
+
           confirmButtonText: "Try again",
         })
        }
         
     }
+
+    const handleUpdateChange = async () => {
+      const petWeightss = doc(db, "List_of_Pets", petId);
+      await updateDoc(petWeightss, {
+        Token: 1,
+        requestWeight:false,
+        requestRfid:false,
+        GoalWeight:goalWeight,
+      }).then( async()=>{
+    
+        setOpenModal(false)
+    
+        Swal.fire({
+          title: "Success?",
+          text: "Successfully added new pet!",
+          icon: "success",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Okay",
+        })
+
+        await addDoc(collection(db, "Petbackup_data"), {
+          DeviceName:credential.DeviceName.trim(),
+          Petname: petname,
+          Gender:genders,
+          Rfid:rfid,
+          Weight:weight,
+          GoalWeight:goalWeight,
+          Age:age,
+          image:choose || null,
+          synced:false,
+          petType:petKind,
+          audioBase64:Base64,
+          petFeedingSlot:placeSlot,
+          requestWeight: false,
+          requestRfid: false,
+          Token:0,
+          Created_at: serverTimestamp(),
+          Updated_at: serverTimestamp(),
+        }).then(()=>{
+          setGenders('');
+          SetGoalWeight('');
+          SetPetAge('');
+          SetRfid('');
+          SetWeight('');
+          setPetName('');
+          setBase64('')
+        });
+
   
-
-
-    const handleFakeRFID = () => {
-      setClick1(true);
-      setTimeout(() => {
-        const fakePassword = generateFakePassword(20);
-        setClick1(false);
-        SetRfid(fakePassword)
-      }, 3000);
+      })
   
     }
   
-    const handleFakeWeight = () => {
-      setClick(true);
-      setTimeout(() => {
-        const fakeWeight = generateFakeWeight(15, 25);
-        SetWeight(fakeWeight)
-        setClick(false);
-      }, 3000);
+
+
+    const handleFakeRFID = async () => {
+   
+      const petRrfid = doc(db, "List_of_Pets", petId);
+      await updateDoc(petRrfid, {
+        requestRfid: true,
+      }).then(()=>{
+        setClick1(true);
+      })
   
     }
+  
+    const handleFakeWeight = async () => {
+      
+      const petWeightss = doc(db, "List_of_Pets", petId);
+      await updateDoc(petWeightss, {
+        requestWeight: true,
+      }).then(()=>{
+        setClick(true)
+      })
+  
+    }
+
+    const handlePlayAudio = () => {
+      // audioRecord.play()
+      setIsPlaying(true);
+    }
+
+    const handlePauseAudio = () => {
+      // audioRecord.pause()
+      setIsPlaying(false);
+    }
+
 
 
  
@@ -398,12 +509,13 @@ console.log(petKind);
              </SelectContent>
            </Select>
          </div>
+         <div className='flex justify-center items-center gap-5 w-full '>
          {specified ? (
-               <div className='flex justify-between  items-center  gap-2'>
+               <div className='flex justify-between w-full  items-center  gap-2'>
     
                <div className="flex flex-col w-full space-y-1.5 ">
                  <Label htmlFor="rfid">Input type of pet</Label>
-                 <Input id="rfid" placeholder="Set type pet here"   value={petKind} onChange={(e)=>{
+                 <Input id="rfid" placeholder="Set type pet here"  className='w-full'   value={petKind} onChange={(e)=>{
                    
                     if(e.target.value.toLowerCase().trim() === "dog" || e.target.value.toLowerCase().trim()=== "cat"){
                       Swal.fire({
@@ -434,7 +546,7 @@ console.log(petKind);
              
                </div>
          ): (
-          <div className="flex flex-col space-y-1.5">
+          <div className="flex flex-col space-y-1.5 w-full">
           <Label htmlFor="gender">What type of pet?</Label>
           <Select  onValueChange={(e)=> {
            if(e === "specified"){
@@ -459,16 +571,82 @@ console.log(petKind);
           </Select>
         </div>
          )}
+
+         
+
+         </div>
         
+    
+ 
+    
+         <div className="flex flex-row justify-center items-center gap-1">
+       <span className='font-bold opacity-60' >Record your voice to call your pet.</span>
+       <span className='italic font-bold text-red-500 opacity-60 hover:opacity-100 cursor-pointer transition-all ease-in' onClick={()=> setShowVisibility(true)}>Click here</span>
+      
+         </div>
+         <Modal
+        open={showVisibility}
+  
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        
+        <Box sx={style}>
+        <div className='w-full justify-center  flex flex-col px-5'>
+         <h1 className='font-bold'>Add Record for Pet</h1>
+         <span className='text-[12px] mb-3 opacity-40 font-bold'>Click recording to start record your voice.</span>
+         <AudioRecorder isAddPet={true} setBase64={setBase64} setAudioRecord={setAudioRecord}/>
+         <span className='mt-5 text-[12px] opacity-40 font-bold mb-2'>Click here to listen your recorded file</span>
+         <div className='w-full flex justify-center items-center  border p-2 rounded-md shadow-sm cursor-pointer hover:shadow-md' onClick={!isPlaying ? handlePlayAudio : handlePauseAudio}>
+          {isPlaying ? <>
+
+<BiPause color='#FAB1A0' size={24}/>
+     <span className='text-[#FAB1A0] font-bold'>Pause</span>
+   
+   </>: <>
+
+       <BiPlay color='#FAB1A0' size={24}/>
+            <span className='text-[#FAB1A0] font-bold'>Play</span>
+          
+          </>}
+           </div>
+          </div>
+       
+      <div className='flex gap-2 mt-4 '>
+          
+          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=> setShowVisibility(false)}>
+          <BiX size={24} color='white' />
+           <span className='text-white font-bold'>Close</span>
+          </div>
+      </div>
+        </Box>
+      </Modal>
+
+       </div>
+     </form>
+
+
+     <Modal
+        open={openModal}
+  
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        
+        <Box sx={style}>
+        <div className='w-full justify-center  flex flex-col px-5'>
+         <h1 className='font-bold'>Add pet Weight and RFID</h1>
+         <span className='text-[12px] mb-3 opacity-40 font-bold'>Click the button to provide the weight and rfid.</span>
+      
          <div className='flex justify-between  items-center  gap-2'>
     
          <div className="flex flex-col w-full space-y-1.5 ">
            <Label htmlFor="rfid">RFID</Label>
-           <Input id="rfid" placeholder="Generate RFID here" disabled  value={rfid} onChange={(e)=>{
+           <Input id="rfid" placeholder="Generate RFID here"   value={rfid} onChange={(e)=>{
               SetRfid(e.target.value);
             }}/>
          </div>
-         <div className=' gap-2 h-[40px] mt-5 flex justify-center items-center w-full rounded-sm cursor-pointer   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={handleFakeRFID}>
+         <div  className=' gap-2 h-[40px] mt-5 flex justify-center items-center w-full rounded-sm cursor-pointer   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={handleFakeRFID}>
          {click1 ?
  <>
 
@@ -490,50 +668,78 @@ console.log(petKind);
         
        
          </div>
-    
-         <div className='flex justify-between  items-center  gap-2  '>
-    
-    <div className="flex flex-col w-full space-y-1.5 ">
-    <Label htmlFor="rfid">Weight</Label>
-    <Input id="weight"  placeholder="Pet weight"  value={weight} onChange={(e)=>{
-              SetWeight(e.target.value);
-            }}  />
-    </div>
-    <div className='gap-2 cursor-pointer h-[40px] mt-5 flex justify-center items-center w-full rounded-sm   bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in' onClick={handleFakeWeight}>
-    {click ?
- <>
+         {rfid && (
 
-  <span className='text-sm font-bold text-white'>
-   PLEASE WAIT...
-  </span>
- </>
-          : 
-            <>
-           
-           <FaBalanceScale size={20} color='white' className=' max-md:hidden block'/>
-    <label className='text-white font-bold cursor-pointer'>Weight PET</label>
-            </>
-           
-         }
-         
-
-    </div>
-     </div>
+<div className='flex justify-between  items-center  gap-2  '>
     
-     <div className="flex flex-col space-y-1.5">
+<div className="flex flex-col w-full space-y-1.5 ">
+<Label htmlFor="rfid">Weight</Label>
+<Input id="weight"  placeholder="Pet weight"  value={weight} onChange={(e)=>{
+          SetWeight(e.target.value);
+        }}  />
+</div>
+<div className={`gap-2 cursor-pointer h-[40px] mt-5 flex justify-center items-center w-full rounded-sm  hover:bg-[coral] transition-all ease-in   bg-[#FAB1A0] `} onClick={handleFakeWeight}>
+ 
+{click ?
+<>
 
-           <Label htmlFor="goalWeight">Goal Weight</Label>
-           <Input id="goalWeight" placeholder="Input goal weight of pet"  value={goalWeight} onChange={(e)=>{
-              SetGoalWeight(e.target.value);
-            }} />
-         </div>
-    
-         <div className="flex flex-col space-y-1.5">
-       <Label htmlFor="petname">Add audio to call a pet</Label>
-          <AudioRecorder isAddPet={true} setBase64={setBase64}/>
-         </div>
-       </div>
-     </form>
+<span className='text-sm font-bold text-white'>
+PLEASE WAIT...
+</span>
+</>
+      : 
+        <>
+       
+       <FaBalanceScale size={20} color='white' className=' max-md:hidden block'/>
+<label className='text-white font-bold cursor-pointer'>Weight PET</label>
+        </>
+       
+     }
+
+     
+     
+
+</div>
+
+
+ </div>
+)}
+        
+     <div className="flex flex-col mt-3 space-y-1.5">
+
+<Label htmlFor="goalWeight">Goal Weight</Label>
+<Input id="goalWeight" placeholder="Input goal weight of pet"  value={goalWeight} onChange={(e)=>{
+   SetGoalWeight(e.target.value);
+ }} />
+</div>
+          </div>
+          <div className='flex gap-2 mt-4 '>
+          
+          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleUpdateChange}>
+          
+          <BiSave size={20} color='white'/>
+           <span className='text-white font-bold'>Submit</span>
+          </div>
+      </div>
+       
+      <div className='flex gap-2 mt-3 '>
+          
+          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md  border-[#FAB1A0] opacity-50 hover:opacity-100  transition-all ease-in cursor-pointer" onClick={()=>{
+            setGenders('');
+            SetGoalWeight('');
+            SetPetAge('');
+            SetRfid('');
+            SetWeight('');
+            setPetName('');
+            setBase64('')
+            setOpenModal(false)
+          }} >
+          <BiX size={24} color='#FAB1A0' />
+           <span className='text-[#FAB1A0] font-bold'>Close</span>
+          </div>
+      </div>
+        </Box>
+      </Modal>
     </CardContent>
     <CardFooter className="flex justify-between">
      <div className='border px-4 py-2 rounded-md  border-[#FAB1A0] text-[#FAB1A0] font-bold cursor-pointer hover:border-[coral] hover:text-[coral] ' onClick={()=>{

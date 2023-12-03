@@ -1,14 +1,19 @@
 
-
+'use client'
 import React from 'react'
 import Image from 'next/image'
 import SideBar from '../component/SideBar';
 import ScheduleForm from '../component/ScheduleForm';
+import { useSearchParams } from 'next/navigation';
+
 
 
 function page() {
 
     
+const searchParams = useSearchParams()
+
+const petnames = searchParams.get('petnames') || null
 
     return (
         <div className="h-screen relative">
@@ -19,9 +24,9 @@ function page() {
                 alt='back image'
                 objectFit='cover'
             />
-            <div className='absolute left-0 right-0 max-sm:px-5  px-10 '>
+            <div className={`absolute left-0 right-0 max-sm:px-5  px-10 ${petnames && "mt-10"}`}>
                 <div className='flex justify-between'>
-                <SideBar />
+                {!petnames && <SideBar />}
             </div>
     
             <div className='flex gap-5 w-full min-h-max p-2'>

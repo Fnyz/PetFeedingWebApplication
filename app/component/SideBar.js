@@ -112,7 +112,9 @@ function SideBar() {
           <List>
             {sideList.map((text, index) => (
               <ListItem key={index} >
-                <Link href={text.link} className={`flex w-[100%] p-2 rounded-lg ${text.link === pathname ? 'none' : 'border'}`} style={{
+                <div onClick={()=> {
+                  window.location.href = text.link;
+                }} className={` cursor-pointer flex w-[100%] p-2 rounded-lg ${text.link === pathname ? 'none' : 'border'}`} style={{
                   backgroundColor: text.link === pathname ? '#FAB1A0' : 'white',
            
                 }}>
@@ -124,7 +126,7 @@ function SideBar() {
                   <ListItemText primary={text.name} style={{
                     color: text.link === pathname ? 'white' : 'gray', 
                   }}/>
-                </Link>
+                </div>
               </ListItem>
             ))}
           </List>
