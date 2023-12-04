@@ -110,8 +110,8 @@ function ScheduleForm() {
     const [click1, setClick1] = useState(false);
     const [showMe, setShowMe] = useState(false);
     const [petList, setPetList] = useState([]);
-    const [petSlots, setSlotPet] = useState({});
-    const [times, setAllTime] = useState([]);
+    const [slots, setSlots] = useState([]);
+
     
 
     const searchParams = useSearchParams()
@@ -132,6 +132,46 @@ function ScheduleForm() {
       
     });
   }
+
+  
+  useEffect(()=>{
+    
+   
+      const jsonValue = localStorage.getItem('credentials');
+      const credential = JSON.parse(jsonValue);
+    
+      const q = query(collection(db, "feeding_schedule"), where('DeviceName', "==", credential.DeviceName.trim()));
+     onSnapshot(q, (querySnapshot) => {
+    const forPetName = [];
+    querySnapshot.forEach((docs) => {
+      forPetName.push({data:docs.data(), id: docs.id});
+  
+    });
+
+     setSlots(forPetName);
+
+
+    // const filteredArray = forPetName.filter((a) => {
+    //   return a.data.petSlot === "slot_one";
+    // });
+    
+    // // Log the 'ScheduleTime' values for elements that meet the condition
+    // const combinedScheduleTime = filteredArray.reduce((result, item) => {
+    //   return result.concat(item.data.ScheduleTime);
+    // }, []);
+
+    // console.log(combinedScheduleTime);
+  
+
+    
+    
+    
+  });
+  
+
+    
+  },[])
+
 
   
 
@@ -230,36 +270,82 @@ function ScheduleForm() {
     setClick1(true);
     const a = petSchesData.find((d) => d.dts.Days === days && d.dts.DeviceName === credential.DeviceName)
     const b = a?.dts.ScheduleTime.find((d) => d.time === currentTime);
-    
-    if(b){
-     const res = a?.dts.ScheduleTime.filter(d => d.time !== currentTime);
-     const newArray =  [
-      {cups: cups2,
-       parameters:parameters,
-       time:time3,
-      }
-     ]
-    
-     const updateSched = [...res, ...newArray]
-     const docRef = doc(db, 'feeding_schedule', a.id);
-     updateDoc(docRef, {
-      ScheduleTime:updateSched,
-   }).then(()=>{
+    const res  = listSched.find(d => d.data.Days === days.trim() && d.data.DeviceName === credential.DeviceName);
+
+ 
+
+
+
+
+
+    const combinedData = [];
+
+    const filteredArray = slots?.filter((c) => {
+      return c.data.Slot === res?.data.Slot &&  c.data.Days === res.data.Days;
+    });
+    filteredArray?.forEach((item) => {
+ const petname = item.data?.Petname;
+ const scheduleTimes = item.data.ScheduleTime.map((time) => {
+   return { petname, sched:time };
+ });
+ combinedData.push(...scheduleTimes);
+   });
+
+   const timeToMinutes = (timeStr) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+   const rs = combinedData.find(z => timeToMinutes(z.sched.time) === timeToMinutes(time3) || timeToMinutes(currentTime.split(' ')[0].trim()));
+  
+   if(rs){
+  
     setClick1(false);
-     Swal.fire({
-      title: "Success?",
-      text: `Time is updated successfully`,
-      icon: "success",
+    Swal.fire({
+      title: "Warning?",
+      text: rs?.petname === name ? `You already set this time on ${res?.data.Slot==1 ? "SLOT ONE": "SLOT TWO"}` : `${time3} is already set to ${rs?.petname} in ${res?.data.petSlot=="slot_one"? "SLOT_ONE.": "SLOT_TWO."} on the pet schedule, please choose other time.`,
+      icon: "error",
       confirmButtonColor: "#FAB1A0",
       confirmButtonText: "Close",
       
     }).then(()=>{
       Swal.close();
     })
-   });
 
-
-    }
+   
+    return;
+  }else{
+    if(b){
+      const res = a?.dts.ScheduleTime.filter(d => d.time !== currentTime);
+      const newArray =  [
+       {cups: cups2,
+        parameters:parameters,
+        time:time3,
+       }
+      ]
+     
+      const updateSched = [...res, ...newArray]
+      const docRef = doc(db, 'feeding_schedule', a.id);
+      updateDoc(docRef, {
+       ScheduleTime:updateSched,
+    }).then(()=>{
+     setClick1(false);
+      Swal.fire({
+       title: "Success?",
+       text: `Time is updated successfully`,
+       icon: "success",
+       confirmButtonColor: "#FAB1A0",
+       confirmButtonText: "Close",
+       
+     }).then(()=>{
+       Swal.close();
+     })
+    });
+ 
+ 
+     }
+  }
+    
+   
   
   
   
@@ -294,7 +380,7 @@ function ScheduleForm() {
 
   useEffect(()=> {
     const isSchedule = () => {
-      const res = listSched.find(d => d.data.Petname.toLowerCase().trim() === name.toLowerCase().trim());
+      const res = listSched.find(d => d?.data?.Petname.toLowerCase().trim() === name?.toLowerCase().trim());
       
       if(!res){
         setShow(false);
@@ -343,70 +429,101 @@ function ScheduleForm() {
 
    
     const res  = listSched.find(d => d.data.Days === chooseDay && d.data.DeviceName === credential.DeviceName && d.data.Petname === name);
-    
-    const exist  = res?.data.ScheduleTime.find(s => s.time === militaryTime.trim() && s.parameters === parameters )
-    
-    if(exist){
-      
-          setClick(false);
+  
+    const combinedData = [];
+
+    const filteredArray = slots?.filter((a) => {
+      return a.data.Slot === res?.data.Slot &&  a.data.Days === res?.data.Days;
+    });
+    filteredArray?.forEach((item) => {
+ const petname = item.data?.Petname;
+ const scheduleTimes = item.data.ScheduleTime.map((time) => {
+   return { petname, sched:time };
+ });
+ combinedData.push(...scheduleTimes);
+});
+
+        const rs = combinedData.find(a => a.sched.time === militaryTime.trim());
+        if(rs){
+        
           Swal.fire({
             title: "Warning?",
-            text: `Schedule ${exist.time} time in ${exist.feedingSlot === "slot_two" ? "SLOT TWO" : "SLOT ONE"}  is already set, please try again.`,
+            text: rs?.petname === name ? `You already set this time on ${res?.data.Slot==1 ? "SLOT ONE": "SLOT TWO"}` : `${militaryTime.trim()} is already set to ${rs?.petname} in ${res?.data.petSlot=="slot_one"? "SLOT_ONE": "SLOT_TWO"} on the pet schedule, please choose other time.`,
             icon: "warning",
             confirmButtonColor: "#FAB1A0",
             confirmButtonText: "Set time again",
             
           })
-      return;
-    }
-
-  
-
-
-    const existingItem = scheds1.find((item) => item.time === militaryTime.trim() && item.parameters === parameters);
-   
-    if (existingItem) {
-      
-      setClick(false);
-      Swal.fire({
-        title: "Warning?",
-        text: `Time ${existingItem.time} already exists, Remove the existing entry first.`,
-        icon: "warning",
-        confirmButtonColor: "#FAB1A0",
-        confirmButtonText: "Set time again",
-        
-      })
-     
-      return;
-    }
-
-
-    // Add the new food item and time to the list
-    setSchedules([...scheds1, { time: militaryTime.trim(), cups: caps, parameters}]);
-     
+          setCaps('');  
+       
+          
+        }else{
+          const exist  = res?.data.ScheduleTime.find(s => s.time === militaryTime.trim() && s.parameters === parameters )
     
-
-
-    const existingItem2 = scheds2.find((item) => item.time === militaryTime2.trim() && item.parameters2 === parameters2);
-    if (existingItem2) {
-      // You can handle the duplicate time case here
-      setClick(false);
-      Swal.fire({
-        title: "Warning?",
-        text: `Time ${existingItem2.time} already exists. Remove the existing entry first.`,
-        icon: "warning",
-        confirmButtonColor: "#FAB1A0",
-        confirmButtonText: "Set time again",
+          if(exist){
+            
+                setClick(false);
+                Swal.fire({
+                  title: "Warning?",
+                  text: `Schedule ${exist.time} time in ${exist.feedingSlot === "slot_two" ? "SLOT TWO" : "SLOT ONE"}  is already set, please try again.`,
+                  icon: "warning",
+                  confirmButtonColor: "#FAB1A0",
+                  confirmButtonText: "Set time again",
+                  
+                })
+            return;
+          }
+      
         
-      })
-   
-      return;
-    }
-
-    // Add the new food item and time to the list
-    setSchedules2([...scheds2, { time: militaryTime2.trim(), cups: caps, parameters2 }]);
-
-    setCaps('');  
+      
+      
+          const existingItem = scheds1.find((item) => item.time === militaryTime.trim() && item.parameters === parameters);
+         
+          if (existingItem) {
+            
+            setClick(false);
+            Swal.fire({
+              title: "Warning?",
+              text: `Time ${existingItem.time} already exists, Remove the existing entry first.`,
+              icon: "warning",
+              confirmButtonColor: "#FAB1A0",
+              confirmButtonText: "Set time again",
+              
+            })
+           
+            return;
+          }
+      
+      
+          // Add the new food item and time to the list
+          setSchedules([...scheds1, { time: militaryTime.trim(), cups: caps, parameters}]);
+           
+          
+      
+      
+          const existingItem2 = scheds2.find((item) => item.time === militaryTime2.trim() && item.parameters2 === parameters2);
+          if (existingItem2) {
+            // You can handle the duplicate time case here
+            setClick(false);
+            Swal.fire({
+              title: "Warning?",
+              text: `Time ${existingItem2.time} already exists. Remove the existing entry first.`,
+              icon: "warning",
+              confirmButtonColor: "#FAB1A0",
+              confirmButtonText: "Set time again",
+              
+            })
+         
+            return;
+          }
+      
+          // Add the new food item and time to the list
+          setSchedules2([...scheds2, { time: militaryTime2.trim(), cups: caps, parameters2 }]);
+      
+          setCaps('');  
+        }
+    
+  
     
   };
 
@@ -490,19 +607,19 @@ function ScheduleForm() {
 
     const handleSubmit = async () => {
       setClick(true);
+      const h = petList.find((a)=>a.data.DeviceName.toLowerCase().trim() === credential.DeviceName.trim() && a.data.Petname.trim().toLowerCase() === name.trim().toLowerCase())
+
       const petSchedule = {
         DeviceName: credential.DeviceName,
         Petname: name,
         Days: chooseDay,
         ScheduleTime: scheds1,
+        petId:h?.id, 
+        Slot:h.data.Slot,
         synced:false,
         created_at: serverTimestamp(),
       }
 
-    
-
-
-   
   
       if(!name || !chooseDay || !scheds1.length) {
         setClick(false);

@@ -353,12 +353,12 @@ function AddPetsForm() {
     }
 
     const handlePlayAudio = () => {
-      // audioRecord.play()
+      audioRecord.play()
       setIsPlaying(true);
     }
 
     const handlePauseAudio = () => {
-      // audioRecord.pause()
+      audioRecord.pause()
       setIsPlaying(false);
     }
 
@@ -491,7 +491,23 @@ console.log(petKind);
               SetPetAge(e.target.value);
             }} />
          </div>
+         <div className="flex flex-col space-y-1.5">
+           <Label htmlFor="gender">PetFeeding Slot</Label>
+           <Select  onValueChange={(e)=> setPetSlot(e)}  >
+             <SelectTrigger id="gender">
+               <SelectValue placeholder="Select slot here" />
+             </SelectTrigger>
+             <SelectContent position="popper ">
+              {slot.map((d, i)=> {
+                return (
+                  <SelectItem value={d.val} key={i}>{d.label}</SelectItem>
+                )
+              })}
          
+            
+             </SelectContent>
+           </Select>
+         </div>
          <div className="flex flex-col space-y-1.5">
            <Label htmlFor="gender">Gender</Label>
            <Select  onValueChange={(e)=> setGenders(e)}  >
