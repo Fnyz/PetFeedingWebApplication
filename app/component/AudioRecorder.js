@@ -118,7 +118,7 @@ export default class AudioRecorder extends Component {
             {this.state.click ? <BiPause size={25} color='white'/> : <BiMicrophone size={20} color='white'/>}
             <span className='text-white font-bold'>{this.state.click ? 'RECORDING....': 'START RECORDING'}</span>
         </div>
-
+      
         <div onClick={this.stop} disabled={!this.state.isRecording} className={`  rounded-md transition-all ease-in  flex border justify-center items-center w-[100%] p-2 gap-2  border-[#FAB1A0] ${!this.state.isRecording ? "opacity-50 pointer-events-none": "opacity-100 cursor-pointer hover:shadow-md"}`}>
             <BiStop size={25} color='#FAB1A0'/>
             <span className='text-[#FAB1A0] font-bold'>STOP RECORDING</span>

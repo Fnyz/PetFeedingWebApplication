@@ -5,7 +5,7 @@ import SideBar from '../component/SideBar';
 import AddPetsForm from '../component/AddPetsForm';
 import { useState } from 'react';
 import { useEffect } from 'react';
-
+import Pageload from '../component/Pageload';
 
 function page() {
 

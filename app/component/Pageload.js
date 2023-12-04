@@ -9,7 +9,7 @@ export default function Pageload() {
          loop
          animationData={dsdds}
          play
-         style={{ width: 200, height: 200 }}
+         style={{ width: 300, height: 300 }}
        />
     
          <span className='font-bold text-[70px] text-[#FAB1A0] max-md:text-[30px] text-center'>!PURRFECT PLATE.</span>

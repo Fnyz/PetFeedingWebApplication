@@ -13,7 +13,7 @@ import { collection, addDoc, query, where, onSnapshot, getDocs,updateDoc, doc, d
 import { db } from '../firebase';
 import CircularProgress from '@mui/material/CircularProgress';
 import { BiHome } from "react-icons/bi";
-import Pageload from '../component/Pageload';
+
 import { usePathname } from 'next/navigation'
 
 
@@ -40,7 +40,7 @@ function page() {
     const [message, setMessage] = React.useState('Hello, do you want to watch the live video?');
     const [credential, setCredential] = React.useState({});
     const [loading, setLoading] = React.useState(false);
-    const [liveStreamUrl, setLiveStreamUrl] = useState('https://www.youtube.com/watch?v=cRpx3zkRIX0');
+    const [liveStreamUrl, setLiveStreamUrl] = useState('');
     const [apiKey1, setApiKey] = useState('');
     const [channel, setChannel] = useState('');
     const [visible1, setVisible1] = useState(false);
@@ -150,7 +150,7 @@ function page() {
       setChannel(channelId);
       setLiveId(id);
 
-      console.log(apiKey, channelId, id);
+
 
  
       try {
@@ -400,12 +400,7 @@ function page() {
     
       },[])
 
-      if(!isClient){
-   
-        return(
-          <Pageload/>
-        )
-      }
+      
 
 
 
@@ -423,20 +418,19 @@ function page() {
                 <div className='flex justify-between  '>
                 <SideBar />
                  </div>
-
+               
                  <div className=' max-h-min mt- 2'>
-                {isClient && <VideoFrame  youtubeUrl={liveStreamUrl} handleVideoEnd={handleVideoEnd}/> }
-                 <div className=''>
-                  <label>STOP LIVESTREAM</label>
-                 </div>
+                {isClient && <VideoFrame  youtubeUrl={liveStreamUrl} handleVideoEnd={handleVideoEnd} liveiD={liveiD} deviceName = {credential.DeviceName.trim()}/>  }
+              
                  </div>
                   
             </div>
 
+
             <div>
     
       <Modal
-        open={false}
+        open={visible}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
         sx={{

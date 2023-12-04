@@ -5,7 +5,7 @@ import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
-import {collection, query, where, onSnapshot , orderBy, serverTimestamp, addDoc} from "firebase/firestore";
+import {collection, query, where, onSnapshot , orderBy, serverTimestamp, addDoc, deleteDoc} from "firebase/firestore";
 import { db } from '../firebase';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -144,9 +144,11 @@ const [scheduleOpens, setScheduleOpens] = useState(false);
 
 
 const HandleDelete = async () => {
+ 
   setClick(true)
   try {
     await deleteDoc(doc(db, "List_of_Pets", petId)).then(()=>{
+      setDelete(false);
       const user = localStorage.getItem("credentials");
       const datas = JSON.parse(user);
       const q = query(collection(db, "feeding_schedule"), where("Petname", "==", petname.trim()), where("DeviceName", "==", datas.DeviceName.trim()));
@@ -534,7 +536,7 @@ const [opens, setOpens] = React.useState(false);
             </div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80">{item.dt.Petname}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80">{item.dt.petType}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.Weight}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt?.Weight?.toFixed(2)}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.Age}</div>
             <div class={`w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80 ${item.dt.Gender === 'female' ? "text-pink-500": "text-blue-500"}`}>{item.dt.Gender}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">

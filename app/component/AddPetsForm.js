@@ -111,8 +111,8 @@ function AddPetsForm() {
     ]
 
     const slot = [
-      {val: 'slot_one', label: 'Slot 1' },
-      {val: 'slot_two', label: 'Slot 2' },
+      {val: 1, label: 'Slot 1' },
+      {val: 2, label: 'Slot 2' },
     ]
     const kindPet = [
       {val: 'dog', label: 'Dog' },
@@ -135,6 +135,8 @@ function AddPetsForm() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [openModal, setOpenModal] = React.useState(false);
     const [petId, setPetID] = React.useState('');
+
+
 
 
     const getAllDatas = () => {
@@ -232,28 +234,20 @@ function AddPetsForm() {
           image:choose || null,
           synced:false,
           petType:petKind,
-          audioBase64:Base64 || null,
-          petFeedingSlot:placeSlot,
+          RecordingFile:Base64 || null,
           requestWeight: false,
           requestRfid: false,
           Token:0,
+          Slot:parseInt(placeSlot),
           Created_at: Date.now(),
           Updated_at: Date.now(),
         });
   
         if(addListPet.id){
-        
-           addDoc(collection(db, "Task"), {
-            type:'refresh_pet',
-            deviceName:credential.DeviceName.trim(),
-            document_id:addListPet.id,
-            request:null,
-          }).then(()=>{
-            setClick2(false)
-            setOpenModal(true);
-            setPetID(addListPet.id);
-
-          });
+          setClick2(false)
+          setOpenModal(true);
+          setPetID(addListPet.id);
+           
 
         
         }
@@ -309,8 +303,8 @@ function AddPetsForm() {
           image:choose || null,
           synced:false,
           petType:petKind,
-          audioBase64:Base64,
-          petFeedingSlot:placeSlot,
+          RecordingFile:Base64,
+          Slot:parseInt(placeSlot),
           requestWeight: false,
           requestRfid: false,
           Token:0,

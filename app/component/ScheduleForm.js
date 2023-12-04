@@ -628,7 +628,7 @@ function ScheduleForm() {
         petId:h?.id, 
         Slot:h?.data.Slot,
         synced:false,
-        created_at: serverTimestamp(),
+     
       }
 
   
@@ -662,11 +662,7 @@ function ScheduleForm() {
             deviceName: credential.DeviceName,
             document_id: docRef.id,
             request:null,
-          }).then(async()=>{
-            await addDoc(collection(db, "PetFeedingSlot"), {
-              Slot_One: scheds1,
-            })
-          });
+          })
 
           setClick(false);
           Swal.fire({
@@ -688,6 +684,12 @@ function ScheduleForm() {
           updateDoc(docRef, {
             ScheduleTime:updatedSched,
          }).then(()=>{
+          addDoc(collection(db, "Task"),{
+            type:'Schedule',
+            deviceName: credential.DeviceName,
+            document_id: res.id,
+            request:null,
+          })
            setClick(false);
              Swal.fire({
                title: "Success?",
