@@ -1,7 +1,7 @@
 "use client"
 import Lottie from 'react-lottie-player'
-import dsdds from "../public/Image/dsdds.json"
-export default function Loading() {
+import dsdds from "../../public/Image/dsdds.json"
+export default function Pageload() {
     // Or a custom loading skeleton component
     return (
       <div className="w-full h-screen gap-2 bg-white flex  justify-center items-center max-md:flex-col max-md:p-3 ">  

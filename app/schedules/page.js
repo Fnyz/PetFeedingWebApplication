@@ -1,15 +1,21 @@
 
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Image from 'next/image'
 import SideBar from '../component/SideBar';
 import ScheduleForm from '../component/ScheduleForm';
 import { useSearchParams } from 'next/navigation';
-
+import Pageload from '../component/Pageload';
 
 
 function page() {
 
+    useEffect(()=>{
+        const user = localStorage.getItem("credentials");
+        if(!user){
+          window.location.href = "/login";
+        }    
+    },[])
     
 const searchParams = useSearchParams()
 

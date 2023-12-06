@@ -4,7 +4,7 @@ import Image from 'next/image'
 import SideBar from '../component/SideBar';
 import ReportsForm from '../component/ReportsForm';
 import Messages from '../component/Messages';
-
+import Pageload from '../component/Pageload';
 
 function page() {
   const [isclient, SetIsClient] = useState(false);
@@ -14,7 +14,9 @@ function page() {
   },[])
 
   if(!isclient){
-    return;
+    return (
+      <Pageload/>
+    )
   }
   return (
     <div className="h-screen relative  ">

@@ -22,7 +22,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
-
+import Pageload from '../component/Pageload';
  
 
 
@@ -43,8 +43,11 @@ function page() {
  
 
   useEffect(()=>{
-    const user = localStorage.getItem("credentials");
 
+    const user = localStorage.getItem("credentials");
+    if(!user){
+      window.location.href = "/login";
+    }
     
     if(user){
         const datas = JSON.parse(user);
@@ -53,13 +56,17 @@ function page() {
             setUserId(doc.id)
         });
     }
+
+
   },[])
   
  
 
   if(!isclient){
    
-    return;
+    return(
+      <Pageload/>
+    )
   }
 
 

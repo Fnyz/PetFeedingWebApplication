@@ -12,10 +12,19 @@ function page() {
   const [isclient, setIsclient] = useState(false);
 
   useEffect(()=>{
+    const user = localStorage.getItem("credentials");
+    if(!user){
+      window.location.href = "/login";
+    }
+    
     setIsclient(true)
   },[])
 
-  if(!isclient) return;
+  if(!isclient){
+    return (
+      <Pageload/>
+    )
+  };
  
   return (
     <div className=" h-screen relative  ">

@@ -16,8 +16,7 @@ import { createUserWithEmailAndPassword , sendEmailVerification} from 'firebase/
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2'
 import CircularProgress from '@mui/material/CircularProgress';
-
-
+import Pageload from '@/app/component/Pageload';
 
 function page() {
 
@@ -164,7 +163,9 @@ function page() {
   };
 
   if(!isclient){
-    return;
+    return(
+      <Pageload/>
+    )
   }
   return (
     <div className="h-screen relative w-full">

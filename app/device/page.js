@@ -32,6 +32,7 @@ import { BiSolidDevices } from "react-icons/bi";
 import { FaConnectdevelop } from "react-icons/fa6";
 import Swal from 'sweetalert2'
 import CircularProgress from '@mui/material/CircularProgress';
+import Pageload from '../component/Pageload';
 function page() {
 
     const router = useRouter();
@@ -59,9 +60,12 @@ function page() {
       setClient(true);
         const user = localStorage.getItem("user");
         if(user){
+          
             const data = JSON.parse(user);
             setUserData(data);
             setEmail(data.email)
+        }else{
+          window.location.href = "/login"
         }
        
     },[])
@@ -161,6 +165,8 @@ querySnapshot.forEach(async (docss) => {
 
     
 
+    
+
 
     
 
@@ -254,7 +260,7 @@ querySnapshot.forEach(async (docss) => {
         const devicesss = doc(db, "users", a.id);
         await updateDoc(devicesss, {
           isActive:true
-        }).then(()=> {
+        }).then(async()=> {
           setPassword('')
           setClick(false);
           Swal.fire({
@@ -295,7 +301,9 @@ querySnapshot.forEach(async (docss) => {
 
 
     if(!isClient){
-      return;
+      return (
+        <Pageload />
+      )
     }
 
  

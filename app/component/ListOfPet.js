@@ -5,7 +5,7 @@ import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
-import {collection, query, where, onSnapshot , orderBy, serverTimestamp} from "firebase/firestore";
+import {collection, query, where, onSnapshot , orderBy, serverTimestamp, addDoc} from "firebase/firestore";
 import { db } from '../firebase';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -357,6 +357,14 @@ const [opens, setOpens] = React.useState(false);
         requestWeight: true,
       }).then(()=>{
         setClick1(true)
+        const user = localStorage.getItem("credentials");
+      const datas = JSON.parse(user);
+        addDoc(collection(db, "Task"), {
+          type:'request_weight',
+          deviceName:datas.DeviceName.trim(),
+          document_id:petId,
+          request:null,
+        })
       })
 
   }

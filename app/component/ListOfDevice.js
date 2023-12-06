@@ -5,7 +5,7 @@ import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
-import {collection, query, where, onSnapshot , orderBy, serverTimestamp, getDoc} from "firebase/firestore";
+import {collection, query, where, onSnapshot , orderBy, serverTimestamp, getDoc, setDoc} from "firebase/firestore";
 import { db } from '../firebase';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -237,16 +237,18 @@ const suggestDeleting = () => {
         return;
     }
  
- 
-   
-   const res = lives.find(l => l.dt.DeviceName === device);
-   const a = doc(db, "Livestream", res.id);
-      await updateDoc(a, {
-       ApiKey:apiky,
-       ChannelID:channel,
-       jsonKeyFile: jsonFile,
-      }).then(()=>{
-        setJSONFile("")
+    const request = {
+      DeviceName:device,
+      isliveNow: false,
+      Youtube_Url:"",
+      ApiKey:apiky,
+      ChannelID:channel,
+      Streamkey:jsonFile,
+      ended:false
+    }
+
+    setDoc(doc(db, "Livestream", device),request).then(async()=>{
+      setJSONFile("")
         setApiKy("")
         setChannel("");
         setClick(false);
@@ -259,8 +261,19 @@ const suggestDeleting = () => {
           
          
         })
+    });  
+ 
+   
+  //  const res = lives.find(l => l.dt.DeviceName === device);
+  //  const a = doc(db, "Livestream", res.id);
+  //     await updateDoc(a, {
+  //      ApiKey:apiky,
+  //      ChannelID:channel,
+  //      jsonKeyFile: jsonFile,
+  //     }).then(()=>{
+        
       
-      });
+  //     });
 
 
   }
@@ -268,7 +281,7 @@ const suggestDeleting = () => {
   useEffect(()=>{
     getAllDeviceHere()
     liveStreamDetails();
-    setPosition("WITHDEVICE")
+    setPosition("ALLUSER")
   
   },[])
 
@@ -619,7 +632,7 @@ const suggestDeleting = () => {
 
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="age" className="text-right">
-              JSON FILE
+              STREAM KEY
             </Label>
             <Input id="age" placeholder="STREAM KEY"  className="col-span-3"  value={jsonFile} onChange={(e)=> setJSONFile(e.target.value)}   />
           </div>

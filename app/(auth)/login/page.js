@@ -28,7 +28,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2'
 import CircularProgress from '@mui/material/CircularProgress';
-
+import Pageload from '@/app/component/Pageload';
 
 const style = {
   position: 'absolute',
@@ -341,7 +341,11 @@ function page() {
     });
   }
 
-  if(!isclient) return;
+  if(!isclient){
+    return (
+      <Pageload/>
+    )
+  };
 
 
 

@@ -9,11 +9,12 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import { collection, addDoc, query, where, onSnapshot, getDocs,updateDoc, doc, deleteDoc} from 'firebase/firestore';
+import { collection, addDoc, query, where, onSnapshot, getDocs,updateDoc, doc, deleteDoc, setDoc} from 'firebase/firestore';
 import { db } from '../firebase';
 import CircularProgress from '@mui/material/CircularProgress';
 import { BiHome } from "react-icons/bi";
-
+import Pageload from '../component/Pageload';
+import { usePathname } from 'next/navigation'
 
 
 const style = {
@@ -39,13 +40,22 @@ function page() {
     const [message, setMessage] = React.useState('Hello, do you want to watch the live video?');
     const [credential, setCredential] = React.useState({});
     const [loading, setLoading] = React.useState(false);
-    const [liveStreamUrl, setLiveStreamUrl] = useState('');
+    const [liveStreamUrl, setLiveStreamUrl] = useState('https://www.youtube.com/watch?v=cRpx3zkRIX0');
     const [apiKey1, setApiKey] = useState('');
     const [channel, setChannel] = useState('');
     const [visible1, setVisible1] = useState(false);
     const [liveiD, setLiveId] = useState("");
     const [liveStreamList, setLiveStreamList] = useState([]);
+    const pathname = usePathname()
 
+
+    useEffect(()=>{
+      const user = localStorage.getItem("credentials");
+      if(!user){
+        window.location.href = "/login";
+      }
+     
+    },[])
 
     const handleVideoEnd = () => {
    
@@ -85,12 +95,10 @@ function page() {
  
 
     const handleRefetch =async () => {
-
-    
       try {
         // Step 1: Get live broadcasts associated with the channel
         const liveBroadcastsResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?key=${apiKey1}&channelId=${channel}&eventType=live&type=video&part=snippet,id`
+          `https://www.googleapis.com/youtube/v3/search?key=${apiKey1}&channelId=${channel}&eventType=live&type=video&part=snippet`
         );
     
         const liveBroadcastsData = await liveBroadcastsResponse.json();
@@ -141,11 +149,14 @@ function page() {
       setApiKey(apiKey);
       setChannel(channelId);
       setLiveId(id);
+
+      console.log(apiKey, channelId, id);
+
  
       try {
         // Step 1: Get live broadcasts associated with the channel
         const liveBroadcastsResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&eventType=live&type=video&part=snippet,id`
+          `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&eventType=live&type=video&part=snippet`
         );
     
         const liveBroadcastsData = await liveBroadcastsResponse.json();
@@ -222,16 +233,15 @@ function page() {
             const datas = JSON.parse(user);
             const q = query(collection(db, "Livestream"), where("DeviceName", "==", datas.DeviceName.trim()));
             onSnapshot(q, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
+            snapshot.docChanges().forEach(async(change) => {
               setLiveId(change.doc.id)
             
-            if (change.type == "modified" && change.doc.data().isliveNow === true) {
+            if (change.type === "modified" && change.doc.data().isliveNow === true) {
              
                 setMessage('Please wait for a minute, proccessing youtube url.');
                 fetchLiveStreams(change.doc.data().ApiKey,change.doc.data().ChannelID, change.doc.id);
-      
-   
             }
+           
            
          
            
@@ -281,28 +291,26 @@ function page() {
             Youtube_Url:"",
             ApiKey:"",
             ChannelID:"",
-            Streamkey:""
+            Streamkey:"",
+            ended:false
           }
           
           const user = localStorage.getItem("credentials")
           const datas = JSON.parse(user);
           const res = liveStreamList.find(e => e.data.DeviceName.trim() === datas.DeviceName.trim())
           if(!res){
-           
-            const docRef = await addDoc(collection(db, "Livestream"),request);
-            if(docRef.id) {
-              await addDoc(collection(db, "Task"),{
-                type:'Livestream',
-                deviceName:credential.DeviceName.trim(),
-                document_id: docRef.id,
-                request:'Start',
-              }).then(()=>{
-                setLoading(true);
-              })
-              console.log('Sending request to live video!');
-             return;
-            }
-        
+            setVisible(false);
+            setLoading(false)
+            Swal.fire({
+              title: "Warning?",
+              text: "Please contact administrator to set up your live video, thank you!",
+              icon: "success",
+              confirmButtonColor: "#FAB1A0",
+              confirmButtonText: "Okay",
+            }).then(()=>{
+              Swal.close();
+              window.location.href = "/reports"
+            })  
           return;
          }
 
@@ -312,13 +320,15 @@ function page() {
            ended:false,
         }).then(async()=>{
           console.log("Updated Database");
-          await addDoc(collection(db, "Task"),{
-            type:'Livestream',
-            deviceName:credential.DeviceName.trim(),
-            document_id: docRef.id,
-            request:'Start',
-          });
-          console.log('Sending request to live video!');
+         
+            await addDoc(collection(db, "Task"),{
+              type:'Livestream',
+              deviceName:credential.DeviceName.trim(),
+              document_id: res.id,
+              request:'Start',
+            });
+            console.log('Sending request to live video!');
+          
           setLoading(true);
          })
 
@@ -390,6 +400,13 @@ function page() {
     
       },[])
 
+      if(!isClient){
+   
+        return(
+          <Pageload/>
+        )
+      }
+
 
 
     return (
@@ -409,7 +426,9 @@ function page() {
 
                  <div className=' max-h-min mt- 2'>
                 {isClient && <VideoFrame  youtubeUrl={liveStreamUrl} handleVideoEnd={handleVideoEnd}/> }
-                 
+                 <div className=''>
+                  <label>STOP LIVESTREAM</label>
+                 </div>
                  </div>
                   
             </div>
@@ -417,7 +436,7 @@ function page() {
             <div>
     
       <Modal
-        open={visible}
+        open={false}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
         sx={{

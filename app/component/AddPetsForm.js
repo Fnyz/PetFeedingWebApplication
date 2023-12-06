@@ -46,6 +46,7 @@ import { styled } from '@mui/material/styles';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { BiX } from "react-icons/bi";
+import Pageload from '../component/Pageload';
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
   clipPath: 'inset(50%)',
@@ -71,6 +72,8 @@ const style = {
   zIndex:0,
   p: 2,
 };
+
+
 
 
 
@@ -234,8 +237,8 @@ function AddPetsForm() {
           requestWeight: false,
           requestRfid: false,
           Token:0,
-          Created_at: serverTimestamp(),
-          Updated_at: serverTimestamp(),
+          Created_at: Date.now(),
+          Updated_at: Date.now(),
         });
   
         if(addListPet.id){
@@ -311,8 +314,8 @@ function AddPetsForm() {
           requestWeight: false,
           requestRfid: false,
           Token:0,
-          Created_at: serverTimestamp(),
-          Updated_at: serverTimestamp(),
+          Created_at: Date.now(),
+          Updated_at: Date.now(),
         }).then(()=>{
           setGenders('');
           SetGoalWeight('');
@@ -321,6 +324,9 @@ function AddPetsForm() {
           SetWeight('');
           setPetName('');
           setBase64('')
+          setTimeout(() => {
+            window.location.href="/dashboard"
+          }, 3000);
         });
 
   
@@ -337,6 +343,12 @@ function AddPetsForm() {
         requestRfid: true,
       }).then(()=>{
         setClick1(true);
+        addDoc(collection(db, "Task"), {
+          type:'request_rfid',
+          deviceName:credential.DeviceName.trim(),
+          document_id:petId,
+          request:null,
+        })
       })
   
     }
@@ -347,7 +359,13 @@ function AddPetsForm() {
       await updateDoc(petWeightss, {
         requestWeight: true,
       }).then(()=>{
-        setClick(true)
+        setClick(true);
+        addDoc(collection(db, "Task"), {
+          type:'request_weight',
+          deviceName:credential.DeviceName.trim(),
+          document_id:petId,
+          request:null,
+        })
       })
   
     }

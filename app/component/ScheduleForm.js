@@ -269,19 +269,19 @@ function ScheduleForm() {
   const handleUpdateTimeHere = (days, parameters) => {
     setClick1(true);
     const a = petSchesData.find((d) => d.dts.Days === days && d.dts.DeviceName === credential.DeviceName)
-    const b = a?.dts.ScheduleTime.find((d) => d.time === currentTime);
-    const res  = listSched.find(d => d.data.Days === days.trim() && d.data.DeviceName === credential.DeviceName);
+    const b = a?.dts.ScheduleTime.find((d) => d.time === currentTime.split(" ")[0].trim);
+    const res1  = listSched.find(d => d.data.Days === days.trim() && d.data.DeviceName === credential.DeviceName );
 
  
-
-
+  
+   
 
 
 
     const combinedData = [];
 
     const filteredArray = slots?.filter((c) => {
-      return c.data.Slot === res?.data.Slot &&  c.data.Days === res.data.Days;
+      return c.data.Slot === res1?.data.Slot &&  c.data.Days === res1.data.Days;
     });
     filteredArray?.forEach((item) => {
  const petname = item.data?.Petname;
@@ -295,14 +295,21 @@ function ScheduleForm() {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
   };
-   const rs = combinedData.find(z => timeToMinutes(z.sched.time) === timeToMinutes(time3) || timeToMinutes(currentTime.split(' ')[0].trim()));
+
+
+
+  //  const rs = combinedData.find(z => timeToMinutes(z.sched.time) === timeToMinutes(currentTime.split(' ')[0].trim()));
   
-   if(rs){
+   const rs1 = combinedData.find(z => timeToMinutes(z.sched.time) === timeToMinutes(time3))
+ 
+
+
+   if(rs1){
   
     setClick1(false);
     Swal.fire({
       title: "Warning?",
-      text: rs?.petname === name ? `You already set this time on ${res?.data.Slot==1 ? "SLOT ONE": "SLOT TWO"}` : `${time3} is already set to ${rs?.petname} in ${res?.data.petSlot=="slot_one"? "SLOT_ONE.": "SLOT_TWO."} on the pet schedule, please choose other time.`,
+      text: rs1?.petname === name ? `You already set this time on ${res1?.data.Slot==1 ? "SLOT ONE": "SLOT TWO"}` : `${time3} is already set to ${rs?.petname} in ${res1?.data.petSlot=="slot_one"? "SLOT_ONE.": "SLOT_TWO."} on the pet schedule, please choose other time.`,
       icon: "error",
       confirmButtonColor: "#FAB1A0",
       confirmButtonText: "Close",
@@ -313,9 +320,11 @@ function ScheduleForm() {
 
    
     return;
-  }else{
-    if(b){
-      const res = a?.dts.ScheduleTime.filter(d => d.time !== currentTime);
+  }
+
+ 
+   console.log("Hey")
+      const res = a?.dts.ScheduleTime.filter(d => d.time !== currentTime.split(" ")[0].trim());
       const newArray =  [
        {cups: cups2,
         parameters:parameters,
@@ -342,8 +351,10 @@ function ScheduleForm() {
     });
  
  
-     }
-  }
+   
+  
+
+  
     
    
   
@@ -607,15 +618,15 @@ function ScheduleForm() {
 
     const handleSubmit = async () => {
       setClick(true);
-      const h = petList.find((a)=>a.data.DeviceName.toLowerCase().trim() === credential.DeviceName.trim() && a.data.Petname.trim().toLowerCase() === name.trim().toLowerCase())
-
+      const h = petList.find((a)=>a.data.DeviceName.trim() === credential.DeviceName.trim() && a.data.Petname.trim() === name.trim())
+    
       const petSchedule = {
         DeviceName: credential.DeviceName,
         Petname: name,
         Days: chooseDay,
         ScheduleTime: scheds1,
         petId:h?.id, 
-        Slot:h.data.Slot,
+        Slot:h?.data.Slot,
         synced:false,
         created_at: serverTimestamp(),
       }
