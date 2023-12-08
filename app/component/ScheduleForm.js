@@ -12,7 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import Stack from '@mui/material/Stack';
-import { BiXCircle, BiAddToQueue, BiShowAlt, BiTimeFive, BiX, BiEdit ,BiSolidTrash, BiSave, BiEditAlt    } from "react-icons/bi";
+import { BiXCircle, BiAddToQueue, BiShowAlt, BiTimeFive, BiX, BiEdit ,BiSolidTrash, BiSave, BiEditAlt, BiHome} from "react-icons/bi";
 import {
   Dialog,
   DialogContent,
@@ -27,8 +27,22 @@ import moment from 'moment';
 import { ScrollArea  } from "@/components/ui/scroll-area"
 import CircularProgress from '@mui/material/CircularProgress';
 import { useSearchParams } from 'next/navigation';
+import Modal from '@mui/material/Modal';
 
 
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+
+  width: 600,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  borderRadius:2,
+  zIndex:0,
+  p: 2,
+};
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -52,8 +66,8 @@ import { db } from '../firebase';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Swal from 'sweetalert2'
-
-
+import { TimerContext } from '../TimerContext';
+import { useContext } from 'react';
 
 
 const days = [
@@ -85,7 +99,7 @@ const days = [
 
 function ScheduleForm() {
 
-
+  const { count, isRunning, startTimer, stopTimer, resetTimer, modalTime, setModalTime } = useContext(TimerContext);
     const [petDatas, setPetDatas] = React.useState([]);
     const [credential, setCredential] = React.useState({});
     const [data, setDataName] = React.useState([])
@@ -111,7 +125,7 @@ function ScheduleForm() {
     const [showMe, setShowMe] = useState(false);
     const [petList, setPetList] = useState([]);
     const [slots, setSlots] = useState([]);
-
+ 
     
 
     const searchParams = useSearchParams()
@@ -133,7 +147,17 @@ function ScheduleForm() {
     });
   }
 
-  
+ 
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    const displayMinutes = String(minutes).padStart(2, '0');
+    const displaySeconds = String(remainingSeconds).padStart(2, '0');
+    return `${displayMinutes}:${displaySeconds}`;
+  };
+
+
   useEffect(()=>{
     
    
@@ -150,18 +174,6 @@ function ScheduleForm() {
 
      setSlots(forPetName);
 
-
-    // const filteredArray = forPetName.filter((a) => {
-    //   return a.data.petSlot === "slot_one";
-    // });
-    
-    // // Log the 'ScheduleTime' values for elements that meet the condition
-    // const combinedScheduleTime = filteredArray.reduce((result, item) => {
-    //   return result.concat(item.data.ScheduleTime);
-    // }, []);
-
-    // console.log(combinedScheduleTime);
-  
 
     
     
@@ -323,7 +335,7 @@ function ScheduleForm() {
   }
 
  
-   console.log("Hey")
+
       const res = a?.dts.ScheduleTime.filter(d => d.time !== currentTime.split(" ")[0].trim());
       const newArray =  [
        {cups: cups2,
@@ -618,6 +630,22 @@ function ScheduleForm() {
 
     const handleSubmit = async () => {
       setClick(true);
+      resetTimer();
+      
+      if(!name || !chooseDay || !scheds1.length) {
+        setClick(false);
+        Swal.fire({
+          title: "Warning?",
+          text: "Please input all fields.",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Yes, I will.",
+          
+        })
+      
+        return;
+      }
+  
       const h = petList.find((a)=>a.data.DeviceName.trim() === credential.DeviceName.trim() && a.data.Petname.trim() === name.trim())
     
       const petSchedule = {
@@ -632,19 +660,6 @@ function ScheduleForm() {
       }
 
   
-      if(!name || !chooseDay || !scheds1.length) {
-        setClick(false);
-        Swal.fire({
-          title: "Warning?",
-          text: "Please input all fields.",
-          icon: "warning",
-          confirmButtonColor: "#FAB1A0",
-          confirmButtonText: "Yes, I will.",
-          
-        })
-      
-        return;
-      }
   
       const res = listSched.find(d => d.data.Days.toLowerCase().trim() === chooseDay.toLowerCase().trim() && d.data.DeviceName.trim() === credential.DeviceName.trim() && d.data.Petname.toLowerCase().trim() === name.toLowerCase().trim());
 
@@ -665,14 +680,9 @@ function ScheduleForm() {
           })
 
           setClick(false);
-          Swal.fire({
-            title: "Success?",
-            text: "Schedule added successfully",
-            icon: "success",
-            confirmButtonColor: "#FAB1A0",
-            confirmButtonText: "Okay, Thank you.",
-            
-          })
+          setModalTime(true);
+          startTimer();
+          localStorage.setItem("timesave", true);
         
         }
         return;
@@ -690,15 +700,10 @@ function ScheduleForm() {
             document_id: res.id,
             request:null,
           })
+       
            setClick(false);
-             Swal.fire({
-               title: "Success?",
-               text: "Schedule added successfully",
-               icon: "success",
-               confirmButtonColor: "#FAB1A0",
-               confirmButtonText: "Okay, Thank you.",
-               
-             })
+           setModalTime(true);
+           startTimer();
            setSchedules([])
            setSchedules2([])
            setName('')
@@ -738,6 +743,8 @@ function ScheduleForm() {
     <CardHeader>
      <CardTitle>Scheduler!</CardTitle>
      <CardDescription>Fill out this form belows.</CardDescription>
+     
+    
     </CardHeader>
     <CardContent>
 
@@ -762,6 +769,7 @@ function ScheduleForm() {
    
       renderInput={(params, i) => <TextField {...params} key={i} label="Select Petname" />}
     />
+
          <div className="flex flex-col space-y-1.5">
            <Label className='mb-2 font-bold  opacity-50'>Days</Label>
           
@@ -780,6 +788,7 @@ function ScheduleForm() {
       paddingBottom:10,
     
     }}>
+
     <LocalizationProvider dateAdapter={AdapterDayjs}   >
       <DemoContainer components={['TimePicker']} sx={{
         width:'100%',
@@ -1048,6 +1057,7 @@ function ScheduleForm() {
     <CardFooter className="flex justify-between">
     {petnames ? (
       <Button variant="outline" onClick={()=>{
+
        window.location.href = "/dashboard"
        setName("");
       }}>Go back to Dashboard</Button>
@@ -1080,6 +1090,46 @@ function ScheduleForm() {
          }
         
       </div>
+
+      <Modal
+        open={modalTime}
+  
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        
+        <Box sx={style}>
+        <div className='w-full justify-center  flex flex-col px-5'>
+         <h1 className='font-bold'>Schedule is added successfully!</h1>
+         <span className='text-[12px] mb-3 opacity-40 font-bold'>Please wait for 10 mins before adding new schedule.</span>
+         <div className="text-center">
+
+      <div className="w-64 h-8 bg-gray-300 rounded-full overflow-hidden inline-block">
+        <div
+          className="h-full bg-[#FAB1A0]"
+          style={{ width: `${((600 - count) / 540) * 100}%` }}
+        ></div>
+      </div>
+      <div className="mt-2 font-bold">Remaining Time: {formatTime(count)}</div>
+    </div>
+  
+        
+          </div>
+       
+      <div className='flex gap-2 mt-4 '>
+          
+          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=> {
+          
+            localStorage.setItem("timesave", true);
+             window.location.href ="/dashboard"
+          }}>
+          <BiHome size={20} color='white' />
+           <span className='text-white font-bold'>Go to Dashboard</span>
+          </div>
+      </div>
+        </Box>
+      </Modal>
+
     </CardFooter>
     </Card>
   )

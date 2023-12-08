@@ -77,23 +77,6 @@ const style = {
 
 
 
-function generateFakePassword(length) {
-  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let password = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * charset.length);
-    password += charset[randomIndex];
-  }
-  return password;
-}
-
-
-function generateFakeWeight(min, max) {
-  const fakeWeight = (Math.random() * (max - min) + min).toFixed(2); // Generates a random weight between min and max with 2 decimal places
-  return `${fakeWeight} kg`;
-}
-
-
 
 
 function AddPetsForm() {
@@ -135,6 +118,36 @@ function AddPetsForm() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [openModal, setOpenModal] = React.useState(false);
     const [petId, setPetID] = React.useState('');
+    const [month, setMonth] = React.useState('');
+    const [open1, setOpen1] = React.useState(false);
+    const [week, setWeek] = React.useState('');
+    const [open2, setOpen2] = React.useState(false);
+
+    const handleChange = (event) => {
+      setMonth(event.target.value);
+    };
+  
+    const handleClose = () => {
+      setOpen1(false);
+    };
+  
+    const handleOpen = () => {
+      setOpen1(true);
+    };
+
+    
+    const handleChange1 = (event) => {
+      setWeek(event.target.value);
+    };
+  
+    const handleClose1 = () => {
+      setOpen2(false);
+    };
+  
+    const handleOpen1 = () => {
+      setOpen(true);
+    };
+  
 
 
 
@@ -732,6 +745,22 @@ PLEASE WAIT...
 
  </div>
 )}
+   <label>
+        Select Period:
+        <select >
+          <option value="months">Months</option>
+          <option value="weeks">Weeks</option>
+        </select>
+      </label>
+      <br />
+      <label>
+        Select Value:
+        <select id="selectValue">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
+            <option key={value} value={value}>{value}</option>
+          ))}
+        </select>
+      </label>
         
      <div className="flex flex-col mt-3 space-y-1.5">
 

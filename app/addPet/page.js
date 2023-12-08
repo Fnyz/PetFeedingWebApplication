@@ -5,7 +5,7 @@ import SideBar from '../component/SideBar';
 import AddPetsForm from '../component/AddPetsForm';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import Pageload from '../component/Pageload';
+
 
 function page() {
 
@@ -20,11 +20,7 @@ function page() {
     setIsclient(true)
   },[])
 
-  if(!isclient){
-    return (
-      <Pageload/>
-    )
-  };
+  if(!isclient) return;
  
   return (
     <div className=" h-screen relative  ">

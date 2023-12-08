@@ -32,7 +32,7 @@ import { BiSolidDevices } from "react-icons/bi";
 import { FaConnectdevelop } from "react-icons/fa6";
 import Swal from 'sweetalert2'
 import CircularProgress from '@mui/material/CircularProgress';
-import Pageload from '../component/Pageload';
+
 function page() {
 
     const router = useRouter();
@@ -300,11 +300,7 @@ querySnapshot.forEach(async (docss) => {
     }
 
 
-    if(!isClient){
-      return (
-        <Pageload />
-      )
-    }
+    if(!isClient)return;
 
  
     

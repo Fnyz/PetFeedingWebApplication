@@ -5,7 +5,7 @@ import Image from 'next/image'
 import SideBar from '../component/SideBar';
 import ScheduleForm from '../component/ScheduleForm';
 import { useSearchParams } from 'next/navigation';
-import Pageload from '../component/Pageload';
+
 
 
 function page() {

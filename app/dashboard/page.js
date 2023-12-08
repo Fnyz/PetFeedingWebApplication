@@ -22,7 +22,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
-import Pageload from '../component/Pageload';
+
  
 
 
@@ -62,12 +62,7 @@ function page() {
   
  
 
-  if(!isclient){
-   
-    return(
-      <Pageload/>
-    )
-  }
+  if(!isclient) return;
 
 
 

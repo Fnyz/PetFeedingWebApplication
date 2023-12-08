@@ -1,6 +1,6 @@
+import { TimerProvider } from './TimerContext'
 import './globals.css'
 import { Poppins } from 'next/font/google'
-
 
 
 const inter = Poppins({ subsets: ['latin'], weight:"400" })
@@ -13,9 +13,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <TimerProvider>
       <body className={inter.className}>
         {children}
         </body>
+      </TimerProvider>
+ 
     </html>
   )
 }
