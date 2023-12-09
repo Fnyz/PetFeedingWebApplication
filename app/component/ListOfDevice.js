@@ -721,7 +721,12 @@ const suggestDeleting = () => {
           
         <Typography variant="caption" className=' opacity-75'>Change the information below.</Typography>
           </div>
-          <BiX size={30} onClick={()=> setOpens1(false)} color='red' className='cursor-pointer'/>
+          <BiX size={30} onClick={()=> {
+            setApiKy("");
+            setChannel("");
+            setJSONFile("");
+             setOpens1(false)
+          }} color='red' className='cursor-pointer'/>
           
         </div>
         

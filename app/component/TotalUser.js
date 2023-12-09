@@ -14,7 +14,7 @@ function TotalUser({position}) {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(()=>{
-    const q = query(collection(db, "Notifications"), where("type", "==", "User"),  where("hasSeen", "==", false));
+    const q = query(collection(db, "notifications"), where("type", "==", "Admin"),  where("hasSeen", "==", false));
     onSnapshot(q, (querySnapshot) => {
    const dt = [];
    querySnapshot.forEach((doc) => {

@@ -68,6 +68,7 @@ function ReportsForm() {
           setUserImage(docSnap.data().image);
           setUserName(docSnap.data().username);
           setEmail(docSnap.data().email);
+
         } 
     
       }
@@ -199,6 +200,10 @@ function ReportsForm() {
 
      <form>
        <div className="grid w-full items-center gap-4">
+       <div className="flex flex-col space-y-1.5">
+           <Label htmlFor="email">Device Name</Label>
+           <Input id="petname" placeholder="Input email here" value={deviceName} disabled/>
+         </div>
          <div className="flex flex-col space-y-1.5">
            <Label htmlFor="email">Email Address</Label>
            <Input id="petname" placeholder="Input email here" value={email} onChange={(e)=>{

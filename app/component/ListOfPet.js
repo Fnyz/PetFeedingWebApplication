@@ -781,7 +781,7 @@ const [opens, setOpens] = React.useState(false);
             <Label htmlFor="age" className="text-right">
               Weight
             </Label>
-            <Input id="age" placeholder="15" className="col-span-3 " value={weight} disabled={!needUpdate}  onChange={(e) => setWeight(e.target.value)} />
+            <Input id="age" placeholder="15" className="col-span-3 " value={parseFloat(weight).toFixed(2)} disabled={!needUpdate}  onChange={(e) => setWeight(e.target.value)} />
           </div>
           {!needUpdate && (
           <div className="flex justify-center  items-center gap-1 ">

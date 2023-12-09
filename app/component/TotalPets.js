@@ -35,7 +35,7 @@ function TotalPets() {
         
         })
 
-        const b = query(collection(db, "notifications"), where("deviceName", "==", datas?.DeviceName?.trim()));
+        const b = query(collection(db, "notifications"), where("deviceName", "==", datas?.DeviceName?.trim()), where("type", "==", "User"));
         const data1 = [];
         onSnapshot(b, (querySnapshot) => {
           querySnapshot.forEach((docs) => {

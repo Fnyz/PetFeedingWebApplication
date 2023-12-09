@@ -243,16 +243,16 @@ function ListOfChats() {
            }).then(()=>{
              console.log('seen now!')
            });
-
-           const q = query(collection(db, "notifications"), where("type", "==", res.data.sender), where("hasSeen", "==", false));
+           console.log("hello")
+           const q = query(collection(db, "notifications"), where("type", "==", "Admin"), where("hasSeen", "==", false));
              onSnapshot(q, (querySnapshot) => {
             const dt = [];
             querySnapshot.forEach((doc) => {
                 dt.push({data:doc.data(), id:doc.id});
             });
-           
+           console.log(dt)
             dt.map(a => {
-             const docRef = doc(db, 'Notifications', a.id);
+             const docRef = doc(db, 'notifications', a.id);
            updateDoc(docRef, {
              hasSeen:true,
           }).then(()=>{
@@ -281,7 +281,7 @@ function ListOfChats() {
        />      
                </div>
                    <div className='flex flex-col justify-center'>
-                       <span className={`font-bold max-md:text-[15px] ${!res.data.hasSeen  && "text-[#FAB1A0]"}`}>{res.data.sender}</span>
+                       <span className={`font-bold max-md:text-[15px] ${!res.data.hasSeen  && "text-[#FAB1A0]"}`}>{res.data.deviceName}</span>
                        <span className={`text-sm opacity-60 max-md:text-[13px] ${!res.data.hasSeen  && "text-[#FAB1A0]"}`}>{res.data.message[res.data.message.length - 1]?.message || "You read the message."}</span>
                    </div>
                    </div>
@@ -319,7 +319,7 @@ function ListOfChats() {
 />      
         </div>
             <div className='flex flex-col justify-center'>
-                <span className='font-bold max-md:text-[15px]'>{userName}</span>
+                <span className='font-bold max-md:text-[15px]'>{deviceName}</span>
                 {active ? (
   <div className=' flex items-center gap-1 w-full'>
   <span className='text-sm opacity-60 max-md:text-[13px]'>Active now</span>
@@ -354,7 +354,7 @@ function ListOfChats() {
 />      
                 </div>
                 <div className='flex flex-col'>
-                    <label className='text-[10px] opacity-70'>{d.username} / {moment(d.messagedate.toDate()).calendar()}</label>
+                    <label className='text-[10px] opacity-70'>{deviceName} / {moment(d.messagedate.toDate()).calendar()}</label>
                     <label className='text-[13px] opacity-80 font-bold'>{d.message}</label>
                 </div>
                </div>

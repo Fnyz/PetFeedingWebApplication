@@ -49,7 +49,7 @@ setNotifications(data);
   return (
     <div className=' border w-1/5 rounded-md p-2 shadow-md z-50 max-md:w-full max-lg:w-full'>
         <di className='flex justify-between p-2'>
-            <h1 className='text-[12px] font-bold opacity-[0.7] text-red-500'>!Notifications</h1>
+            <h1 className='text-[12px] font-bold opacity-[0.7] '>!Notifications</h1>
         </di>
         <div>
                 <ScrollArea className='border p-1 rounded-sm w-full no-scrollbar h-[450px]'>
@@ -68,16 +68,16 @@ setNotifications(data);
                 :  notif.map((item, i) => {
                     return (
                         <div key={i} className='w-full border mb-2 h-[100px] border-l-4 border-[coral] rounded-sm shadow-md px-2 pb-1'>
-                            <div className='flex items-center p-1 gap-1 '>
-                            <MdErrorOutline color='blue' size={15} className='opacity-60' />
-                                <h1 className='text-[13px] font-bold  capitalize opacity-60'>{item.name} * </h1>
-                                <span className='text-[10px]'>{moment(item.dataNotif.toDate()).calendar()}</span>
+                            <div className='flex items-center p-1 gap-1 mt-2 '>
+                            <MdErrorOutline color='green' size={15} className='opacity-60' />
+                                <h1 className='text-[13px] font-bold  capitalize opacity-60'>{item.name.toUpperCase()} * </h1>
+                                <span className='text-[10px] opacity-60 text-red-500 font-bold'>{moment(item.dataNotif.toDate()).calendar()}</span>
                          
                             </div>
                           
                             <div className=' flex flex-col justify-center  px-1 gap-2 '>
                             <p className='text-[12px] opacity-60   font-bold'>Weight: {parseFloat(item?.weight).toFixed(2)} kg</p>
-                                <p className='text-[15px] leading-none font-bold  text-red-500 opacity-60 '>
+                                <p className='text-[15px] leading-none   opacity-60 '>
                                    {item.message}.
                                 </p>
                               

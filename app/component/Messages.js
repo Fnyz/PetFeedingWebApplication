@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import Divider from '@mui/material/Divider';
- 
+import moment from 'moment';
 
 import { useState, useEffect, useMemo } from 'react';
 import { collection, doc, updateDoc, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDoc} from "firebase/firestore"; 
@@ -298,7 +298,7 @@ function Messages() {
           />
                 </div>
                 <div className='flex flex-col'>
-                    <label className='text-[10px] opacity-70'>{data.username} / 10:20</label>
+                    <label className='text-[10px] opacity-70'>{dvName} / {moment(data.messagedate.toDate()).calendar()}</label>
                     <label className='text-[13px] opacity-80 font-bold'>{data.message}</label>
                 </div>
                </div>
