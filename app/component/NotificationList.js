@@ -5,7 +5,7 @@ import moment from 'moment';
 import { ScrollArea ,ScrollBar } from "@/components/ui/scroll-area"
 import { Avatar } from '@mui/material';
 import { db } from '../firebase';
-import { onSnapshot, query, where, collection } from 'firebase/firestore';
+import { onSnapshot, query, where, collection, orderBy, getDocs } from 'firebase/firestore';
 
 import {
   Card,
@@ -41,15 +41,34 @@ function NotificationList() {
 
     
     useEffect(()=>{
-        const q = query(collection(db, "Notifications"), where("type", "==", "User"));
-        onSnapshot(q, (querySnapshot) => {
-       const dt = [];
-       querySnapshot.forEach((doc) => {
-           dt.push({data:doc.data(), id:doc.id});
-       });
-       dt.sort((a,b) => b.data.createdAt - a.data.createdAt);
-       setNotifications(dt);
-       });
+   
+       const q = query(collection(db, "notifications"), where("type", "==", "Admin"), orderBy("createdAt", "desc"));
+       onSnapshot(q, (querySnapshot) => {
+      const data = [];
+      querySnapshot.forEach(async(docs) => {
+      
+        const q = query(collection(db, "users"), where("Devicename", "==", docs.data().deviceName));
+
+const querySnapshot = await getDocs(q);
+querySnapshot.forEach((doc1) => {
+  // doc.data() is never undefined for query doc snapshots
+   data.push({
+    hasSeen:docs.data().hasSeen,
+    deviceName: docs.data().deviceName,
+    image:doc1.data().image,
+    Messages:docs.data().Messages,
+    createdAt:docs.data().createdAt
+   })
+});
+setNotifications(data);
+
+      });
+
+    
+     
+
+     
+    });
 
      
     },[])
@@ -72,23 +91,23 @@ function NotificationList() {
         {notifications && notifications.map((d, i)=> {
             return (
                 
-        <div className={`flex  justify-between items-center border gap-9 mb-2 p-3 w-full rounded-md max-md:flex-col ${!d.data.hasSeen ? "border-[#FAB1A0]": " opacity-50"} `}>
+        <div className={`flex  justify-between items-center border gap-9 mb-2 p-3 w-full rounded-md max-md:flex-col ${!d.hasSeen ? "border-[#FAB1A0]": " opacity-50"} `}>
         <div className='flex justify-center items-center gap-4 '>
-        <div className={`border p-1 rounded-full ${!d.data.hasSeen && "border-[#FAB1A0]"}  relative `}>
+        <div className={`border p-1 rounded-full ${!d.hasSeen && "border-[#FAB1A0]"}  relative `}>
     <Avatar
 alt="Remy Sharp"
-src={d.data.image ||"/Image/anyaCuttie.jpg"}
+src={d.image ||"/Image/anyaCuttie.jpg"}
 sx={{ width: 50, height: 50 }}
 />      
     </div>
         <div className='flex flex-col justify-center'>
-            <span className={`font-bold max-md:text-[15px] ${!d.data.hasSeen && "text-[#FAB1A0]"}`}>{d.data.User}</span>
-            <span className={`text-sm opacity-60 max-md:text-[13px] ${!d.data.hasSeen && "text-[#FAB1A0]"}`}>{d.data.Messages} </span>
+            <span className={`font-bold max-md:text-[15px] ${!d.hasSeen && "text-[#FAB1A0]"}`}>{d.deviceName}</span>
+            <span className={`text-sm opacity-60 max-md:text-[13px] ${!d.hasSeen && "text-[#FAB1A0]"} w-[100%] `}>{d.Messages} </span>
         </div>
         </div>
      
-        <div className='text-[10px] opacity-70 max-md:self-end max-md:text-[12px] text-red-500 font-bold'>
-           {moment(d.data.createdAt.toDate()).calendar()}
+        <div className='text-[10px] opacity-70 max-md:self-end max-md:text-[12px] text-red-500 font-bold w-[100px]'>
+           {moment(d.createdAt.toDate()).calendar()}
         </div>
     </div>
 

@@ -11,6 +11,7 @@ function TotalPets() {
 
     
   const [listOfPet, setListOfPet] = useState([]);
+  const [noti, setNotify] = useState([]);
 
 
 
@@ -34,6 +35,16 @@ function TotalPets() {
         
         })
 
+        const b = query(collection(db, "notifications"), where("deviceName", "==", datas?.DeviceName?.trim()));
+        const data1 = [];
+        onSnapshot(b, (querySnapshot) => {
+          querySnapshot.forEach((docs) => {
+            data1.push({dt:docs.data(), id: docs.id});
+            setNotify(data1);
+        });
+        
+        })
+
     }
 
 
@@ -44,9 +55,9 @@ function TotalPets() {
     <div className='w-4/5  flex '>
     <div className='flex flex-row gap-2 '>
         <div className=' w-[170px] border h-20 rounded-md  shadow-sm'>
-            <h1 className='pl-2 text-[10px] pt-1'>Notifications</h1>
+            <h1 className='pl-2 text-[10px] pt-1'> {noti?.length > 0 ? "Notifications":"Notification"}</h1>
             <div className='flex'>
-                <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> 100</span>
+                <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {noti?.length}</span>
                 
                 <div className=' flex-1 relative h-[50px] opacity-[0.7]'>
                 <Image
@@ -60,7 +71,7 @@ function TotalPets() {
             </div>
         </div>
         <div className=' w-[170px] border h-20 rounded-md  shadow-sm'>
-        <h1 className='pl-2 text-[10px] pt-1'>Pets</h1>
+        <h1 className='pl-2 text-[10px] pt-1'>  {noti?.length > 0 ? "Pets":"Pet"}</h1>
             <div className='flex'>
                 <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {listOfPet.length}</span>
                 <div className=' flex-1 relative h-[50px]'>

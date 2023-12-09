@@ -131,14 +131,15 @@ function page() {
           <AlertDialogAction>
           <form
             onSubmit={(event) => {
+              localStorage.clear();
+              window.location.href = "/login"
               event.preventDefault();
               signOut(auth).then(() => {
                 const a = doc(db, "users", userId);
                 updateDoc(a, {
                 isActive:false
                }).then(()=> {
-               localStorage.clear();
-               window.location.href = "/login"
+            
             })
                 
               }).catch((error) => {

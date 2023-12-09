@@ -13,7 +13,7 @@ import { collection, addDoc, query, where, onSnapshot, getDocs,updateDoc, doc, d
 import { db } from '../firebase';
 import CircularProgress from '@mui/material/CircularProgress';
 import { BiHome } from "react-icons/bi";
-
+import Swal from 'sweetalert2'
 import { usePathname } from 'next/navigation'
 
 
@@ -47,6 +47,8 @@ function page() {
     const [liveiD, setLiveId] = useState("");
     const [liveStreamList, setLiveStreamList] = useState([]);
     const pathname = usePathname()
+
+    const [errorMess, setErrorMessages] = useState("Something went wrong, please click the bottom to request again?")
 
 
     useEffect(()=>{
@@ -83,7 +85,16 @@ function page() {
         Youtube_Url:'',
         isliveNow:false,
         ended:true,
-     }).then(()=>{
+     }).then(async()=>{
+      const user = localStorage.getItem("credentials")
+      const datas = JSON.parse(user);
+const q = query(collection(db, "Task"), where("deviceName", "==", datas.DeviceName.trim()), where("type","==","Livestream"));
+
+const querySnapshot = await getDocs(q);
+querySnapshot.forEach( async(docss) => {
+  await deleteDoc(doc(db, "Task", docss.id))
+});
+
        console.log("Updated Database");
        setLiveStreamUrl("");
        setVisible(false);
@@ -95,111 +106,135 @@ function page() {
  
 
     const handleRefetch =async () => {
-      try {
-        // Step 1: Get live broadcasts associated with the channel
-        const liveBroadcastsResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?key=${apiKey1}&channelId=${channel}&eventType=live&type=video&part=snippet`
-        );
-    
-        const liveBroadcastsData = await liveBroadcastsResponse.json();
-      
-        // Step 2: Extract video IDs from the live broadcasts
-        const videoIds = liveBroadcastsData.items.map((item) => item.id.videoId);
-        console.log(videoIds);
+      // Step 1: Get live broadcasts associated with the channel
+const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey1}&channelId=${channel}&eventType=live&type=video&part=snippet,id`;
 
-          if(!videoIds[0]){
-            setVisible1(true);
-            setVisible(false);
-            
-            return;
-          }
-         
-   
-          const url = `https://www.youtube.com/watch?v=${videoIds[0]}`;
-          
-          if(url){
-            const docRef = doc(db, 'Livestream', liveiD);
-            updateDoc(docRef, {
-              Youtube_Url:url,
-           }).then(()=>{
-             console.log("Updated Database");
-             setLiveStreamUrl(url);
-             setTimeout(() => {
-              setVisible1(false);
-              setVisible(false);
-             }, 6000);
-        
-           });
-          }
+fetch(apiUrl)
+  .then(response => {
+    if (!response.ok) {
+      const docRef = doc(db, 'Livestream', liveiD);
+        updateDoc(docRef, {
+          isliveNow: false,
 
-          
-
-        // You can use the video IDs for further processing
-      } catch (error) {
-        console.error('Error fetching live streams:', error);
-      }
-
-    }
-
+        }).then(() => {
+          setErrorMessages("Video quota exceeded!, Please contact adminstrator!");
+          setVisible1(true);
+          setLoading(false);
   
+        });
+      return;
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('API Response:', data); // Log the entire API response
+    const liveVideo = data?.items && data?.items[0]; // Check if items array exists
 
-
-
-    const fetchLiveStreams = async (apiKey, channelId, id) => {
-      setApiKey(apiKey);
-      setChannel(channelId);
-      setLiveId(id);
-
-
-
+    if (liveVideo) {
+      const videoId = liveVideo.id.videoId;
+      const url = `https://www.youtube.com/watch?v=${videoId}`;
  
-      try {
-        // Step 1: Get live broadcasts associated with the channel
-        const liveBroadcastsResponse = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&eventType=live&type=video&part=snippet`
-        );
-    
-        const liveBroadcastsData = await liveBroadcastsResponse.json();
-      
-        // Step 2: Extract video IDs from the live broadcasts
-        const videoIds = liveBroadcastsData.items.map((item) => item.id.videoId);
-
-          if(!videoIds[0]){
-            setVisible1(true);
-            setVisible(false);
-      
-            console.log(videoIds[0]);
-            return;
-          }
-         
-          const url = `https://www.youtube.com/watch?v=${videoIds[0]}`;
-          if(url){
-            const docRef = doc(db, 'Livestream', liveiD);
-            updateDoc(docRef, {
-              Youtube_Url:url,
-           }).then(()=>{
-             console.log("Updated Database");
-             setLiveStreamUrl(url);
-             setTimeout(() => {
-              setVisible1(false);
-              setVisible(false);
-             }, 6000);
-        
-           });
-          }
-      
-    
-        
-        
-        // You can use the video IDs for further processing
-      } catch (error) {
-        console.error('Error fetching live streams:', error);
+      if (!data?.items.length) {
+        setVisible1(true);
+        setVisible(false);
+        return;
       }
 
-     
+      if(data.items){
+        const docRef = doc(db, 'Livestream', liveiD);
+        updateDoc(docRef, {
+          Youtube_Url:url,
+       }).then(()=>{
+         console.log("Updated Database");
+         setLiveStreamUrl(url);
+         setTimeout(() => {
+          setVisible1(false);
+          setVisible(false);
+         }, 6000);
+    
+       });
+      }
+      // // You can use the video IDs for further processing
+    } else {
+      // Handle case when there are no live videos
+    }
+  })
+  .catch(error => {
+    setVisible(false);
+  });
 
 
-    };
+  }
+
+
+
+  const fetchLiveStreams = async (apiKey, channelId, id) => {
+
+    setApiKey(apiKey);
+    setChannel(channelId);
+    setLiveId(id);
+  
+    
+   
+    // Step 1: Get live broadcasts associated with the channel
+const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&eventType=live&type=video&part=snippet,id`;
+
+fetch(apiUrl)
+  .then(response => {
+    if (!response.ok) {
+      const docRef = doc(db, 'Livestream', id);
+        updateDoc(docRef, {
+          isliveNow: false,
+
+        }).then(() => {
+          setErrorMessages("Video quota exceeded!, Please contact adminstrator!");
+         setVisible1(true);
+         setLoading(false);
+        });
+      return;
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('API Response:', data); // Log the entire API response
+    const liveVideo = data?.items && data?.items[0]; // Check if items array exists
+
+    if (liveVideo) {
+      const videoId = liveVideo.id.videoId;
+      const url = `https://www.youtube.com/watch?v=${videoId}`;
+ 
+      if (!data?.items.length) {
+        setVisible1(true);
+        setVisible(false);
+    
+        return;
+      }
+
+      if(data.items){
+        const docRef = doc(db, 'Livestream', id);
+        updateDoc(docRef, {
+          Youtube_Url:url,
+       }).then(()=>{
+         console.log("Updated Database");
+         setLiveStreamUrl(url);
+         setTimeout(() => {
+          setVisible1(false);
+          setVisible(false);
+         }, 6000);
+    
+       });
+      }
+      // // You can use the video IDs for further processing
+    } else {
+      // Handle case when there are no live videos
+    }
+  })
+  .catch(error => {
+
+    setVisible(false);
+  });
+
+  };
 
 
 
@@ -240,6 +275,7 @@ function page() {
              
                 setMessage('Please wait for a minute, proccessing youtube url.');
                 fetchLiveStreams(change.doc.data().ApiKey,change.doc.data().ChannelID, change.doc.id);
+                
             }
            
            
@@ -285,15 +321,7 @@ function page() {
     const startVideoLive = async () => {
       setLoading(true);
         if(!liveStreamUrl){
-          const request = {
-            DeviceName:credential.DeviceName.trim(),
-            isliveNow: false,
-            Youtube_Url:"",
-            ApiKey:"",
-            ChannelID:"",
-            Streamkey:"",
-            ended:false
-          }
+        
           
           const user = localStorage.getItem("credentials")
           const datas = JSON.parse(user);
@@ -308,7 +336,6 @@ function page() {
               confirmButtonColor: "#FAB1A0",
               confirmButtonText: "Okay",
             }).then(()=>{
-              Swal.close();
               window.location.href = "/reports"
             })  
           return;
@@ -363,7 +390,7 @@ function page() {
          snapshot.docChanges().forEach((change) => {
           const {DeviceName,Youtube_Url, isliveNow, ApiKey, ChannelID, ended } = change.doc.data()
     
-          if(DeviceName == datas.DeviceName.trim() && !isliveNow && !Youtube_Url && !ended){
+          if(DeviceName == datas.DeviceName.trim() && !Youtube_Url && !isliveNow && !ended){
             setMessage('Please wait a minute to see the live?');
             setLoading(true);
             return;
@@ -491,7 +518,7 @@ function page() {
           <div className='grid gap-1 justify-center '>
          
           <Typography className='font-bold text-sm text-center'>
-          Something went wrong, please click the bottom to request again?
+         {errorMess}
           </Typography>
           <div className='grid gap-2'>
           <div className='w-full  p-1 grid justify-center items-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer' onClick={handleRefetch}>

@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { BiX } from "react-icons/bi";
+import { BiX, BiCalendar } from "react-icons/bi";
 import { petsData } from '../animeData';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
@@ -38,7 +38,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useMemo } from 'react';
-import { useSearchParams } from 'next/navigation'
+import dayjs from 'dayjs';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
  
 
 
@@ -111,7 +115,10 @@ function generateFakeWeight(min, max) {
 
 
 function ListOfPet() {
-
+  const [warn, setWarning] = React.useState(false);
+  const [goalMonthSet, setGoalMonths] = React.useState(false);
+  const [value, setValue] = React.useState();
+  const [value1, setValue1] = React.useState();
   const [listOfPet, setListOfPet] = useState([]);
   const [listOfPet1, setListOfPet1] = useState([]);
   const [visible, setVisible] = useState(false);
@@ -384,6 +391,8 @@ const [opens, setOpens] = React.useState(false);
       Updated_at: serverTimestamp(),
       Token:1,
       requestWeight:false,
+      StartGoalMonth: dayjs(value.$d).format('MM/DD/YYYY'),
+      EndGoalMonth:  dayjs(value1.$d).format('MM/DD/YYYY'),
     }
     try {
       const collects = doc(db, "List_of_Pets", petId);
@@ -526,7 +535,7 @@ const [opens, setOpens] = React.useState(false);
             <div class="w-1/4 h-20    flex justify-center items-center">
              <div className='relative w-[100px] h-[60px] rounded-sm overflow-hidden'>
              <Image
-                src={item.dt.image}
+                src={item?.dt?.image}
                fill
                alt='profile'
                objectFit='cover'
@@ -536,7 +545,7 @@ const [opens, setOpens] = React.useState(false);
             </div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80">{item.dt.Petname}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80">{item.dt.petType}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt?.Weight?.toFixed(2)}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center">{parseFloat(item?.dt?.Weight).toFixed(2)}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.Age}</div>
             <div class={`w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80 ${item.dt.Gender === 'female' ? "text-pink-500": "text-blue-500"}`}>{item.dt.Gender}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">
@@ -775,7 +784,7 @@ const [opens, setOpens] = React.useState(false);
             <Input id="age" placeholder="15" className="col-span-3 " value={weight} disabled={!needUpdate}  onChange={(e) => setWeight(e.target.value)} />
           </div>
           {!needUpdate && (
-          <div className="flex justify-center items-center gap-1 ">
+          <div className="flex justify-center  items-center gap-1 ">
             <span className='text-sm font-bold opacity-60'> See the pet schedule?</span>
             <span className='text-red-500 italic text-sm cursor-pointer font-bold hover:opacity-100 opacity-60 transition-all ease-in' onClick={()=>{
               setScheduleOpens(true);
@@ -806,7 +815,103 @@ const [opens, setOpens] = React.useState(false);
          }
          
           </div>
-          )}
+          )}       
+          
+    
+         {needUpdate && (
+
+<>
+<div className="grid  items-center gap-4  ">
+          
+          {goalMonthSet ? (
+ <div className='my-3'>
+  <div className=' flex justify-between items-center  '>
+  <label className='font-bold'>  Select Goal Month:</label>
+  <BiX size={25} color='red' className='opacity-60 hover:opacity-100 cursor-pointer' onClick={()=> setGoalMonths(false)}/>
+    </div>
+  <div className=' flex flex-col w-full'>
+  <LocalizationProvider dateAdapter={AdapterDayjs}>
+ <DemoContainer components={['DatePicker', 'DatePicker']}>
+  <div className='flex flex-col gap-2 w-full'>
+  <DatePicker label="Start Date:"   value={value1}
+     onChange={(newValue) => setValue1(newValue)}/>
+   <DatePicker
+     label="End Date"
+     value={value}
+     onChange={(newValue) => setValue(newValue)}
+   />
+  </div>
+  
+ </DemoContainer>
+</LocalizationProvider>
+  </div>
+
+ </div> 
+
+ ): (
+
+<div className='mt-3 gap-1 flex'>
+      <span className='font-bold opacity-60 text-sm'>Do you want to set the goal month?</span>
+      <span className='italic text-red-500 font-bold opacity-60 hover:opacity-100 cursor-pointer text-sm' onClick={()=> {
+       setWarning(true);
+      }}>Click here</span>
+    </div>
+
+ )}
+
+
+          </div>
+          
+ 
+<Modal
+        open={warn}
+  
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        
+        <Box sx={style}>
+          <div className='w-full flex justify-center items-center'>
+          <Image
+        width={150}
+        height={150}
+        src="/Image/KawaiDog.png"
+        contentFit="cover"
+       
+      />
+          </div>
+      
+        <div className='w-full justify-center  flex  px-5'>
+         <span className='text-[20px] font-bold mr-1 text-[#FAB1A0]'>|</span>
+         <span className='text-[15px]  opacity-40 font-bold'>Please make sure you have already consulted the professional before setting the goal for the month.</span>
+      
+          </div>
+          <div className='flex gap-2 mt-4 '>
+          
+          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=> {
+            setWarning(false);
+            setGoalMonths(true);  
+          }}>
+          <BiCalendar color='white' size={20} />
+           <span className='text-white font-bold'>Set Goal month now</span>
+          </div>
+      </div>
+       
+      <div className='flex gap-2 mt-3 '>
+          
+          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md  border-[#FAB1A0] opacity-50 hover:opacity-100  transition-all ease-in cursor-pointer" onClick={()=>{
+             setWarning(false);
+          }} >
+          <BiX size={24} color='#FAB1A0' />
+           <span className='text-[#FAB1A0] font-bold'>Close</span>
+          </div>
+      </div>
+        </Box>
+      </Modal>
+</>
+
+         )}
+       
           {needUpdate ?
           <div className='flex gap-2'>
           <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleUpdate}>
@@ -886,7 +991,7 @@ const [opens, setOpens] = React.useState(false);
       >
         <Box sx={style}>
         <Typography variant="h6" gutterBottom className='text-center'>
-        <span className='font-bold text-[coral]'>{petname}</span> list of schedules.
+        <span className='font-bold text-[coral] '>{petname}</span> list of schedules
       </Typography>
     
       <ScrollArea className="flex p-2 flex-col h-[245px]  border rounded-md space-y-1.5 ">

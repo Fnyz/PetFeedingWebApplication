@@ -23,7 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import moment from 'moment';
+import moment, { duration } from 'moment';
 import { ScrollArea  } from "@/components/ui/scroll-area"
 import CircularProgress from '@mui/material/CircularProgress';
 import { useSearchParams } from 'next/navigation';
@@ -99,7 +99,7 @@ const days = [
 
 function ScheduleForm() {
 
-  const { count, isRunning, startTimer, stopTimer, resetTimer, modalTime, setModalTime } = useContext(TimerContext);
+ 
     const [petDatas, setPetDatas] = React.useState([]);
     const [credential, setCredential] = React.useState({});
     const [data, setDataName] = React.useState([])
@@ -125,6 +125,7 @@ function ScheduleForm() {
     const [showMe, setShowMe] = useState(false);
     const [petList, setPetList] = useState([]);
     const [slots, setSlots] = useState([]);
+    const [petSlotss, setPetSlotss] = useState("");
  
     
 
@@ -148,14 +149,6 @@ function ScheduleForm() {
   }
 
  
-
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    const displayMinutes = String(minutes).padStart(2, '0');
-    const displaySeconds = String(remainingSeconds).padStart(2, '0');
-    return `${displayMinutes}:${displaySeconds}`;
-  };
 
 
   useEffect(()=>{
@@ -387,7 +380,7 @@ function ScheduleForm() {
           schedDatas.push({dts: doc.data(), id: doc.id});
       });
       setPetSchedDataset(schedDatas);
-     
+      
       
     });
     }
@@ -410,7 +403,7 @@ function ScheduleForm() {
         
         return;
       }
-
+      setPetSlotss(res.data.Slot)
       setShow(true);
       }
   
@@ -435,7 +428,12 @@ function ScheduleForm() {
   };
 
 
+
   const addFoodItem = () => {
+
+  
+    
+    
   
     if(!caps){
       setClick(false);
@@ -449,6 +447,7 @@ function ScheduleForm() {
           })
       return;
     }
+    
 
    
     const res  = listSched.find(d => d.data.Days === chooseDay && d.data.DeviceName === credential.DeviceName && d.data.Petname === name);
@@ -496,34 +495,48 @@ function ScheduleForm() {
                 })
             return;
           }
-      
-        
-      
-      
-          const existingItem = scheds1.find((item) => item.time === militaryTime.trim() && item.parameters === parameters);
-         
-          if (existingItem) {
-            
-            setClick(false);
-            Swal.fire({
-              title: "Warning?",
-              text: `Time ${existingItem.time} already exists, Remove the existing entry first.`,
-              icon: "warning",
-              confirmButtonColor: "#FAB1A0",
-              confirmButtonText: "Set time again",
-              
-            })
-           
-            return;
-          }
-      
-      
-          // Add the new food item and time to the list
-          setSchedules([...scheds1, { time: militaryTime.trim(), cups: caps, parameters}]);
-           
+
+          function convertTimeStringToDate(timeString) {
+            const currentDate = new Date();
           
-      
-      
+            const [hours, minutes] = timeString.split(':');
+          
+            currentDate.setHours(parseInt(hours, 10));
+            currentDate.setMinutes(parseInt(minutes, 10));
+          
+            return currentDate;
+          }
+
+        ;
+           
+          const isDisabled = scheds1.some(
+            (a) =>
+              Math.abs(convertTimeStringToDate(a.time) - convertTimeStringToDate(militaryTime)) <= 9 * 60 * 1000 // 10 minutes in milliseconds
+          );
+
+          if (!isDisabled) {
+
+            const existingItem = scheds1.find((item) => item.time === militaryTime.trim() && item.parameters === parameters);
+         
+            if (existingItem) {
+              
+              setClick(false);
+              Swal.fire({
+                title: "Warning?",
+                text: `Time ${existingItem.time} already exists, Remove the existing entry first.`,
+                icon: "warning",
+                confirmButtonColor: "#FAB1A0",
+                confirmButtonText: "Set time again",
+                
+              })
+             
+              return;
+            }
+            setSchedules([...scheds1, { time: militaryTime.trim(), cups: caps, parameters}]);
+       
+            
+         
+        
           const existingItem2 = scheds2.find((item) => item.time === militaryTime2.trim() && item.parameters2 === parameters2);
           if (existingItem2) {
             // You can handle the duplicate time case here
@@ -544,6 +557,26 @@ function ScheduleForm() {
           setSchedules2([...scheds2, { time: militaryTime2.trim(), cups: caps, parameters2 }]);
       
           setCaps('');  
+        
+  
+          
+           
+          } else {
+          
+            Swal.fire({
+              title: "Warning?",
+              text: `You can only set a new schedule time after at least 10 minutes.`,
+              icon: "warning",
+              confirmButtonColor: "#FAB1A0",
+              confirmButtonText: "Try again!",
+              
+            })
+          }
+      
+        
+      
+      
+        
         }
     
   
@@ -630,7 +663,7 @@ function ScheduleForm() {
 
     const handleSubmit = async () => {
       setClick(true);
-      resetTimer();
+  
       
       if(!name || !chooseDay || !scheds1.length) {
         setClick(false);
@@ -647,7 +680,7 @@ function ScheduleForm() {
       }
   
       const h = petList.find((a)=>a.data.DeviceName.trim() === credential.DeviceName.trim() && a.data.Petname.trim() === name.trim())
-    
+
       const petSchedule = {
         DeviceName: credential.DeviceName,
         Petname: name,
@@ -680,9 +713,15 @@ function ScheduleForm() {
           })
 
           setClick(false);
-          setModalTime(true);
-          startTimer();
-          localStorage.setItem("timesave", true);
+          Swal.fire({
+            title: "Success?",
+            text: "Pet schedule is set successfully!",
+            icon: "success",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Okay, Thank you",
+            
+          })
+      
         
         }
         return;
@@ -702,12 +741,18 @@ function ScheduleForm() {
           })
        
            setClick(false);
-           setModalTime(true);
-           startTimer();
            setSchedules([])
            setSchedules2([])
            setName('')
            setTwelveHourTime('')
+           Swal.fire({
+            title: "Success?",
+            text: "Schedule is set successfully!",
+            icon: "success",
+            confirmButtonColor: "#FAB1A0",
+            confirmButtonText: "Okay, Thank you",
+            
+          })
          });
          return;
      
@@ -802,11 +847,9 @@ function ScheduleForm() {
           viewRenderers={{
             hours: renderTimeViewClock,
             minutes: renderTimeViewClock,
-            seconds: renderTimeViewClock,
           }}
-          
+      
           ampm={true}  
-            
           onChange={(e) =>  setTwelveHourTime(`${e?.$H}:${e?.$m}` || "")}
           autoFocus={false}
         />
@@ -856,9 +899,9 @@ function ScheduleForm() {
 </DialogTrigger>
 <DialogContent className="sm:max-w-[425px]">
   <DialogHeader>
-    <DialogTitle>{name} set schedules.</DialogTitle>
+    <DialogTitle><span className='capitalize text-[coral]'>{name}</span> set schedules on <span className='text-red-500 font-bold'>{petSlotss === 1 ? "SLOT ONE" : "SLOT TWO"}.</span></DialogTitle>
     <DialogDescription>
-      {`You have ${petSchesData.length} schedules for ${name}.`}
+     See the list of schedules below.
     </DialogDescription>
   </DialogHeader>
   <ScrollArea className="flex p-2 flex-col h-[400px]  border rounded-md space-y-1.5 ">
@@ -1091,44 +1134,7 @@ function ScheduleForm() {
         
       </div>
 
-      <Modal
-        open={modalTime}
-  
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        
-        <Box sx={style}>
-        <div className='w-full justify-center  flex flex-col px-5'>
-         <h1 className='font-bold'>Schedule is added successfully!</h1>
-         <span className='text-[12px] mb-3 opacity-40 font-bold'>Please wait for 10 mins before adding new schedule.</span>
-         <div className="text-center">
-
-      <div className="w-64 h-8 bg-gray-300 rounded-full overflow-hidden inline-block">
-        <div
-          className="h-full bg-[#FAB1A0]"
-          style={{ width: `${((600 - count) / 540) * 100}%` }}
-        ></div>
-      </div>
-      <div className="mt-2 font-bold">Remaining Time: {formatTime(count)}</div>
-    </div>
-  
-        
-          </div>
-       
-      <div className='flex gap-2 mt-4 '>
-          
-          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=> {
-          
-            localStorage.setItem("timesave", true);
-             window.location.href ="/dashboard"
-          }}>
-          <BiHome size={20} color='white' />
-           <span className='text-white font-bold'>Go to Dashboard</span>
-          </div>
-      </div>
-        </Box>
-      </Modal>
+     
 
     </CardFooter>
     </Card>

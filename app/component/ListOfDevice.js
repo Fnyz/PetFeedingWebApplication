@@ -121,6 +121,8 @@ function ListOfDevice({setPositions}) {
   const [allDevice, setALLDevice] = React.useState([]);
   const [click, setClick] = useState(false);
   const [opens, setOpens] = React.useState(false);
+  const [opens1, setOpens1] = React.useState(false);
+  const [liveId, setLiveId] = React.useState("");
 
 
 
@@ -252,6 +254,7 @@ const suggestDeleting = () => {
         setApiKy("")
         setChannel("");
         setClick(false);
+        setVisible(false);
         Swal.fire({
           title: "Success?",
           text: "Youtube live key is sumitted successfully!",
@@ -263,17 +266,51 @@ const suggestDeleting = () => {
         })
     });  
  
-   
-  //  const res = lives.find(l => l.dt.DeviceName === device);
-  //  const a = doc(db, "Livestream", res.id);
-  //     await updateDoc(a, {
-  //      ApiKey:apiky,
-  //      ChannelID:channel,
-  //      jsonKeyFile: jsonFile,
-  //     }).then(()=>{
+
+
+  }
+
+
+  const handleUpdateKeys = async () => {
+
+    setClick(true);
+    if(!apiky || !channel || !jsonFile) {
+      setClick(false)
+      setVisible(false);
+      Swal.fire({
+        title: "Warning?",
+        text: "Please input all fields.",
+        icon: "warning",
+        confirmButtonColor: "#FAB1A0",
+        confirmButtonText: "Yes, I will.",
         
-      
-  //     });
+       
+      })
+        return;
+    }
+ 
+    const request = {
+      ApiKey:apiky,
+      ChannelID:channel,
+      Streamkey:jsonFile,
+    }
+
+    const devicesss = doc(db, "Livestream", liveId);
+            updateDoc(devicesss, request).then(()=> {
+              setClick(false)
+              setOpens1(false);
+              setVisible(false);
+              Swal.fire({
+                title: "Success?",
+                text: "Youtube information is updated successfully!",
+                icon: "success",
+                confirmButtonColor: "#FAB1A0",
+                confirmButtonText: "Okay, Thank you",
+              })
+
+              return;
+            })
+ 
 
 
   }
@@ -670,6 +707,78 @@ const suggestDeleting = () => {
         </div>
         </Box>
       </Modal>
+
+      <Modal
+        open={opens1}
+     
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+        <div className='flex justify-between '>
+          <div>
+          <Typography variant="h5" className='font-bold'>YOUTUBE API & KEY</Typography>
+          
+        <Typography variant="caption" className=' opacity-75'>Change the information below.</Typography>
+          </div>
+          <BiX size={30} onClick={()=> setOpens1(false)} color='red' className='cursor-pointer'/>
+          
+        </div>
+        
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="petname" className="text-right">
+              API KEY
+            </Label>
+            <Input id="petname" placeholder='API KEY HERE'  className="col-span-3" value={apiky} onChange={(e)=> setApiKy(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="age" className="text-right">
+              ID
+            </Label>
+            <Input id="age" placeholder="CHANNEL ID HERE"  className="col-span-3"  value={channel} onChange={(e)=> setChannel(e.target.value)}   />
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="age" className="text-right">
+              STREAM KEY
+            </Label>
+            <Input id="age" placeholder="STREAM KEY"  className="col-span-3"  value={jsonFile} onChange={(e)=> setJSONFile(e.target.value)}   />
+          </div>
+
+
+
+
+          <div className="grid grid-cols items-center gap-4">
+           <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2' onClick={()=> handleUpdateKeys()}>
+          
+            {click ?
+ <>
+  <CircularProgress color='inherit' size={15}/>
+  <span className='text-md font-bold'>
+   PLEASE WAIT
+  </span>
+ </>
+          : 
+            <>
+           
+           <BiSave size={20} color='white'/>
+            <span>
+              SAVE CHANGES
+            </span>
+            </>
+           
+         }
+         
+           </div>
+          </div>
+       
+          
+         
+          
+        </div>
+        </Box>
+      </Modal>
            </div>
            
      
@@ -763,10 +872,26 @@ const suggestDeleting = () => {
           </div>
           {device && (
  <div className="grid grid-cols items-center gap-4">
- <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] hover:bg-[coral] cursor-pointer gap-2' onClick={handleOpen2}>
+ 
+ <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white bg-[#FAB1A0] transition-all ease-in hover:bg-[coral] cursor-pointer gap-2' onClick={handleOpen2}>
   <BiLogoYoutube size={20} color='white'/>
   <span>
     ADD YOUTUBE KEY
+  </span>
+  
+ </div>
+
+ <div className='flex justify-center items-center border p-2 rounded-md font-bold text-white border-[#FAB1A0] opacity-60 hover:opacity-100 transition-all ease-in  cursor-pointer gap-2' onClick={()=>{
+    setOpens1(true);
+    const res  = lives.find(l => l.dt.DeviceName === device);
+    setApiKy(res.dt.ApiKey);
+    setChannel(res.dt.ChannelID),
+    setJSONFile(res.dt.Streamkey);
+    setLiveId(res.id)
+  }}>
+  <BiEditAlt size={20} color='#FAB1A0'/>
+  <span className='text-[#FAB1A0]'>
+    CHANGE YOUTUBE KEY
   </span>
   
  </div>

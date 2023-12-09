@@ -151,12 +151,11 @@ function Messages() {
 
 
         const notification = {
-          User:email,
+          deviceName:email,
           Messages: `${username} is send you a message please check it to chat.`,
-          image: images,
           createdAt: serverTimestamp(),
-          type:"User",
           hasSeen:false,
+          type:"Admin"
         }
     
     
@@ -180,7 +179,7 @@ function Messages() {
           addDoc(collection(db, "Messages"),message)
           .then((docs)=> {
             if(docs.id){
-              addDoc(collection(db, "Notifications"),notification)
+              addDoc(collection(db, "notifications"),notification)
               .then((docs)=> {
               if(docs.id){
               setMess('')
@@ -227,17 +226,17 @@ function Messages() {
     <DialogTrigger asChild >
     <Box sx={{ '& > :not(style)': { m: 1, position:'absolute', right:20, bottom:25} }}>
     <Fab aria-label="add" >
-    <Badge badgeContent={dMessage?.data?.adminSend === false ? dMessage.data.message.filter(a => a.type === "Admin" && a.unseen === false).length: 0} color="primary">
+    <Badge badgeContent={dMessage?.data?.adminSend === false ? dMessage?.data.message.filter(a => a.type === "Admin" && a.unseen === false).length: 0} color="primary">
     <BiMessageRoundedDots size={25} className='hover:text-red-600' onClick={()=>{
    
-       const b = dMessage.data.message.map(d =>{
+       const b = dMessage?.data.message.map(d =>{
         return d.unseen === false ? { ...d, unseen: true } : d
        })
    
   
    const dts = messageData.find((d) => d.data.deviceName === dvName && d.data.sender === email);
-      if(dts.data.adminSend === false){
-              const docRef = doc(db, 'Messages', dts.id);
+      if(dts?.data.adminSend === false){
+              const docRef = doc(db, 'Messages', dts?.id);
         updateDoc(docRef, {
         adminSend:true,
         message:b
@@ -261,8 +260,8 @@ function Messages() {
   
     </DialogTrigger>
     <DialogContent className="w-full" onClick={()=> {
-          const dts = messageData.find((d) => d.data.deviceName === dvName && d.data.sender === email);
-          const docRef = doc(db, 'Messages', dts.id);
+          const dts = messageData.find((d) => d?.data.deviceName === dvName && d?.data.sender === email);
+          const docRef = doc(db, 'Messages', dts?.id);
           updateDoc(docRef, {
             adminSend:true,
          }).then(()=>{

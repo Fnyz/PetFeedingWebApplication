@@ -244,7 +244,7 @@ function ListOfChats() {
              console.log('seen now!')
            });
 
-           const q = query(collection(db, "Notifications"), where("User", "==", res.data.sender), where("hasSeen", "==", false));
+           const q = query(collection(db, "notifications"), where("type", "==", res.data.sender), where("hasSeen", "==", false));
              onSnapshot(q, (querySnapshot) => {
             const dt = [];
             querySnapshot.forEach((doc) => {

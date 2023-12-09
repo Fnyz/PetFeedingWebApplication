@@ -18,7 +18,7 @@ function VideoFrame({youtubeUrl, handleVideoEnd, liveiD, deviceName}) {
     await addDoc(collection(db, "Task"),{
       type:'Livestream',
       deviceName:deviceName,
-      document_id: res.id,
+      document_id: liveiD,
       request:'Stop',
     });
    });

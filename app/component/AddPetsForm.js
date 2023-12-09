@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { BiRfid, BiPlus } from "react-icons/bi";
+import { BiRfid, BiPlus, BiCalendar } from "react-icons/bi";
 import { Avatar } from '@mui/material';
 import {
     Sheet,
@@ -45,8 +45,12 @@ import AudioRecorder from './AudioRecorder';
 import { styled } from '@mui/material/styles';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
-import { BiX } from "react-icons/bi";
-import Pageload from '../component/Pageload';
+import { BiX } from "react-icons/bi"; 
+import dayjs from 'dayjs';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
   clipPath: 'inset(50%)',
@@ -80,7 +84,10 @@ const style = {
 
 
 function AddPetsForm() {
-
+  const [warn, setWarning] = React.useState(false);
+  const [goalMonthSet, setGoalMonths] = React.useState(false);
+  const [value, setValue] = React.useState();
+  const [value1, setValue1] = React.useState();
     const [showVisibility, setShowVisibility] = React.useState(false);
     const [specified, setSpecifiedPet] = useState(false);
     const [dog, setDog] = React.useState([]);
@@ -118,39 +125,8 @@ function AddPetsForm() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [openModal, setOpenModal] = React.useState(false);
     const [petId, setPetID] = React.useState('');
-    const [month, setMonth] = React.useState('');
-    const [open1, setOpen1] = React.useState(false);
-    const [week, setWeek] = React.useState('');
-    const [open2, setOpen2] = React.useState(false);
-
-    const handleChange = (event) => {
-      setMonth(event.target.value);
-    };
+    const [show, setShow] = React.useState(false);
   
-    const handleClose = () => {
-      setOpen1(false);
-    };
-  
-    const handleOpen = () => {
-      setOpen1(true);
-    };
-
-    
-    const handleChange1 = (event) => {
-      setWeek(event.target.value);
-    };
-  
-    const handleClose1 = () => {
-      setOpen2(false);
-    };
-  
-    const handleOpen1 = () => {
-      setOpen(true);
-    };
-  
-
-
-
 
     const getAllDatas = () => {
       const q = query(collection(db, "List_of_Pets"));
@@ -171,6 +147,12 @@ function AddPetsForm() {
       getAllDatas();
       handleShowCredData();
     },[])
+
+
+  
+
+
+
 
 
     
@@ -251,6 +233,8 @@ function AddPetsForm() {
           requestWeight: false,
           requestRfid: false,
           Token:0,
+          StartGoalMonth: dayjs(value.$d).format('MM/DD/YYYY'),
+          EndGoalMonth:  dayjs(value1.$d).format('MM/DD/YYYY'),
           Slot:parseInt(placeSlot),
           Created_at: Date.now(),
           Updated_at: Date.now(),
@@ -380,6 +364,7 @@ function AddPetsForm() {
     const handlePlayAudio = () => {
       audioRecord.play()
       setIsPlaying(true);
+      audioRecord.addEventListener('ended', handleAudioEnded);
     }
 
     const handlePauseAudio = () => {
@@ -387,6 +372,11 @@ function AddPetsForm() {
       setIsPlaying(false);
     }
 
+    const handleAudioEnded = () => {
+      setIsPlaying(false);
+      setShow(false);
+  
+    };
 
 
  
@@ -636,21 +626,29 @@ console.log(petKind);
         <div className='w-full justify-center  flex flex-col px-5'>
          <h1 className='font-bold'>Add Record for Pet</h1>
          <span className='text-[12px] mb-3 opacity-40 font-bold'>Click recording to start record your voice.</span>
-         <AudioRecorder isAddPet={true} setBase64={setBase64} setAudioRecord={setAudioRecord}/>
-         <span className='mt-5 text-[12px] opacity-40 font-bold mb-2'>Click here to listen your recorded file</span>
-         <div className='w-full flex justify-center items-center  border p-2 rounded-md shadow-sm cursor-pointer hover:shadow-md' onClick={!isPlaying ? handlePlayAudio : handlePauseAudio}>
-          {isPlaying ? <>
+         <AudioRecorder isAddPet={true} setBase64={setBase64} setAudioRecord={setAudioRecord} setShow={setShow}/>
+       
+         {show && (
+          <>
+            <span className='mt-5 text-[12px] opacity-40 font-bold mb-2'>Click here to listen your recorded file</span>
+            <div className='w-full flex justify-center items-center  border p-2 rounded-md shadow-sm cursor-pointer hover:shadow-md' onClick={!isPlaying ? handlePlayAudio : handlePauseAudio}>
+     {isPlaying ? <>
 
 <BiPause color='#FAB1A0' size={24}/>
-     <span className='text-[#FAB1A0] font-bold'>Pause</span>
-   
-   </>: <>
+<span className='text-[#FAB1A0] font-bold'>Pause</span>
 
-       <BiPlay color='#FAB1A0' size={24}/>
-            <span className='text-[#FAB1A0] font-bold'>Play</span>
-          
-          </>}
-           </div>
+</>: <>
+
+  <BiPlay color='#FAB1A0' size={24}/>
+       <span className='text-[#FAB1A0] font-bold'>Play</span>
+     
+     </>}
+      </div>
+          </>
+    
+
+         )}
+    
           </div>
        
       <div className='flex gap-2 mt-4 '>
@@ -682,8 +680,8 @@ console.log(petKind);
          <div className='flex justify-between  items-center  gap-2'>
     
          <div className="flex flex-col w-full space-y-1.5 ">
-           <Label htmlFor="rfid">RFID</Label>
-           <Input id="rfid" placeholder="Generate RFID here"   value={rfid} onChange={(e)=>{
+           <Label htmlFor="rfid" className="font-bold">RFID</Label>
+           <Input id="rfid" placeholder="Generate RFID here" disabled   value={rfid} onChange={(e)=>{
               SetRfid(e.target.value);
             }}/>
          </div>
@@ -745,30 +743,50 @@ PLEASE WAIT...
 
  </div>
 )}
-   <label>
-        Select Period:
-        <select >
-          <option value="months">Months</option>
-          <option value="weeks">Weeks</option>
-        </select>
-      </label>
-      <br />
-      <label>
-        Select Value:
-        <select id="selectValue">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((value) => (
-            <option key={value} value={value}>{value}</option>
-          ))}
-        </select>
-      </label>
+
+  
+   
         
      <div className="flex flex-col mt-3 space-y-1.5">
 
-<Label htmlFor="goalWeight">Goal Weight</Label>
+<Label htmlFor="goalWeight" className="mb-1 font-bold">Goal Weight</Label>
 <Input id="goalWeight" placeholder="Input goal weight of pet"  value={goalWeight} onChange={(e)=>{
    SetGoalWeight(e.target.value);
  }} />
+ 
 </div>
+
+{goalMonthSet ? (
+ <div className='my-3'>
+  <div className='w-full flex justify-between items-center'>
+  <label className='font-bold'>  Select Goal Month:</label>
+  <BiX size={25} color='red' className='opacity-60 hover:opacity-100 cursor-pointer' onClick={()=> setGoalMonths(false)}/>
+    </div>
+ <LocalizationProvider dateAdapter={AdapterDayjs}>
+ <DemoContainer components={['DatePicker', 'DatePicker']}>
+   <DatePicker label="Start Date:"   value={value1}
+     onChange={(newValue) => setValue1(newValue)}/>
+   <DatePicker
+     label="End Date"
+     value={value}
+     onChange={(newValue) => setValue(newValue)}
+   />
+ </DemoContainer>
+</LocalizationProvider>
+ </div> 
+
+ ): (
+
+<div className='mt-3 gap-1 flex'>
+      <span className='font-bold opacity-60'>Do you want to set the goal month?</span>
+      <span className='italic text-red-500 font-bold opacity-60 hover:opacity-100 cursor-pointer' onClick={()=> {
+       setWarning(true);
+      }}>Click here.</span>
+    </div>
+
+ )}
+ 
+
           </div>
           <div className='flex gap-2 mt-4 '>
           
@@ -790,6 +808,52 @@ PLEASE WAIT...
             setPetName('');
             setBase64('')
             setOpenModal(false)
+          }} >
+          <BiX size={24} color='#FAB1A0' />
+           <span className='text-[#FAB1A0] font-bold'>Close</span>
+          </div>
+      </div>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={warn}
+  
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        
+        <Box sx={style}>
+          <div className='w-full flex justify-center items-center'>
+          <Image
+        width={170}
+        height={170}
+        src="/Image/KawaiDog.png"
+        contentFit="cover"
+       
+      />
+          </div>
+      
+        <div className='w-full justify-center  flex  px-5'>
+         <span className='text-[20px] font-bold mr-1 text-[#FAB1A0]'>|</span>
+         <span className='text-[20px] mb-3 opacity-40 font-bold'>Please make sure you have already consulted the professional before setting the goal for the month.</span>
+      
+          </div>
+          <div className='flex gap-2 mt-4 '>
+          
+          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=> {
+            setWarning(false);
+            setGoalMonths(true);  
+          }}>
+          <BiCalendar color='white' size={20} />
+           <span className='text-white font-bold'>Set Goal month now</span>
+          </div>
+      </div>
+       
+      <div className='flex gap-2 mt-3 '>
+          
+          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md  border-[#FAB1A0] opacity-50 hover:opacity-100  transition-all ease-in cursor-pointer" onClick={()=>{
+             setWarning(false);
           }} >
           <BiX size={24} color='#FAB1A0' />
            <span className='text-[#FAB1A0] font-bold'>Close</span>

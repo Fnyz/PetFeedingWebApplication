@@ -50,6 +50,7 @@ export default class AudioRecorder extends Component {
       };
 
       stop = () => {
+     
         Mp3Recorder
           .stop()
           .getMp3()
@@ -72,6 +73,7 @@ export default class AudioRecorder extends Component {
               const player = new Audio(URL.createObjectURL(file));
               this.props.setAudioRecord(player);
               this.props.setBase64(Base64);
+              this.props.setShow(true);
               return;
              }
              if(Base64){
@@ -114,12 +116,12 @@ export default class AudioRecorder extends Component {
   render() {
     return (
       <div className='flex gap-2 justify-center items-center max-md:flex-col w-full'>
-        <div onClick={this.start} disabled={this.state.isRecording} className={`rounded-md transition-all ease-in ${this.state.isRecording ? "opacity-50 ": "opacity-100 cursor-pointer hover:shadow-md flex items-center justify-center"} hover:bg-[coral]  w-[100%] p-2 gap-2 cursor-pointer bg-[#FAB1A0]`}>
+        <div onClick={this.start} disabled={this.state.isRecording} className={`rounded-md flex justify-center items-center transition-all ease-in ${this.state.isRecording ? "opacity-50 ": "opacity-100 cursor-pointer hover:shadow-md flex items-center justify-center"} hover:bg-[coral]  w-[100%] p-2 gap-2 cursor-pointer bg-[#FAB1A0]`}>
             {this.state.click ? <BiPause size={25} color='white'/> : <BiMicrophone size={20} color='white'/>}
-            <span className='text-white font-bold'>{this.state.click ? 'RECORDING....': 'START RECORDING'}</span>
+            <span className='text-white font-bold'>{this.state.click ? 'RECORDING..': 'START RECORDING'}</span>
         </div>
       
-        <div onClick={this.stop} disabled={!this.state.isRecording} className={`  rounded-md transition-all ease-in  flex border justify-center items-center w-[100%] p-2 gap-2  border-[#FAB1A0] ${!this.state.isRecording ? "opacity-50 pointer-events-none": "opacity-100 cursor-pointer hover:shadow-md"}`}>
+        <div onClick={this.stop} disabled={!this.state.isRecording} className={` rounded-md transition-all ease-in  flex border justify-center items-center w-[100%] p-2 gap-2  border-[#FAB1A0] ${!this.state.isRecording ? "opacity-50 pointer-events-none": "opacity-100 cursor-pointer hover:shadow-md"}`}>
             <BiStop size={25} color='#FAB1A0'/>
             <span className='text-[#FAB1A0] font-bold'>STOP RECORDING</span>
         </div>
