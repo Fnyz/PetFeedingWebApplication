@@ -127,6 +127,7 @@ function ListOfPet() {
   const [gender, setGender] = React.useState('');
   const [age, setAge] = React.useState('');
   const [petId, setPetId] = React.useState('');
+  const [canShow, setCanShow] = React.useState(false);
   const [position, setPosition] = React.useState("")
   const [needUpdate, setNeedUpdate] = React.useState(false);
   const [gendered, setGenders] = React.useState([{
@@ -139,6 +140,11 @@ function ListOfPet() {
    }
 
 ]);
+const [placeSlot, setPetSlot] = React.useState('');
+const slot = [
+  {val: 1, label: 'Slot 1' },
+  {val: 2, label: 'Slot 2' },
+]
 const [petname, setPetname] = React.useState('');
 const [weight, setWeight] = React.useState('');
 const [goalWeight, setGoalWeight] = React.useState('');
@@ -172,6 +178,16 @@ const HandleDelete = async () => {
     
   }
 }
+
+const convertToMilitaryTime3 = (time) => {
+  const date = new Date(`2000-01-01 ${time}`);
+  const militaryTimeValue = date.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit' });
+  const ampm = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).slice(-2);
+  return militaryTimeValue.split(' ')[0].trim();
+
+
+};  
+
 
 useEffect(()=> {
       
@@ -211,7 +227,12 @@ const suggestDeleting = () => {
 
 
 const handleNeedupdate = () => {
+
+ 
   setNeedUpdate((prev) => !prev);
+  setCanShow(false);
+  setValue("Invalid Date");
+  setValue1("Invalid Date");
 }
 
 
@@ -232,6 +253,9 @@ const [opens, setOpens] = React.useState(false);
 
   const handleChange = (event) => {
     setGender(event.target.value);
+  };
+  const handleChange2 = (event) => {
+    setPetSlot(event.target.value);
   };
 
   const [choose, setChoose] = React.useState('');
@@ -328,6 +352,14 @@ const [opens, setOpens] = React.useState(false);
       setGoalWeight(res.dt.GoalWeight);
       setChoose(res.dt.image)
       setWeight(res.dt.Weight);
+      setPetSlot(res.dt.Slot);
+
+      if(res.dt.StartGoalMonth === "Invalid Date"){
+        setCanShow(false);
+        return;
+      }
+      setValue1(res.dt.StartGoalMonth);
+      setValue(res.dt.EndGoalMonth)
    
 
         return;
@@ -390,9 +422,10 @@ const [opens, setOpens] = React.useState(false);
       image:choose,
       Updated_at: serverTimestamp(),
       Token:1,
+      Slot:placeSlot,
       requestWeight:false,
-      StartGoalMonth: dayjs(value.$d).format('MM/DD/YYYY'),
-      EndGoalMonth:  dayjs(value1.$d).format('MM/DD/YYYY'),
+      StartGoalMonth: dayjs(value?.$d || null).format('MM/DD/YYYY'),
+      EndGoalMonth:  dayjs(value1?.$d || null).format('MM/DD/YYYY'),
     }
     try {
       const collects = doc(db, "List_of_Pets", petId);
@@ -441,7 +474,7 @@ const [opens, setOpens] = React.useState(false);
   return (
     <ScrollArea className='z-50 border w-4/5 h-[500px] max-md:w-full max-lg:w-full rounded-md overflow-hidden pt-5 shadow-sm'>
        <ScrollBar orientation="horizontal" />
-      <div className='flex justify-between items-center  gap-5 px-10'>
+      <div className='flex justify-between items-center max-md:flex-col  gap-5 px-10'>
       <div className='flex justify-center items-center  gap-5'>
       <Image
            src="/Image/animals.png"
@@ -463,8 +496,8 @@ const [opens, setOpens] = React.useState(false);
       <div className='flex gap-2 justify-center items-center'>
       <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className=' cursor-pointer border px-4 py-2 rounded-md'>
-          <span className='font-bold opacity-70'>FILTER BY TYPE</span>
+        <div className=' cursor-pointer border px-4 py-2 rounded-md max-md:w-[50%] text-center'>
+          <span className='font-bold opacity-70 '>FILTER BY TYPE</span>
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
@@ -516,16 +549,17 @@ const [opens, setOpens] = React.useState(false);
 
        
        <div class="flex mt-5">
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">IMAGE</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">PETNAME</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">PETTYPE</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">WEIGHT</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">AGE</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">GENDER</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] ">OPTIONS</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">IMAGE</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">PETNAME</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">PETTYPE</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">WEIGHT</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">AGE</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">GENDER</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">SLOT</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] max-md:text-sm">OPTIONS</div>
       </div>
 
-      <div className=' h-[350px] overflow-auto  p-2 '>
+      <div className=' h-[350px] overflow-auto  p-1 '>
         
         {listOfPet.length > 0 ? listOfPet.map((item, index) => {
           return (
@@ -533,21 +567,23 @@ const [opens, setOpens] = React.useState(false);
 
        
             <div class="w-1/4 h-20    flex justify-center items-center">
-             <div className='relative w-[100px] h-[60px] rounded-sm overflow-hidden'>
+             <div className='relative w-[100px] h-[60px] rounded-sm overflow-hidden max-md:w-[50px] max-md:h-[40px]'>
              <Image
                 src={item?.dt?.image}
                fill
                alt='profile'
                objectFit='cover'
+           
      
              />
              </div>
             </div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80">{item.dt.Petname}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80 capitalize">{item.dt.Petname}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80">{item.dt.petType}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center">{parseFloat(item?.dt?.Weight).toFixed(2)}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center">{item.dt.Age}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80">{parseFloat(item?.dt?.Weight).toFixed(2)}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80">{item.dt.Age}</div>
             <div class={`w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80 ${item.dt.Gender === 'female' ? "text-pink-500": "text-blue-500"}`}>{item.dt.Gender}</div>
+            <div class={`w-1/4 h-20 text-center  flex justify-center items-center font-bold ${parseInt(item.dt.Slot) === 1 ? "text-pink-500": "text-blue-500"}`}>{parseInt(item.dt.Slot) === 1 ? "One": "Two"}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">
 
             <div>
@@ -734,14 +770,42 @@ const [opens, setOpens] = React.useState(false);
             </Label>
             <Input id="petname" placeholder='Kussy' value={petname} className="col-span-3" disabled={!needUpdate} onChange={(e) => setPetname(e.target.value)}/>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="age" className="text-right">
               Age
             </Label>
             <Input id="age" placeholder="15" value={age} className="col-span-3" disabled={!needUpdate} onChange={(e) => setAge(e.target.value)} />
           </div>
-        
+          <div className="grid grid-cols-4 items-center gap-4">
+           <Label htmlFor="gender">PetFeeding Slot</Label>
+     
+          <Box sx={{
+            width:270,
+            display: 'flex',
+            gap:1,
+          }} >
+      <FormControl fullWidth >
+        <Select
+          value={placeSlot}
+          onChange={handleChange2}
+          className='h-[38px]  opacity-70'
+          disabled={!needUpdate}
+        > 
+         {slot.map((d,i)=> {
+          return (
+              <MenuItem value={d.val} key={i}>{d.label}</MenuItem>
+          )
+         })}
+     
+        </Select>
+      </FormControl>
+  
+    </Box>
+ 
+         </div>
            <div className="grid grid-cols-4 items-center gap-4">
+          
           <Label htmlFor="petname" className="text-right">
               Gender
             </Label>
@@ -777,12 +841,23 @@ const [opens, setOpens] = React.useState(false);
             </Label>
             <Input id="age" placeholder="15" value={goalWeight} className="col-span-3" disabled={!needUpdate} onChange={(e) => setGoalWeight(e.target.value)} />
           </div>
+       
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="age" className="text-right">
               Weight
             </Label>
             <Input id="age" placeholder="15" className="col-span-3 " value={parseFloat(weight).toFixed(2)} disabled={!needUpdate}  onChange={(e) => setWeight(e.target.value)} />
           </div>
+          {canShow && (
+ <div className="flex  items-center gap-2">
+ <Label htmlFor="age" className="text-right">
+ Goal Month:
+ </Label>
+ <Input id="age" placeholder="15" value={ value === "Invalid Date" ? "Select Start Date" : dayjs(value1).format('MM/DD/YYYY') } className="col-span-3"  disabled  />
+ <Input id="age" placeholder="15" value={value1 === "Invalid Date" ? "Select End Date" : dayjs(value).format('MM/DD/YYYY') } className="col-span-3"  disabled  />
+</div>
+          )}
+         
           {!needUpdate && (
           <div className="flex justify-center  items-center gap-1 ">
             <span className='text-sm font-bold opacity-60'> See the pet schedule?</span>
@@ -794,7 +869,7 @@ const [opens, setOpens] = React.useState(false);
 
           )}
        
-          {needUpdate && (
+          {!goalMonthSet && needUpdate && (
 
 <div className="flex items-center gap-2 border p-2 justify-center rounded-md border-[#FAB1A0] cursor-pointer hover:border-[coral] transition-all ease-in" onClick={handleFakeWeight}>
         
@@ -827,7 +902,15 @@ const [opens, setOpens] = React.useState(false);
  <div className='my-3'>
   <div className=' flex justify-between items-center  '>
   <label className='font-bold'>  Select Goal Month:</label>
-  <BiX size={25} color='red' className='opacity-60 hover:opacity-100 cursor-pointer' onClick={()=> setGoalMonths(false)}/>
+  <BiX size={25} color='red' className='opacity-60 hover:opacity-100 cursor-pointer' onClick={()=> {
+    setGoalMonths(false)
+    if(value === "Invalid Date" || value1 === "Invalid Date" ){
+      setCanShow(false);
+      setValue("Invalid Date")
+      setValue1("Invalid Date")
+    }
+ 
+  }}/>
     </div>
   <div className=' flex flex-col w-full'>
   <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -890,7 +973,14 @@ const [opens, setOpens] = React.useState(false);
           
           <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=> {
             setWarning(false);
-            setGoalMonths(true);  
+            setGoalMonths(true); 
+            setCanShow(true);
+            if(value === "Invalid Date" || value1 === "Invalid Date"){
+              setValue("Invalid Date")
+              setValue1("Invalid Date")
+              return;
+            }
+          
           }}>
           <BiCalendar color='white' size={20} />
            <span className='text-white font-bold'>Set Goal month now</span>
@@ -901,6 +991,7 @@ const [opens, setOpens] = React.useState(false);
           
           <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md  border-[#FAB1A0] opacity-50 hover:opacity-100  transition-all ease-in cursor-pointer" onClick={()=>{
              setWarning(false);
+            
           }} >
           <BiX size={24} color='#FAB1A0' />
            <span className='text-[#FAB1A0] font-bold'>Close</span>
@@ -911,10 +1002,10 @@ const [opens, setOpens] = React.useState(false);
 </>
 
          )}
-       
-          {needUpdate ?
+   
+          {!goalMonthSet && needUpdate ?
           <div className='flex gap-2'>
-          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleUpdate}>
+          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer"   onClick={handleUpdate}>
           {click ?
  <>
  
@@ -933,12 +1024,12 @@ const [opens, setOpens] = React.useState(false);
          
        
           </div>
-          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleNeedupdate}>
+          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer"  onClick={handleNeedupdate}>
           <BiX size={25} color='white'/>
            <span className='text-white font-bold'>CANCEL</span>
           </div>
           </div> 
-           :   <div className="flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleNeedupdate}>
+           : !goalMonthSet &&  <div className="flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={handleNeedupdate}>
           <BiEdit size={20} color='white'/>
            <span className='text-white font-bold'>EDIT</span>
           </div>}
@@ -1019,7 +1110,7 @@ const [opens, setOpens] = React.useState(false);
                   return (
                     <div key={b}>
                        <div className='flex  items-center gap-1 space-y-0'>
-                 <label className='text-[15px]'>{s.time} {s.parameters}</label>
+                 <label className='text-[15px]'>{convertToMilitaryTime3(s.time)} {s.parameters}</label>
                  <label className='text-[15px] text-[#FAB1A0]'>/</label>
                  <label  className='text-[15px]'>{s.cups} {s.cups > 1 ? 'CUPS': 'CUP'}</label>
                  </div>
@@ -1033,20 +1124,23 @@ const [opens, setOpens] = React.useState(false);
             )
           })}
       </ScrollArea>
-      <div className='flex gap-2 mt-4'>
-         <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=>{
-          window.location.href =  `/schedules?petnames=${petname}`
-         }} >
-          <BiSolidTimeFive size={20} color='white'/>
-           <span className='text-white font-bold'>ADD CHEDULE</span>
-          </div>
-          <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md border-[#FAB1A0] hover:opacity-100 opacity-50 transition-all ease-in cursor-pointer" onClick={()=>{
-            setScheduleOpens(false);
-          }}>
-          <BiX size={20} color='#FAB1A0' />
-           <span className='text-[#FAB1A0] font-bold'>CLOSE</span>
-          </div>
-      </div>
+    
+ <div className='flex gap-2 mt-4'>
+ <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=>{
+  window.location.href =  `/schedules?petnames=${petname}`
+ }} >
+  <BiSolidTimeFive size={20} color='white'/>
+   <span className='text-white font-bold'>ADD CHEDULE</span>
+  </div>
+  <div className="w-full flex items-center gap-2 border p-2 justify-center rounded-md border-[#FAB1A0] hover:opacity-100 opacity-50 transition-all ease-in cursor-pointer" onClick={()=>{
+    setScheduleOpens(false);
+  }}>
+  <BiX size={20} color='#FAB1A0' />
+   <span className='text-[#FAB1A0] font-bold'>CLOSE</span>
+  </div>
+</div>
+    
+     
         </Box>
       </Modal>
 

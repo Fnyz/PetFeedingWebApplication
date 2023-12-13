@@ -12,7 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { renderTimeViewClock } from '@mui/x-date-pickers/timeViewRenderers';
 import Stack from '@mui/material/Stack';
-import { BiXCircle, BiAddToQueue, BiShowAlt, BiTimeFive, BiX, BiEdit ,BiSolidTrash, BiSave, BiEditAlt, BiHome} from "react-icons/bi";
+import { BiXCircle, BiAddToQueue, BiShowAlt, BiTimeFive, BiX, BiEdit ,BiSolidTrash, BiSave, BiEditAlt, BiSolidTime } from "react-icons/bi";
 import {
   Dialog,
   DialogContent,
@@ -102,6 +102,7 @@ function ScheduleForm() {
     const [petList, setPetList] = useState([]);
     const [slots, setSlots] = useState([]);
     const [petSlotss, setPetSlotss] = useState("");
+    const [showTimepicker, setShowTimepicker] = useState(false);
  
     
 
@@ -214,8 +215,19 @@ function ScheduleForm() {
     const ampm = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).slice(-2);
     setMilitaryTime2(militaryTimeValue.split(' ')[0].trim())
     setParameters2(ampm)
+
  
   };  
+
+  const convertToMilitaryTime3 = (time) => {
+    const date = new Date(`2000-01-01 ${time}`);
+    const militaryTimeValue = date.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit' });
+    const ampm = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).slice(-2);
+    return militaryTimeValue.split(' ')[0].trim();
+
+ 
+  };  
+
 
 
   const handleUpdateTimeManage = (time, cups) => {
@@ -232,14 +244,27 @@ function ScheduleForm() {
     const b = a?.dts.ScheduleTime.filter((d) => d.time !== time );
     
     if(a.dts.ScheduleTime.length - 1 === 0){
-      await deleteDoc(doc(db, "feeding_schedule",a.id));
+      await deleteDoc(doc(db, "feeding_schedule",a.id)).then(()=>{
+        addDoc(collection(db, "Task"),{
+          type:'Schedule',
+          deviceName: credential.DeviceName,
+          document_id: a.id,
+          request:null,
+        })
+      });
+
       return;
     }
     const docRef = doc(db, 'feeding_schedule', a.id);
     updateDoc(docRef, {
      ScheduleTime:b,
   }).then(()=>{
-     
+    addDoc(collection(db, "Task"),{
+      type:'Schedule',
+      deviceName: credential.DeviceName,
+      document_id: docRef.id,
+      request:null,
+    })
   });
     
     
@@ -407,10 +432,9 @@ function ScheduleForm() {
 
   const addFoodItem = () => {
 
-  
-    
-    
-  
+
+
+
     if(!caps){
       setClick(false);
           Swal.fire({
@@ -424,6 +448,8 @@ function ScheduleForm() {
       return;
     }
     
+
+    setShowTimepicker(false)
 
    
     const res  = listSched.find(d => d.data.Days === chooseDay && d.data.DeviceName === credential.DeviceName && d.data.Petname === name);
@@ -453,6 +479,7 @@ function ScheduleForm() {
             
           })
           setCaps('');  
+          setMilitaryTime('');
        
           
         }else{
@@ -532,7 +559,8 @@ function ScheduleForm() {
           // Add the new food item and time to the list
           setSchedules2([...scheds2, { time: militaryTime2.trim(), cups: caps, parameters2 }]);
       
-          setCaps('');  
+          setCaps(''); 
+          setMilitaryTime2('');
         
   
           
@@ -771,7 +799,7 @@ function ScheduleForm() {
 
 
     
-       <div className="grid w-full items-center gap-4 ">
+       <div className="grid w-full items-center gap-4  ">
        <Autocomplete
        onInputChange={(event, newInputValue) => {
         setName(newInputValue)
@@ -783,12 +811,9 @@ function ScheduleForm() {
       disablePortal
       id="combo-box-demo"
       options={data}
-      sx={{ width: '100%' }}
+      sx={{ width: '100%'}}
       value={name}
-     
-  
-   
-      renderInput={(params, i) => <TextField {...params} key={i} label="Select Petname" />}
+      renderInput={(params, i) => <TextField {...params} key={i} className=' italic' label="Select Petname" />}
     />
 
          <div className="flex flex-col space-y-1.5">
@@ -804,41 +829,48 @@ function ScheduleForm() {
       
     </Box>
 
-    <div className='flex max-lg:flex-col gap-2 ' style={{
+    <div className='flex max-lg:flex-col gap-2  justify-center items-center pt-2' style={{
       width:'100%',
       paddingBottom:10,
-    
+     
     }}>
 
-    <LocalizationProvider dateAdapter={AdapterDayjs}   >
-      <DemoContainer components={['TimePicker']} sx={{
-        width:'100%',
-       
-      }} >
+ 
+    <div className=' max-md:w-full border h-14 w-[100px] flex justify-center items-center shadow-sm rounded-md cursor-pointer hover:opacity-100 opacity-70 gap-1' onClick={()=> setShowTimepicker((prev)=> !prev)} >
+       {showTimepicker ?   <BiX   className=' text-[32px] max-md:text-[30px] opacity-50'  color='red'/>: <BiSolidTime color='#FAB1A0' className=' text-[30px] max-md:text-[28px]'/>} 
+       <span className='font-bold opacity-70 max-md:block hidden'> {showTimepicker ? "Close" : "Select time" }</span>
+    </div>
 
-        <TimePicker
-          
-          label="Select Time"
-          className='w-full'
-          viewRenderers={{
-            hours: renderTimeViewClock,
-            minutes: renderTimeViewClock,
-          }}
+       {showTimepicker && (
+  <LocalizationProvider dateAdapter={AdapterDayjs}   >
+  <div components={['TimePicker']} className='w-full'  >
+
+    <TimePicker
       
-          ampm={true}  
-          onChange={(e) =>  setTwelveHourTime(`${e?.$H}:${e?.$m}` || "")}
-          autoFocus={false}
-        />
-      </DemoContainer>
-    </LocalizationProvider>
-
+      label="Select Time"
+     className='w-full'
+      viewRenderers={{
+        hours: renderTimeViewClock,
+        minutes: renderTimeViewClock,
+      }}
+  
+      ampm={true}  
+      onChange={(e) =>  {
+        setTwelveHourTime(`${e?.$H}:${e?.$m}` || "")
+      }}
+    
+    />
+  </div>
+  </LocalizationProvider>
+       )}
+      
     <Box
       component="form"
-      className='w-full pt-2'
+      className='w-full '
       noValidate
       autoComplete="off"
     >
-      <TextField id="outlined-basic" className='w-full'  label="Cups" variant="outlined" value={caps} onChange={(e)=> setCaps(e.target.value)}/>
+      <TextField id="outlined-basic" className='w-full'  label="Set cups here" variant="outlined" value={caps} onChange={(e)=> setCaps(e.target.value)}/>
     </Box>
 
       
@@ -905,7 +937,7 @@ function ScheduleForm() {
           return (  
             <div className='flex justify-between gap-1 space-y-0 border p-2 m-1 rounded-md' key={b}>
                  <div className='flex  items-center gap-1 space-y-0'>
-                 <label className='text-[15px]'>{s.time} {s.parameters}</label>
+                 <label className='text-[15px]'>{ convertToMilitaryTime3(s.time)} {s.parameters}</label>
                  <label className='text-[15px] text-[#FAB1A0]'>/</label>
                  <label  className='text-[15px]'>{s.cups} {s.cups > 1 ? 'cups': 'cup'}</label>
                  </div>

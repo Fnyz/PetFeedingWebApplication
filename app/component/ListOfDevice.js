@@ -472,7 +472,7 @@ const suggestDeleting = () => {
   return (
     <ScrollArea className='z-50 border w-4/5 h-[500px] max-md:w-full max-lg:w-full rounded-md overflow-hidden pt-5 shadow-sm'>
        <ScrollBar orientation="horizontal" />
-      <div className='flex justify-between items-center  gap-5 px-10'>
+      <div className='flex justify-between items-center max-md:flex-col gap-5 px-10'>
       <div className='flex justify-center items-center  gap-5'>
       <Image
            src="/Image/team.png"
@@ -496,7 +496,7 @@ const suggestDeleting = () => {
        <div className='flex gap-2 justify-center items-center'>
 
       <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild className='max-md:w-[50%]'>
         <Button variant="outline">FILTER BY USER'S</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
@@ -539,12 +539,12 @@ const suggestDeleting = () => {
 
        
        <div class="flex mt-5">
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">IMAGE</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">USERNAME</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">EMAIL</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">Device</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0]">OPTIONS</div>
-       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] ">STATUS</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">IMAGE</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">USERNAME</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">EMAIL</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">Device</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] border-r-2 border-[#FAB1A0] max-md:text-sm">OPTIONS</div>
+       <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] max-md:text-sm">STATUS</div>
       </div>
 
       <ScrollArea className=' h-[350px] overflow-auto  p-2 '>
@@ -556,7 +556,7 @@ const suggestDeleting = () => {
 
        
             <div class="w-1/4 h-20    flex justify-center items-center">
-             <div className='relative w-[100px] h-[60px] rounded-sm overflow-hidden'>
+             <div className='relative w-[100px] h-[60px] rounded-sm overflow-hidden max-md:w-[60px]'>
              <Image
                 src={item.dt.image || '/Image/anyaCuttie.jpg'}
                fill
@@ -567,8 +567,9 @@ const suggestDeleting = () => {
              </div>
             </div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80 text-sm">{item.dt.username}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-[12px]">{item.dt.email}</div>
-            <div class={`w-1/4 h-20 text-center  flex justify-center items-center text-sm ${item.dt.Devicename ? "text-blue-500": "text-red-500"} font-bold text-[12px]`}>{item.dt.Devicename ? item.dt.Devicename : "NO DEVICE"}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-[12px] max-md:text-[10px] md:hidden">{item.dt.email.length > 10 ? `${item.dt.email.slice(0, 10)}..`: item.dt.email}</div>
+            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-[12px] max-md:text-[10px] max-md:hidden ">{item.dt.email}</div>
+            <div class={`w-1/4 h-20 text-center  flex justify-center items-center text-sm ${item.dt.Devicename ? "text-blue-500": "text-red-500"} font-bold text-[12px] max-md:text-[10px]`}>{item.dt.Devicename ? item.dt.Devicename : "NO DEVICE"}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">
 
             <div>
@@ -635,7 +636,7 @@ const suggestDeleting = () => {
     </div>
             </div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center text-sm  font-bold">
-              <span className={`text-[10px] p-2 ${item.dt.isActive ? "bg-green-500":"bg-red-500"} opacity-80 text-white rounded-sm w-[100px]`}>{item.dt.isActive ? 'ACTIVE' : 'OFFLINE'}</span>
+              <span className={`text-[10px] p-2 ${item.dt.isActive ? "bg-green-500":"bg-red-500"} opacity-80 text-white rounded-sm w-[100px] `}>{item.dt.isActive ? 'ACTIVE' : 'OFFLINE'}</span>
             </div>
             <Modal
         open={opens}

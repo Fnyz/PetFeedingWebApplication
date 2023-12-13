@@ -270,8 +270,8 @@ function Messages() {
     
     }} >
       <DialogHeader>
-        <DialogTitle>Message</DialogTitle>
-        <DialogDescription>
+        <DialogTitle className="max-md:text-start">Message</DialogTitle>
+        <DialogDescription className="max-md:text-start">
           Feel free to message the admin for more questions?
         </DialogDescription>
       </DialogHeader>
@@ -297,8 +297,11 @@ function Messages() {
 
           />
                 </div>
-                <div className='flex flex-col'>
-                    <label className='text-[10px] opacity-70'>{dvName} / {moment(data.messagedate.toDate()).calendar()}</label>
+                <div className='flex flex-col w-full'>
+                    <div className={` w-full flex max-md:${data.type === 'User' && "flex-col" } gap-1 max-md:gap-0 `}>
+                    <span className='text-[10px] opacity-70 leading-normal'>{dvName} / </span>
+                    <span className='text-[10px] opacity-70 leading-normal'>{moment(data.messagedate.toDate()).calendar()}</span>
+                    </div>
                     <label className='text-[13px] opacity-80 font-bold'>{data.message}</label>
                 </div>
                </div>

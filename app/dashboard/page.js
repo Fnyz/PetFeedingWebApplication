@@ -72,13 +72,14 @@ function page() {
 
 
    
-    <div className="h-screen relative ">
+    <div className="h-screen w-screen relative  ">
         <Image
             src="/Image/WebBackground.png"
             layout='fill'
             quality={100}
             alt='back image'
             objectFit='cover'
+            className=' max-md:hidden block'
         />
         <div className='absolute left-0 right-0  px-5 pt-5 max-md:px-3'>
             <div className='flex justify-between '>

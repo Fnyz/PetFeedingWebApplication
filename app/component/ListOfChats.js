@@ -309,12 +309,12 @@ function ListOfChats() {
        />      
                </div>
                    <div className='flex flex-col justify-center'>
-                       <span className={`font-bold max-md:text-[15px] ${!res.data.hasSeen  && "text-  [#FAB1A0]"}`}>{res.data.deviceName}</span>
+                       <span className={`font-bold max-md:text-[12px] ${!res.data.hasSeen  && "text-  [#FAB1A0]"}`}>{res.data.deviceName}</span>
                        <span className={`text-sm opacity-60 max-md:text-[13px] ${!res.data.hasSeen  && "text-[#FAB1A0]"}`}>  {res.data.message[res.data.message.length - 1]?.message.length > 25 ? `${res.data.message[res.data.message.length - 1]?.message.slice(0, 25)}...`: res.data.message[res.data.message.length - 1]?.message || "You read the message."}</span>
                    </div>
                    </div>
                 
-                   <div className={`text-[12px] opacity-70  ${!res.data.hasSeen && "text-[#FAB1A0]"}`}>
+                   <div className={`text-[12px] opacity-70 max-md:text-[10px]  ${!res.data.hasSeen && "text-[#FAB1A0]"}`}>
                         {moment(res.data.message[res.data.message.length - 1]?.messagedate.toDate()).calendar()}
                    </div>
          
