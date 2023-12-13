@@ -2,16 +2,15 @@
 
 import React, { useEffect, useState , useMemo, useRef} from 'react'
 import {  BiX, BiCircle , BiMailSend} from "react-icons/bi";
-
+import Image from 'next/image';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { collection, doc, updateDoc, addDoc, getDocs, serverTimestamp, query, orderBy, onSnapshot, where, connectFirestoreEmulator} from "firebase/firestore"; 
+import { collection, doc, updateDoc, query,  onSnapshot, where, serverTimestamp, addDoc} from "firebase/firestore"; 
 import { db } from '../firebase';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar } from '@mui/material';
@@ -178,6 +177,18 @@ function ListOfChats() {
           ]
 
 
+
+          
+        const notification = {
+          deviceName:deviceName,
+          Messages: `Admin is send you a message please check it to chat.`,
+          createdAt: serverTimestamp(),
+          hasSeen:false,
+          type:"User"
+        }
+    
+
+
        
       
       
@@ -198,6 +209,9 @@ function ListOfChats() {
              }).then(()=>{
                setSendMessage('')
                setMessage('')
+               addDoc(collection(db, "notifications"),notification);
+            
+  
                console.log('update send message success')
              });
       
@@ -224,13 +238,26 @@ function ListOfChats() {
     <Card className="w-[640px] border h-[600px]">
     <CardHeader>
      <CardTitle>List of Chats</CardTitle>
-     <CardDescription>See the list of chats below.</CardDescription>
+     <CardDescription>See the list of chats from user's below.</CardDescription>
     </CardHeader>
     <CardContent>
 
   
        <ScrollArea className=" h-[450px] items-center gap-4 " >
-         {allMessages.map((res,i)=>{
+         {!allMessages.length && (
+            <div className='w-full  h-full flex flex-col justify-center items-center mt-20'>
+            <Image
+       width={160}
+       height={160}
+       src="/Image/SadDog.png"
+       contentFit="cover"
+      
+     />
+          <label className='text-md font-bold opacity-60'>No messages found.</label>
+           
+         </div>
+         )}
+         {allMessages.length && allMessages.map((res,i)=>{
             return (
                 <div className={`flex ${!res.data.hasSeen && "border-[#FAB1A0]"} p-3 rounded-md justify-between border border-5 items-center mb-2 cursor-pointer hover:shadow-md`} key={i} onClick={()=>{
                     handleOpen(res.data.deviceName)
@@ -272,6 +299,7 @@ function ListOfChats() {
         
          
                 }}>
+                
                 <div className='flex justify-center items-center gap-4'>
                    <div className={` ${!res.data.hasSeen && "border-[#FAB1A0]"} border p-1 rounded-full  relative `}>
                <Avatar
@@ -281,14 +309,15 @@ function ListOfChats() {
        />      
                </div>
                    <div className='flex flex-col justify-center'>
-                       <span className={`font-bold max-md:text-[15px] ${!res.data.hasSeen  && "text-[#FAB1A0]"}`}>{res.data.deviceName}</span>
-                       <span className={`text-sm opacity-60 max-md:text-[13px] ${!res.data.hasSeen  && "text-[#FAB1A0]"}`}>{res.data.message[res.data.message.length - 1]?.message || "You read the message."}</span>
+                       <span className={`font-bold max-md:text-[15px] ${!res.data.hasSeen  && "text-  [#FAB1A0]"}`}>{res.data.deviceName}</span>
+                       <span className={`text-sm opacity-60 max-md:text-[13px] ${!res.data.hasSeen  && "text-[#FAB1A0]"}`}>  {res.data.message[res.data.message.length - 1]?.message.length > 25 ? `${res.data.message[res.data.message.length - 1]?.message.slice(0, 25)}...`: res.data.message[res.data.message.length - 1]?.message || "You read the message."}</span>
                    </div>
                    </div>
                 
                    <div className={`text-[12px] opacity-70  ${!res.data.hasSeen && "text-[#FAB1A0]"}`}>
                         {moment(res.data.message[res.data.message.length - 1]?.messagedate.toDate()).calendar()}
                    </div>
+         
                 </div>
             )
          })}

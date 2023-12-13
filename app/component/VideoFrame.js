@@ -5,7 +5,7 @@ import ReactPlayer from 'react-player/youtube'
 import AudioRecorders from './AudioRecorder'
 import { db } from '../firebase'
 import { collection, addDoc,updateDoc, doc} from 'firebase/firestore';
-
+import { BiStop } from "react-icons/bi";
 function VideoFrame({youtubeUrl, handleVideoEnd, liveiD, deviceName}) {
 
   const handleStopLiveStream = () => {
@@ -16,7 +16,7 @@ function VideoFrame({youtubeUrl, handleVideoEnd, liveiD, deviceName}) {
       ended:true,
    }).then( async()=>{
     await addDoc(collection(db, "Task"),{
-      type:'Livestream',
+      type:'Livestream',  
       deviceName:deviceName,
       document_id: liveiD,
       request:'Stop',
@@ -39,8 +39,9 @@ config={{
         }} />
  </div>
 
- <div className='border m-2 w-[200px]  py-2 text-center border-[#FAB1A0]' onClick={handleStopLiveStream}>
-                  <label className='text-[#FAB1A0] font-bold'>STOP LIVE STREAM</label>
+ <div className='border m-2 w-[200px]  py-2 text-center border-[#FAB1A0] cursor-pointer opacity-60 hover:opacity-100 transition-all ease-in rounded-sm flex justify-center items-center gap-1' onClick={handleStopLiveStream}>
+     <BiStop size={25} color='#FAB1A0'/>
+                  <span className='text-[#FAB1A0] font-bold'>STOP LIVE STREAM</span>
                  </div>
      <AudioRecorders isAddPet={false}/>
     </div>

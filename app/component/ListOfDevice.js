@@ -352,7 +352,7 @@ const suggestDeleting = () => {
       setPositions("WITHOUTDEVICE");
 
     
-      const q = query(collection(db, "users"), where("isAdmin", "==", false),where("hasDevice", "==", false));
+      const q = query(collection(db, "users"), where("isAdmin", "==", false),where("hadDevice", "==", false));
           const data = [];  
           onSnapshot(q, (querySnapshot) => {
          querySnapshot.forEach((docing) => {
@@ -361,6 +361,7 @@ const suggestDeleting = () => {
          });
           data.sort((a, b) => b.dt.createdAt - a.dt.createdAt )
           setUserDataList(data);
+          
       
        });
        return;
@@ -567,7 +568,7 @@ const suggestDeleting = () => {
             </div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80 text-sm">{item.dt.username}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center text-[12px]">{item.dt.email}</div>
-            <div class="w-1/4 h-20 text-center  flex justify-center items-center text-sm text-red-500 font-bold text-[12px]">{item.dt.Devicename ? item.dt.Devicename : "NO DEVICE"}</div>
+            <div class={`w-1/4 h-20 text-center  flex justify-center items-center text-sm ${item.dt.Devicename ? "text-blue-500": "text-red-500"} font-bold text-[12px]`}>{item.dt.Devicename ? item.dt.Devicename : "NO DEVICE"}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">
 
             <div>
@@ -794,7 +795,7 @@ const suggestDeleting = () => {
              <Image
         width={160}
         height={160}
-        src="/Image/KawaiDog.png"
+        src="/Image/SadDog.png"
         contentFit="cover"
        
       />

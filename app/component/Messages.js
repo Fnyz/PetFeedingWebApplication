@@ -199,7 +199,7 @@ function Messages() {
               hasSeen: false,
               message:updatedMessages,
            }).then(()=>{
-            addDoc(collection(db, "Notifications"),notification);
+            addDoc(collection(db, "notifications"),notification);
              setMess('')
              setClick(false)
            });

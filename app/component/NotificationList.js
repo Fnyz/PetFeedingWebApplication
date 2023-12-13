@@ -6,12 +6,11 @@ import { ScrollArea ,ScrollBar } from "@/components/ui/scroll-area"
 import { Avatar } from '@mui/material';
 import { db } from '../firebase';
 import { onSnapshot, query, where, collection, orderBy, getDocs } from 'firebase/firestore';
-
+import Image from 'next/image';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -88,6 +87,19 @@ setNotifications(data);
     <CardContent className='h-full '> 
       <ScrollArea className='flex flex-col space-y-2 gap-2 h-[550px] p-3 border rounded-sm w-full '>
       <ScrollBar orientation="horizontal" />
+        {!notifications.length && (
+          <div className='w-full  h-full flex flex-col justify-center items-center mt-28 '>
+          <Image
+     width={160}
+     height={160}
+     src="/Image/SadDog.png"
+     contentFit="cover"
+    
+   />
+        <label className='text-md font-bold opacity-60'>No notications found.</label>
+         
+       </div>
+        )}
         {notifications && notifications.map((d, i)=> {
             return (
                 

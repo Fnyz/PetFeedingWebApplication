@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { AiFillWarning } from "react-icons/ai";
+import Image from 'next/image';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { db } from '../firebase';
 import { onSnapshot, query, where, collection , orderBy, getDocs} from 'firebase/firestore';
@@ -61,7 +61,19 @@ function AdminNotifications() {
         </di>
         <div>
                 <ScrollArea className='border p-1 rounded-sm w-full no-scrollbar h-[450px]'>
-                { notifications.length &&  notifications.map((item, i) => {
+                {!notifications.length && (<div className='w-full  h-full flex flex-col justify-center items-center mt-28 '>
+             <Image
+        width={160}
+        height={160}
+        src="/Image/SadDog.png"
+        contentFit="cover"
+       
+      />
+           <label className='text-md font-bold opacity-60'>No notications found.</label>
+            
+          </div>
+                )}
+                {notifications.length &&  notifications.map((item, i) => {
                     return (
                         <div key={i} className={`w-[100%] border mb-2 h-[100px] border-l-4   rounded-sm shadow-md  p-2 ${item.hasSeen ? "opacity-50 " : "opacity-95 border-red-300"}  `}>
                             <div className='flex items-center ml-2 gap-1 mt-2'>

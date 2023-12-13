@@ -27,30 +27,8 @@ import moment, { duration } from 'moment';
 import { ScrollArea  } from "@/components/ui/scroll-area"
 import CircularProgress from '@mui/material/CircularProgress';
 import { useSearchParams } from 'next/navigation';
-import Modal from '@mui/material/Modal';
+import Image from 'next/image';
 
-
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-
-  width: 600,
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  borderRadius:2,
-  zIndex:0,
-  p: 2,
-};
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}));
 
 import {
   Card,
@@ -66,8 +44,6 @@ import { db } from '../firebase';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import Swal from 'sweetalert2'
-import { TimerContext } from '../TimerContext';
-import { useContext } from 'react';
 
 
 const days = [
@@ -211,7 +187,7 @@ function ScheduleForm() {
           {days.map((d, i)=> {
               return (
                   <Grid item xs={6}  key={i}  >
-                  <Item className={`cursor-pointer transition-all ease-in font-bold text-white bg-[#FAB1A0] ${chooseDay === d.day && "bg-[coral]"} w-full `} onClick={()=> setChooseDay(d.day)}>{d.day === 'Everyday' ? d.day : d.day.slice(0,3).trim()}</Item>
+                  <Item className={`uppercase cursor-pointer transition-all ease-in font-bold text-white bg-[#FAB1A0] ${chooseDay === d.day && "bg-[coral]"} w-full `} onClick={()=> setChooseDay(d.day)}>{d.day === 'Everyday' ? d.day : d.day.slice(0,3).trim()}</Item>
                   </Grid>
               )
           })}
@@ -1063,8 +1039,17 @@ function ScheduleForm() {
           justifyContent:'center',
           alignItems:'center',
           fontWeight:'bold',
-          opacity:0.7
+          opacity:0.7,
+          flexDirection:'column',
         }}>
+    
+           <Image
+        width={80}
+        height={80}
+        src="/Image/SadDog.png"
+        contentFit="cover"
+       
+      />
          <label> No schedule found!</label>
         </div>
         

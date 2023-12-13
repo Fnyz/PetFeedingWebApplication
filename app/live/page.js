@@ -474,9 +474,9 @@ fetch(apiUrl)
       />
           <div className='grid gap-1 justify-center '>
          
-          <Typography id="modal-modal-description" className='font-bold opacity-60' >
+          <label  className='font-bold opacity-60' >
           {message}
-          </Typography>
+          </label>
           <div className='grid gap-2'>
           <div className={`w-full  p-1 flex gap-2  justify-center items-center rounded-md bg-[#FAB1A0]    ${!loading && "cursor-pointer hover:bg-[coral] transition-all ease-in"}`} disabled={loading} onClick={startVideoLive}>
           {loading && (
@@ -511,18 +511,17 @@ fetch(apiUrl)
         <Image
         width={160}
         height={160}
-        src="/Image/KawaiDog.png"
+        src="/Image/SadDog.png"
         contentFit="cover"
        
       />
           <div className='grid gap-1 justify-center '>
-         
-          <Typography className='font-bold text-sm text-center'>
+          <label className='font-bold text-sm text-center opacity-70'>
          {errorMess}
-          </Typography>
+          </label>
           <div className='grid gap-2'>
           <div className='w-full  p-1 grid justify-center items-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer' onClick={handleRefetch}>
-           <span className='text-white font-bold' >Reload</span>
+           <span className='text-white font-bold'>Reload</span>
           </div>
           <div className='w-full gap-1  p-1 flex justify-center items-center rounded-md border-[#FAB1A0] border transition-all ease-in cursor-pointer' onClick={handleExitPAGE}>
           <BiHome size={20} color='#FAB1A0' />

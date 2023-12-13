@@ -606,7 +606,7 @@ const [opens, setOpens] = React.useState(false);
              <Image
         width={160}
         height={160}
-        src="/Image/KawaiDog.png"
+        src="/Image/SadDog.png"
         contentFit="cover"
        
       />
