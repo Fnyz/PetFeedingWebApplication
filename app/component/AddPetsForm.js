@@ -101,8 +101,8 @@ function AddPetsForm() {
     ]
 
     const slot = [
-      {val: 1, label: 'Slot 1' },
-      {val: 2, label: 'Slot 2' },
+      {val: "1", label: 'Slot 1' },
+      {val: "2", label: 'Slot 2' },
     ]
     const kindPet = [
       {val: 'dog', label: 'Dog' },
@@ -233,8 +233,8 @@ function AddPetsForm() {
           requestWeight: false,
           requestRfid: false,
           Token:0,
-          StartGoalMonth: dayjs(value.$d).format('MM/DD/YYYY'),
-          EndGoalMonth:  dayjs(value1.$d).format('MM/DD/YYYY'),
+          StartGoalMonth: dayjs(value?.$d || null).format('MM/DD/YYYY'),
+          EndGoalMonth:  dayjs(value1?.$d || null).format('MM/DD/YYYY'),
           Slot:parseInt(placeSlot),
           Created_at: Date.now(),
           Updated_at: Date.now(),
@@ -305,6 +305,8 @@ function AddPetsForm() {
           requestWeight: false,
           requestRfid: false,
           Token:0,
+          StartGoalMonth: dayjs(value?.$d || null).format('MM/DD/YYYY'),
+          EndGoalMonth:  dayjs(value1?.$d || null).format('MM/DD/YYYY'),
           Created_at: Date.now(),
           Updated_at: Date.now(),
         }).then(()=>{

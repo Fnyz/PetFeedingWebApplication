@@ -142,17 +142,13 @@ function ScheduleForm() {
   
     });
 
-     setSlots(forPetName);
-
-
-    
-    
+     setSlots(forPetName)
     
   });
   
 
     
-  },[])
+  },[militaryTime])
 
 
   
@@ -200,10 +196,16 @@ function ScheduleForm() {
 
 
   const convertToMilitaryTime = () => {
+    const hourss = twelveHourTime.split(":")[0]
+    const minutess = twelveHourTime.split(":")[1]
     const date = new Date(`2000-01-01 ${twelveHourTime}`);
-    const militaryTimeValue = date.toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: '2-digit' });
+    const militaryTimeValue = date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
     const ampm = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).slice(-2);
-    setMilitaryTime(militaryTimeValue)
+
+    const time_set = (hourss < 10 ? "0" + hourss : hourss) + ":" + (minutess < 10 ? "0" + minutess : minutess) // 00:00 format
+
+    setMilitaryTime(time_set)
+
     setParameters(ampm)
    
   
@@ -220,10 +222,14 @@ function ScheduleForm() {
   };  
 
   const convertToMilitaryTime3 = (time) => {
+    const hourss = time.split(":")[0]
+    const minutess = time.split(":")[1]
     const date = new Date(`2000-01-01 ${time}`);
     const militaryTimeValue = date.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit' });
     const ampm = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }).slice(-2);
-    return militaryTimeValue.split(' ')[0].trim();
+    const time_set = (hourss < 10 ? "0" + hourss : hourss) + ":" + (minutess < 10 ? "0" + minutess : minutess) // 00:00 format
+    return ("" + (hourss == 0 ? 12 : (hourss % 12)) + ":" + minutess)
+    //return militaryTimeValue.split(' ')[0].trim();
 
  
   };  
@@ -457,8 +463,9 @@ function ScheduleForm() {
     const combinedData = [];
 
     const filteredArray = slots?.filter((a) => {
-      return a.data.Slot === res?.data.Slot &&  a.data.Days === res?.data.Days;
+      return a.data.Slot !== res?.data.Slot &&  a.data.Days !== res?.data.Days;
     });
+
     filteredArray?.forEach((item) => {
  const petname = item.data?.Petname;
  const scheduleTimes = item.data.ScheduleTime.map((time) => {
@@ -466,8 +473,13 @@ function ScheduleForm() {
  });
  combinedData.push(...scheduleTimes);
 });
-
-        const rs = combinedData.find(a => a.sched.time === militaryTime.trim());
+      const timeToMinutes = (timeStr) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+      };
+        const rs = combinedData.find(a => timeToMinutes(a.sched.time) === timeToMinutes( militaryTime.trim() ));
+  
+        
         if(rs){
         
           Swal.fire({
@@ -483,7 +495,7 @@ function ScheduleForm() {
        
           
         }else{
-          const exist  = res?.data.ScheduleTime.find(s => s.time === militaryTime.trim() && s.parameters === parameters )
+          const exist  = res?.data.ScheduleTime.find(s => timeToMinutes(s.time) === timeToMinutes(militaryTime.trim()) && s.parameters === parameters )
     
           if(exist){
             
@@ -506,20 +518,61 @@ function ScheduleForm() {
           
             currentDate.setHours(parseInt(hours, 10));
             currentDate.setMinutes(parseInt(minutes, 10));
-          
+  
             return currentDate;
           }
 
         ;
-           
+
+        const res11  = listSched.find(d => d.data.Days === chooseDay && d.data.DeviceName === credential.DeviceName);
+       
+   //for 10 minutes warning from database;
+    const filteredArray1 = slots?.filter((a) => {
+      return  a.data.Days === chooseDay && a.data.Slot === res11?.data.Slot;
+    });
+     const combinedData1 = [];
+    filteredArray1?.forEach((item) => {
+   const petname = item.data?.Petname;
+    const scheduleTimes = item.data.ScheduleTime.map((time) => {
+   return { petname, sched:time };
+     });
+    combinedData1.push(...scheduleTimes);
+        });
+
+      
+          const isDisabled1 = combinedData1.some(
+          (a) =>
+            Math.abs(convertTimeStringToDate(a.sched.time) - convertTimeStringToDate(militaryTime)) <= (9 * 60 * 1000) // 10 minutes in milliseconds
+           );
+    
+        
+
+          if(isDisabled1){
+                 Swal.fire({
+              title: "Warning?",
+              text: `You can only set a new schedule time after at least 10 minutes on ${parseInt(res11.data.Slot) === 1 ? "Slot_one": "Slot_two"}, please check your pet schedules properly.`,
+              icon: "warning",
+              confirmButtonColor: "#FAB1A0",
+              confirmButtonText: "Try again!",
+              
+            })
+
+          return;
+          }
+
+
+
+         
+  //for 10 minutes warning from ui interactions;
           const isDisabled = scheds1.some(
             (a) =>
-              Math.abs(convertTimeStringToDate(a.time) - convertTimeStringToDate(militaryTime)) <= 9 * 60 * 1000 // 10 minutes in milliseconds
+              Math.abs(convertTimeStringToDate(a.time) - convertTimeStringToDate(militaryTime)) <= (9 * 60 * 1000) // 10 minutes in milliseconds
           );
+
 
           if (!isDisabled) {
 
-            const existingItem = scheds1.find((item) => item.time === militaryTime.trim() && item.parameters === parameters);
+            const existingItem = scheds1.find((item) => timeToMinutes(item.time) === timeToMinutes(militaryTime.trim()) && item.parameters === parameters);
          
             if (existingItem) {
               
@@ -540,7 +593,7 @@ function ScheduleForm() {
             
          
         
-          const existingItem2 = scheds2.find((item) => item.time === militaryTime2.trim() && item.parameters2 === parameters2);
+          const existingItem2 = scheds2.find((item) => timeToMinutes(item.time) === timeToMinutes(militaryTime2.trim()) && item.parameters2 === parameters2);
           if (existingItem2) {
             // You can handle the duplicate time case here
             setClick(false);
@@ -569,7 +622,7 @@ function ScheduleForm() {
           
             Swal.fire({
               title: "Warning?",
-              text: `You can only set a new schedule time after at least 10 minutes.`,
+              text: `You can only set a new schedule time after at least 10 minutes on ${parseInt(res11.data.Slot) === 1 ? "Slot_one": "Slot_two"}.`,
               icon: "warning",
               confirmButtonColor: "#FAB1A0",
               confirmButtonText: "Try again!",
@@ -879,7 +932,7 @@ function ScheduleForm() {
     
     <div className='w-full rounded-md p-2 text-center  bg-[#FAB1A0] text-white hover:bg-[coral] transition-all ease-in cursor-pointer flex justify-center items-center gap-2 shadow-sm' onClick={addFoodItem} >
       <BiAddToQueue size={20} />
-      <label className='cursor-pointer font-bold'>SET CAPS AND TIME</label>
+      <label className='cursor-pointer font-bold'>SET CUPS AND TIME</label>
     </div>
    
      <div className='flex justify-between items-center '>

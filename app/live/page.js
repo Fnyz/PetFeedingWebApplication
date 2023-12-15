@@ -398,7 +398,7 @@ fetch(apiUrl)
 
           if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
             setMessage('Please wait for a minute, proccessing youtube url.');
-            fetchLiveStreams(ApiKey ,ChannelID, change.doc.id);
+            setVisible1(true);
             setLoading(true);
             return;
           }
