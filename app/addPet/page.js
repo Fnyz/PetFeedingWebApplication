@@ -31,7 +31,7 @@ function page() {
             alt='back image'
             objectFit='cover'
         />
-        <div className='absolute left-0 right-0  max-sm:px-5  px-10 border py-4'>
+        <div className='absolute left-0 right-0  max-sm:px-5  px-10  py-4'>
             <div className='flex justify-between'>
             <SideBar />
         </div>

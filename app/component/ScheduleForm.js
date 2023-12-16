@@ -746,6 +746,7 @@ function ScheduleForm() {
         petId:h?.id, 
         Slot:h?.data.Slot,
         synced:false,
+        created_at: Date.now(),
      
       }
 
@@ -1096,7 +1097,7 @@ function ScheduleForm() {
          fontSize:13,
          opacity:0.7,
          marginTop:10,
-        }}>{moment(d.dts?.created_at?.toDate()).calendar()}</label>
+        }}>{moment(d.dts?.created_at).calendar()}</label>
        </div>
           )
          })}

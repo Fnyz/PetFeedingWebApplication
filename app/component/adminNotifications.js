@@ -73,7 +73,7 @@ function AdminNotifications() {
             
           </div>
                 )}
-                {notifications.length &&  notifications.map((item, i) => {
+                {notifications.length > 0 &&  notifications.map((item, i) => {
                     return (
                         <div key={i} className={`w-[100%] border mb-2 h-[100px] border-l-4   rounded-sm shadow-md  p-2 ${item.hasSeen ? "opacity-50 " : "opacity-95 border-red-300"}  `}>
                             <div className='flex items-center ml-2 gap-1 mt-2'>

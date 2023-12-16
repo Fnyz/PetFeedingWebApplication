@@ -6,15 +6,13 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import VideoFrame from '../component/VideoFrame';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { collection, addDoc, query, where, onSnapshot, getDocs,updateDoc, doc, deleteDoc, setDoc} from 'firebase/firestore';
 import { db } from '../firebase';
 import CircularProgress from '@mui/material/CircularProgress';
 import { BiHome } from "react-icons/bi";
 import Swal from 'sweetalert2'
-import { usePathname } from 'next/navigation'
+
 
 
 const style = {
@@ -46,9 +44,9 @@ function page() {
     const [visible1, setVisible1] = useState(false);
     const [liveiD, setLiveId] = useState("");
     const [liveStreamList, setLiveStreamList] = useState([]);
-    const pathname = usePathname()
+    const [reloadpage, setReloadPage] = useState(false)
 
-    const [errorMess, setErrorMessages] = useState("Something went wrong, please click the bottom to request again?")
+    const [errorMess, setErrorMessages] = useState("Something went wrong, please click the bottom to request the live video again?")
 
 
     useEffect(()=>{
@@ -79,33 +77,36 @@ function page() {
 
     const handleExitPAGE = () => {
    
-    
-      const docRef = doc(db, 'Livestream', liveiD);
-      updateDoc(docRef, {
-        Youtube_Url:'',
-        isliveNow:false,
-        ended:true,
-     }).then(async()=>{
-      const user = localStorage.getItem("credentials")
-      const datas = JSON.parse(user);
-const q = query(collection(db, "Task"), where("deviceName", "==", datas.DeviceName.trim()), where("type","==","Livestream"));
+      if(liveStreamUrl === ""){
+        const docRef = doc(db, 'Livestream', liveiD);
+        updateDoc(docRef, {
+          Youtube_Url:'',
+          isliveNow:false,
+          ended:true,
+       }).then(async()=>{
+        await addDoc(collection(db, "Task"),{
+          type:'Livestream',  
+          deviceName:credential.DeviceName.trim(),
+          document_id: liveiD,
+          request:'Stop',
+        });
+         console.log("Url removed from live stream!");
+         setLiveStreamUrl("");
+         setVisible(false);
+         setLoading(false);
+         window.location.href = "/dashboard"
+        });
+        // You can perform additional actions here when the video ends
+        return;
+      }
 
-const querySnapshot = await getDocs(q);
-querySnapshot.forEach( async(docss) => {
-  await deleteDoc(doc(db, "Task", docss.id))
-});
-
-       console.log("Updated Database");
-       setLiveStreamUrl("");
-       setVisible(false);
-       setLoading(false);
-       window.location.href = "/dashboard"
-     });
-       // You can perform additional actions here when the video ends
+      window.location.href = "/dashboard"
+      return;
      };
  
 
     const handleRefetch =async () => {
+      setReloadPage(true)
       // Step 1: Get live broadcasts associated with the channel
 const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey1}&channelId=${channel}&eventType=live&type=video&part=snippet,id`;
 
@@ -120,6 +121,7 @@ fetch(apiUrl)
           setErrorMessages("Video quota exceeded!, Please contact adminstrator!");
           setVisible1(true);
           setLoading(false);
+          setReloadPage(false)
   
         });
       return;
@@ -130,30 +132,28 @@ fetch(apiUrl)
     console.log('API Response:', data); // Log the entire API response
     const liveVideo = data?.items && data?.items[0]; // Check if items array exists
 
+    if (!data?.items.length) {
+      setVisible1(true)
+      setReloadPage(false)
+      return;
+    }
+
     if (liveVideo) {
       const videoId = liveVideo.id.videoId;
       const url = `https://www.youtube.com/watch?v=${videoId}`;
  
-      if (!data?.items.length) {
-        setVisible1(true);
-        setVisible(false);
-        return;
-      }
-
-      if(data.items){
         const docRef = doc(db, 'Livestream', liveiD);
         updateDoc(docRef, {
           Youtube_Url:url,
        }).then(()=>{
          console.log("Updated Database");
          setLiveStreamUrl(url);
-         setTimeout(() => {
-          setVisible1(false);
-          setVisible(false);
-         }, 6000);
+         setVisible1(false);
+         setVisible(false);
+         setReloadPage(false)
     
        });
-      }
+  
       // // You can use the video IDs for further processing
     } else {
       // Handle case when there are no live videos
@@ -174,7 +174,7 @@ fetch(apiUrl)
     setChannel(channelId);
     setLiveId(id);
   
-    
+    console.log('hello reached');
    
     // Step 1: Get live broadcasts associated with the channel
 const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&eventType=live&type=video&part=snippet,id`;
@@ -199,38 +199,33 @@ fetch(apiUrl)
     console.log('API Response:', data); // Log the entire API response
     const liveVideo = data?.items && data?.items[0]; // Check if items array exists
 
+    if (!data?.items.length) {
+      setVisible1(true);
+      setVisible(false);
+      setLoading(false);
+      return;
+    }
+
+
     if (liveVideo) {
       const videoId = liveVideo.id.videoId;
       const url = `https://www.youtube.com/watch?v=${videoId}`;
- 
-      if (!data?.items.length) {
-        setVisible1(true);
-        setVisible(false);
-    
-        return;
-      }
-
-      if(data.items){
         const docRef = doc(db, 'Livestream', id);
         updateDoc(docRef, {
           Youtube_Url:url,
        }).then(()=>{
-         console.log("Updated Database");
+         console.log("Youtube url is set successfully!");
          setLiveStreamUrl(url);
-         setTimeout(() => {
           setVisible1(false);
           setVisible(false);
-         }, 6000);
-    
+       
        });
-      }
       // // You can use the video IDs for further processing
     } else {
       // Handle case when there are no live videos
     }
   })
   .catch(error => {
-
     setVisible(false);
   });
 
@@ -388,7 +383,7 @@ fetch(apiUrl)
           const q = collection(db, "Livestream");
           onSnapshot(q, (snapshot) => {
          snapshot.docChanges().forEach((change) => {
-          const {DeviceName,Youtube_Url, isliveNow, ApiKey, ChannelID, ended } = change.doc.data()
+          const {DeviceName,Youtube_Url, isliveNow, ended, ApiKey, ChannelID, id  } = change.doc.data()
     
           if(DeviceName == datas.DeviceName.trim() && !Youtube_Url && !isliveNow && !ended){
             setMessage('Please wait a minute to see the live?');
@@ -398,7 +393,7 @@ fetch(apiUrl)
 
           if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
             setMessage('Please wait for a minute, proccessing youtube url.');
-            setVisible1(true);
+            fetchLiveStreams(ApiKey, ChannelID, id)
             setLoading(true);
             return;
           }
@@ -457,12 +452,10 @@ fetch(apiUrl)
             <div>
     
       <Modal
-        open={visible}
+        open={true}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
-        sx={{
-          backgroundColor: 'black',
-        }}
+        
       >
         <Box sx={style} >
         <Image
@@ -478,7 +471,7 @@ fetch(apiUrl)
           {message}
           </label>
           <div className='grid gap-2'>
-          <div className={`w-full  p-1 flex gap-2  justify-center items-center rounded-md bg-[#FAB1A0]    ${!loading && "cursor-pointer hover:bg-[coral] transition-all ease-in"}`} disabled={loading} onClick={startVideoLive}>
+          <div className={`w-full  p-1 flex gap-2  justify-center items-center rounded-md bg-[#FAB1A0]    ${!loading ? "cursor-pointer hover:bg-[coral] transition-all ease-in": "cursor-not-allowed pointer-events-none"}`} d onClick={startVideoLive}>
           {loading && (
             <CircularProgress  style={{
             color:'white'
@@ -516,12 +509,22 @@ fetch(apiUrl)
        
       />
           <div className='grid gap-1 justify-center '>
-          <label className='font-bold text-sm text-center opacity-70'>
+          <label className='font-bold text-sm text-center opacity-70 mb-2'>
          {errorMess}
           </label>
           <div className='grid gap-2'>
-          <div className='w-full  p-1 grid justify-center items-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer' onClick={handleRefetch}>
+          <div className={`${reloadpage && "pointer-events-none cursor-not-allowed"} w-full  p-1 flex justify-center gap-2 items-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer`} onClick={handleRefetch}>
+            {reloadpage ? (
+              <>
+               <CircularProgress  style={{
+                color:'white'
+              }} size={15} />  
+                <span className='text-white font-bold'>Reloading...</span>
+              </>
+            ): (
+
            <span className='text-white font-bold'>Reload</span>
+            )}
           </div>
           <div className='w-full gap-1  p-1 flex justify-center items-center rounded-md border-[#FAB1A0] border transition-all ease-in cursor-pointer' onClick={handleExitPAGE}>
           <BiHome size={20} color='#FAB1A0' />

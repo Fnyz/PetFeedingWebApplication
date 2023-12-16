@@ -92,7 +92,7 @@ function AddPetsForm() {
     const [specified, setSpecifiedPet] = useState(false);
     const [dog, setDog] = React.useState([]);
     const [cat, setCat] = React.useState([]);
-    const [choose, setChoose] = React.useState('');
+    const [choose, setChoose] = React.useState('https://img.freepik.com/free-vector/cute-shiba-inu-dog-flying-with-bone-cartoon-vector-icon-illustration-animal-nature-icon-isolated_138676-5800.jpg?size=626&ext=jpg');
     const [petname, setPetName] = React.useState('');
     const [age, SetPetAge] = React.useState('');
     const gender = [
@@ -393,9 +393,9 @@ function AddPetsForm() {
 
     setDog(dog);
     setCat(cat);
-    setChoose('/Image/anyaCuttie.jpg');
+
   },[])
-console.log(petKind);
+
   return (
     <Card className="w-full">
     <CardHeader>

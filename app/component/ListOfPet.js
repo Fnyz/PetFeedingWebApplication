@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { BiX, BiCalendar } from "react-icons/bi";
+import { BiX, BiCalendar ,BiRfid } from "react-icons/bi";
 import { petsData } from '../animeData';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
@@ -152,8 +152,14 @@ const [suggestDelete, setDelete] = React.useState(false);
 const [search, setSearch] = React.useState('');
 const [click, setClick] = React.useState(false);
 const [click1, setClick1] = React.useState(false);
+const [click2, setClick2] = React.useState(false);
 const [petSchesData, setPetSchedDataset] = useState([]);
 const [scheduleOpens, setScheduleOpens] = useState(false);
+const [rfid, setRfid] = useState('');
+
+
+
+
 
 
 const HandleDelete = async () => {
@@ -197,18 +203,19 @@ useEffect(()=> {
       const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
       onSnapshot(q, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
-       if (change.doc.data().Weight && change.doc.data().Petname === petname && change.doc.data().Token === 1) {
+       if (change.doc.data().Weight && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
         setWeight(change.doc.data().Weight)
         setClick1(false)
 
         return;
       }
-      // if (change.doc.data().Rfid && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
-      //   SetRfid(change.doc.data().Rfid)
-      //   setClick1(false);
+      if (change.doc.data().Rfid && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
+        setRfid(change.doc.data().Rfid)
+        setClick2(false);
 
-      //   return;
-      // }
+        return;
+      }
+
 
     });
   
@@ -216,7 +223,7 @@ useEffect(()=> {
 
 
   }
-},[ click1])
+},[ click1, click2])
 
 
 const suggestDeleting = () => {
@@ -353,6 +360,7 @@ const [opens, setOpens] = React.useState(false);
       setChoose(res.dt.image)
       setWeight(res.dt.Weight);
       setPetSlot(res.dt.Slot);
+      setRfid(res.dt.Rfid);
 
       if(res.dt.StartGoalMonth === "Invalid Date"){
         setCanShow(false);
@@ -390,6 +398,26 @@ const [opens, setOpens] = React.useState(false);
     setChoose('/Image/anyaCuttie.jpg');
   },[])
 
+
+  const handleFakeRFID = async () => {
+    setClick2(true)
+    const petRrfid = doc(db, "List_of_Pets", petId);
+    await updateDoc(petRrfid, {
+      requestRfid: true,
+    }).then(()=>{
+      setClick2(true);
+      const user = localStorage.getItem("credentials");
+      const datas = JSON.parse(user);
+        addDoc(collection(db, "Task"), {
+          type:'request_rfid',
+          deviceName:datas.DeviceName.trim(),
+          document_id:petId,
+          request:null,
+        })
+      })
+  
+  }
+  
 
   const handleFakeWeight = async () => {
     setClick1(true)
@@ -583,7 +611,7 @@ const [opens, setOpens] = React.useState(false);
             <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80">{parseFloat(item?.dt?.Weight).toFixed(2)}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80">{item.dt.Age}</div>
             <div class={`w-1/4 h-20 text-center  flex justify-center items-center capitalize font-bold opacity-80 ${item.dt.Gender === 'female' ? "text-pink-500": "text-blue-500"}`}>{item.dt.Gender}</div>
-            <div class={`w-1/4 h-20 text-center  flex justify-center items-center font-bold ${parseInt(item.dt.Slot) === 1 ? "text-pink-500": "text-blue-500"}`}>{parseInt(item.dt.Slot) === 1 ? "One": "Two"}</div>
+            <div class={`w-1/4 h-20 text-center  flex justify-center items-center font-bold opacity-80 ${parseInt(item.dt.Slot) === 1 ? "text-pink-500": "text-[coral]"}`}>{parseInt(item.dt.Slot) === 1 ? "One": "Two"}</div>
             <div class="w-1/4 h-20 text-center  flex justify-center items-center">
 
             <div>
@@ -764,6 +792,27 @@ const [opens, setOpens] = React.useState(false);
 
 
         <div className="grid gap-4 py-4">
+         <div className=' relative'>
+        <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="rfid" className="text-right">
+              RFID
+            </Label>
+            <Input id="rfid" placeholder="Set RFID here" value={rfid} className="col-span-3" disabled/>
+          </div>
+          {needUpdate && (
+            <div>
+        {click2 ? 
+          <span className='text-red-400 font-bold text-[12px] bg-white absolute right-2 -top-2 opacity-100  border p-2 rounded-md uppercase flex justify-center items-center gap-1 cursor-not-allowed' disabled >Please wait..</span>  
+        : 
+        
+          <span className='text-red-400 font-bold text-[12px] bg-white absolute right-2 -top-2 cursor-pointer opacity-100  border p-2 rounded-md uppercase flex justify-center items-center gap-1' onClick={handleFakeRFID}>{rfid === "" ? <BiRfid size={15}/> :  <BiEdit size={17}/>}  {rfid ===  "" ? "Set RFID" :"Update RFID"}</span>
+        }
+        </div>
+          )}
+        
+          
+          </div> 
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="petname" className="text-right">
               Petname

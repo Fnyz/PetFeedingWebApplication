@@ -61,9 +61,9 @@ function TotalPets() {
                 
                 <div className=' flex-1 relative h-[50px] opacity-[0.7]'>
                 <Image
-        src="/Image/icons8-notification.svg"
+        src="/Image/output-onlinegiftools (2).gif"
         layout='fill'
-        className='fill-black stroke-2'
+    
         alt='icons'
         />
                 </div>
@@ -76,9 +76,9 @@ function TotalPets() {
                 <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {listOfPet.length}</span>
                 <div className=' flex-1 relative h-[50px]'>
                 <Image
-        src="/Image/1517090.svg"
+        src="/Image/output-onlinegiftools (3).gif"
         layout='fill'
-        className='fill-black stroke-2'
+      
         alt='icons'
         />
                 </div>

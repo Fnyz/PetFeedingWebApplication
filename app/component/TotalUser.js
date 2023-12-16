@@ -88,9 +88,9 @@ function TotalUser({position}) {
             <div className='flex'>
                 <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {notifications.length}</span>
                 
-                <div className=' flex-1 relative h-[40px] opacity-[0.7]'>
+                <div className=' flex-1 relative h-[50px] opacity-[0.7]'>
                 <Image
-        src="/Image/icons8-notification.svg"
+        src="/Image/output-onlinegiftools (2).gif"
         layout='fill'
         className='fill-black stroke-2'
         alt='icons'
@@ -105,7 +105,7 @@ function TotalUser({position}) {
                 <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {listOfUser.length}</span>
                 <div className=' flex-1 relative h-[50px] w-[210px] '>
                 <Image
-        src="/Image/icons8-users-100.png"
+        src="/Image/output-onlinegiftools (3).gif"
         layout='fill'
       
         alt='icons'
