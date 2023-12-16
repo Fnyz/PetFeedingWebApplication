@@ -16,12 +16,13 @@ import { usePathname } from 'next/navigation'
 import Badge from '@mui/material/Badge';
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-
+import { BiSolidReport ,BiSolidReceipt  } from "react-icons/bi";
 
 function SideBarAdmin() {
   const pathname = usePathname()
   const [messages, setAllMessages] = useState([]);
   const [notifications, setAllNotifications] = useState([]);
+  const [reports, setReports] = useState([]);
 
 
   useEffect(()=>{
@@ -35,6 +36,19 @@ function SideBarAdmin() {
    });
 
  
+},[])
+
+useEffect(()=>{
+  const q = query(collection(db, "Reports"), where("hasSeen", "==", false));
+  onSnapshot(q, (querySnapshot) => {
+ const dt = [];
+ querySnapshot.forEach((doc) => {
+     dt.push({data:doc.data(), id:doc.id});
+ });
+ setReports(dt);
+ });
+
+
 },[])
 
 useEffect(()=>{
@@ -70,6 +84,13 @@ useEffect(()=>{
           icon: notifications.length > 0 ? <Badge badgeContent={notifications.length} color="secondary">
         <BiBell size={24}/>
           </Badge> : <BiBell size={24}/>
+        },
+        {
+          name: 'Reports',
+          link: '/usersReport',
+          icon:  reports.length > 0 ? <Badge badgeContent={reports.length} color="secondary">
+          <BiSolidReceipt  size={24}/>
+          </Badge> : <BiSolidReport size={24}/>
         },
         {
           name: 'Chats',

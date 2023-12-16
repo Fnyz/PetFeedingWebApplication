@@ -29,6 +29,7 @@ function Notifications() {
               querySnapshot.forEach((doc) => {
                 const messages = doc.data().Messages.split(" ");
                 const createdAt = doc.data().createdAt.toDate(); 
+                const hasSeen = doc.data().hasSeen; 
               
                 if (messages[0] === "Admin") {
                   const adminUsername = messages[0];
@@ -44,6 +45,7 @@ function Notifications() {
                         name: userDoc.data().username,
                         weight: null,
                         message: doc.data().Messages,
+                        hasSeen,
                         createdAt
                       });
                       notificationsData.sort((a, b) => b.createdAt - a.createdAt);
@@ -68,6 +70,7 @@ function Notifications() {
                       name: petDoc.data().Petname,
                       weight: petDoc.data().Weight,
                       message: doc.data().Messages, 
+                      hasSeen,
                       createdAt
                     });
                     notificationsData.sort((a, b) => b.createdAt - a.createdAt);
@@ -120,7 +123,8 @@ function Notifications() {
                    </div>)
                 :  notif.map((item, i) => {
                     return (
-                        <div key={i} className='w-full border mb-2 h-[100px] border-l-4 border-[coral] rounded-sm shadow-md px-2 pb-1' onTouchStart={()=> item.name === "Admin" && setIsHovered(true)} onTouchEnd={()=> item.name === "Admin" && setIsHovered(true)} onMouseEnter={()=> item.name === "Admin" && setIsHovered(true)} onMouseLeave={()=> item.name === "Admin" && setIsHovered(false)} >
+                        <div key={i} className={` ${!item.hasSeen ? ' pointer-events-none' : 'pointer-events-auto'} w-full border mb-2 h-[100px] border-l-4 ${!item.hasSeen && item.weight && "border-[coral]"} rounded-sm shadow-md px-2 pb-1`} onTouchStart={()=> item.name === "Admin" && setIsHovered(true)} onTouchEnd={()=> item.name === "Admin" && setIsHovered(true)}
+                         onMouseEnter={()=> item.name === "Admin" && item.hasSeen === true && setIsHovered(true)} onMouseLeave={()=> item.name === "Admin" && setIsHovered(false)} >
                             <div className='flex items-center p-1 gap-1 mt-2 ' >
                             <MdErrorOutline color='green' size={15} className='opacity-60' />
                                 <h1 className='text-[13px] font-bold  capitalize opacity-60'>{item?.name?.toUpperCase()} * </h1>
@@ -138,7 +142,7 @@ function Notifications() {
                               
                            
                             </div>
-                            {isHovered && !item.weight && (
+                            {isHovered && item.hasSeen && !item.weight && (
                                 <div className='flex justify-end'>
                                 <div className=' p-1 text-sm w-[100px] text-center opacity-60 rounded-sm font-bold bg-[#FAB1A0] text-white cursor-pointer hover:opacity-100 transition-all ease-in' onClick={()=> window.location.href ="/reports"}>
                                     <span>View now</span>

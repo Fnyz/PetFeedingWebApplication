@@ -37,6 +37,7 @@ function Messages() {
 
 
     const [mess, setMess] = useState('');
+    const [notif, setNotif] = useState([]);
     const [dvName, setDvName] = useState('');
     const [cred, setCred] = useState({});
     const [images, setUserImage] = useState('');
@@ -70,7 +71,21 @@ function Messages() {
  
      
 
-     
+    useEffect(()=>{
+
+      const q = query(collection(db, "notifications"));
+      onSnapshot(q, (querySnapshot) => {
+     const dt = [];
+     querySnapshot.forEach((doc) => {
+         dt.push({data:doc.data(), id:doc.id});
+     });
+     setNotif(dt);
+  
+ 
+   });
+   
+
+    },[])
 
       useEffect(()=>{
 
@@ -151,10 +166,11 @@ function Messages() {
 
 
         const notification = {
-          deviceName:email,
+          deviceName: dvName.trim(),
           Messages: `${username} is send you a message please check it to chat.`,
           createdAt: serverTimestamp(),
           hasSeen:false,
+          pet_name:null,
           type:"Admin"
         }
     
@@ -242,6 +258,11 @@ function Messages() {
         message:b
     }).then(()=>{
       console.log('seen now!')
+      const a = notif.find(e => e.data.hasSeen === true && e.data.type === "User");
+      const docRef = doc(db, 'notifications', a.id);
+        updateDoc(docRef, {
+        hasSeen:false,
+    })
     });
  
     return;

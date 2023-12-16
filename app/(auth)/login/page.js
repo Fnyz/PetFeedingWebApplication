@@ -161,12 +161,6 @@ function page() {
               userId:user.uid,
             }
             setClick(false)
-            Swal.fire({
-              title: "Welcome Admin!",
-              text: "Your account is logged in successfully.",
-              icon: "success",
-              showCancelButton: false,
-            })
             router.push('/home');
             localStorage.setItem("credentials", JSON.stringify(credentials));
             return;

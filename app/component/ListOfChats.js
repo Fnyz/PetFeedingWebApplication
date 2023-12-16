@@ -168,7 +168,6 @@ function ListOfChats() {
             {
               message: message,
               username: 'Admin',
-              image: image,
               type: 'Admin',
               messagedate: new Date(),
               image:imageAdmin,

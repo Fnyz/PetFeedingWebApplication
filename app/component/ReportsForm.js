@@ -114,6 +114,7 @@ function ReportsForm() {
           Username: userName,
           Message:initialMessages,
           createdAt: new Date(),
+          hasSeen:false,
        }
 
 
@@ -166,6 +167,7 @@ function ReportsForm() {
        const docRef = doc(db, 'Reports', res.id);
        updateDoc(docRef, {
          Message:updatedMessages,
+         hasSeen:false,
       }).then(()=>{
         setClick(false);
         setMessage('');
