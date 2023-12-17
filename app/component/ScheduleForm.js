@@ -626,7 +626,7 @@ function ScheduleForm() {
           
             Swal.fire({
               title: "Warning?",
-              text: `You can only set a new schedule time after at least 10 minutes on ${parseInt(res11.data.Slot) === 1 ? "Slot_one": "Slot_two"}.`,
+              text: `You can only set a new schedule time after at least 10 minutes on ${parseInt(res1.data.Slot) === 1 ? "Slot_one": "Slot_two"}.`,
               icon: "warning",
               confirmButtonColor: "#FAB1A0",
               confirmButtonText: "Try again!",

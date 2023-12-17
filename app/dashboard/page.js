@@ -122,7 +122,6 @@ function page() {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Hey you watzupp!</AlertDialogTitle>
           <AlertDialogDescription>
             Do you want to log out?
           </AlertDialogDescription>
