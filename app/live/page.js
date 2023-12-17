@@ -315,7 +315,10 @@ fetch(apiUrl)
 
     const startVideoLive = async () => {
       setLoading(true);
+
+      console.log(liveStreamUrl)
         if(!liveStreamUrl){
+          console.log('reach')
         
           
           const user = localStorage.getItem("credentials")
@@ -355,15 +358,17 @@ fetch(apiUrl)
          })
 
 
-       return;
+     
 
 
+        }else{
+         
+          setVisible(false);
+ 
         }
 
         
 
-
-        setVisible(false);
 
         
     
@@ -453,7 +458,7 @@ fetch(apiUrl)
             <div>
     
       <Modal
-        open={true}
+        open={visible}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
         

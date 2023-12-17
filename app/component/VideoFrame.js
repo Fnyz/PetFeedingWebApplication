@@ -48,9 +48,9 @@ function VideoFrame({youtubeUrl, handleVideoEnd, liveiD, deviceName}) {
    });
   }
   return (
-    <div className=' max-md:px-1 px-7 grid gap-5  h-full max-md:ml-[10px]'>
+    <div className=' max-md:px-1 px-7 grid gap-5  h-full max-md:ml-[10px] '>
       {!youtubeUrl ? (
-        <div className=' border justify-center items-center flex rounded-md'>
+        <div className=' border justify-center items-center flex rounded-md '>
         
   
           <Lottie
@@ -64,7 +64,7 @@ function VideoFrame({youtubeUrl, handleVideoEnd, liveiD, deviceName}) {
 
       ): (
       <div>
- <div className=' h-[700px]'>
+ <div className=' h-[700px] max-xl:h-[600px]'>
 <ReactPlayer url={youtubeUrl}    width={'100%'} height={'100%'} playing={true} 
 onEnded={handleVideoEnd} // Event handler for video end
 config={{
