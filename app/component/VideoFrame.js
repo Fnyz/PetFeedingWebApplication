@@ -78,7 +78,7 @@ config={{
         }} />
  </div>
 
- <div className='border m-2 w-[200px]  py-2 text-center border-[#FAB1A0] cursor-pointer opacity-60 hover:opacity-100 transition-all ease-in rounded-sm flex justify-center items-center gap-1' onClick={()=> setshow(true)}>
+ <div className='border mt-5 w-[200px]  py-2 text-center border-[#FAB1A0] cursor-pointer opacity-60 hover:opacity-100 transition-all ease-in rounded-sm flex justify-center items-center gap-1' onClick={()=> setshow(true)}>
      <BiStop size={25} color='#FAB1A0'/>
                   <span className='text-[#FAB1A0] font-bold'>STOP LIVE STREAM</span>
                  </div>

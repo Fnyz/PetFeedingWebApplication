@@ -12,7 +12,8 @@ import { db } from '../firebase';
 import CircularProgress from '@mui/material/CircularProgress';
 import { BiHome } from "react-icons/bi";
 import Swal from 'sweetalert2'
-
+import { TimerContext } from '../TimerContext';
+import { useContext } from 'react';
 
 
 const style = {
@@ -45,7 +46,7 @@ function page() {
     const [liveiD, setLiveId] = useState("");
     const [liveStreamList, setLiveStreamList] = useState([]);
     const [reloadpage, setReloadPage] = useState(false)
-
+    const [showTimer, setShowTimer] = useState(false);
     const [errorMess, setErrorMessages] = useState("Something went wrong, please click the bottom to request the live video again?")
 
 
@@ -56,6 +57,49 @@ function page() {
       }
      
     },[])
+
+  
+  
+    const {
+      count,
+      isRunning,
+      startTimer,
+      stopTimer,
+      resetTimer,
+      modalTime,
+      setModalTime,
+      message1,
+    } = useContext(TimerContext);
+  
+    const formatTime = (timeInSeconds) => {
+      const minutes = Math.floor(timeInSeconds / 60);
+      const seconds = timeInSeconds % 60;
+      return `${minutes < 10 ? '0' : ''}${minutes} mins ${seconds < 10 ? '0' : ''}${seconds} sec`;
+    };
+  
+    useEffect(() => {
+      setModalTime(formatTime(count));
+    }, [count, setModalTime]);
+  
+    const handleStart = () => {
+      startTimer();
+    };
+  
+
+
+    useEffect(() => {
+      console.log('Count in UI:', count);
+    
+ 
+      if (count === 0) {
+        stopTimer();
+        setShowTimer(false);
+        resetTimer();
+        fetchLiveStreams(apiKey1, channel, liveiD)
+     
+      }
+    
+    }, [count]);
 
     const handleVideoEnd = () => {
    
@@ -398,8 +442,14 @@ fetch(apiUrl)
 
           if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
             setMessage('Please wait for a minute, proccessing youtube url.');
-            fetchLiveStreams(ApiKey, ChannelID, change.doc.id)
+            handleStart();
+            setShowTimer(true);
             setLoading(true);
+            setApiKey(ApiKey)
+            setChannel(ChannelID)
+            setLiveId(change.doc.id)
+            setVisible(false);
+            setVisible1(false);
             return;
           }
      
@@ -458,7 +508,7 @@ fetch(apiUrl)
             <div>
     
       <Modal
-        open={visible}
+        open={true}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
         
@@ -502,9 +552,7 @@ fetch(apiUrl)
         open={visible1}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
-        sx={{
-          backgroundColor: 'black',
-        }}
+       
       >
         <Box sx={style} >
         <Image
@@ -546,6 +594,45 @@ fetch(apiUrl)
         
           </div>
           
+        </Box>
+      </Modal>
+
+      <Modal
+        open={showTimer}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      
+      >
+        <Box sx={style} >
+        <Image
+        width={150}
+        height={150}
+        src="/Image/output-onlinegiftools (4).gif"
+        contentFit="cover"
+       
+      />
+
+      <div>
+   
+      <p className='font-bold text-sm opacity-70'>Livestreaming is not ready yet; please wait until 3 minutes to see the livestream.</p>
+      {message1 && (
+        <div>
+          <p>{message1}</p>
+        </div>
+      )}
+      {modalTime && (
+        <div className='mt-5'>
+          <p className='font-bold opacity-70'>Time remaining: <p className='font-bold text-red-500'>{modalTime}.</p></p>
+        
+        </div>
+      )}
+        <div className='w-full gap-1  mt-5 mb-1 p-1 flex justify-center items-center rounded-md opacity-75 bg-red-500 hover:opacity-100 border transition-all ease-in cursor-pointer' onClick={handleExitPAGE}>
+           <span className='text-white font-bold text-sm'>CANCEL</span>
+          </div>
+          <div className='w-full gap-1 p-1 flex justify-center items-center  border  bg-[#FAB1A0] opacity-75 hover:opacity-100 rounded-md  transition-all ease-in cursor-pointer' onClick={handleGoback}>
+          <span className='text-white font-bold text-sm'>GO HOME</span>
+           </div>
+      </div>
         </Box>
       </Modal>
     </div>
