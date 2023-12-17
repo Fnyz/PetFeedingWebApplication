@@ -102,7 +102,7 @@ function Notifications() {
       
    
   return (
-    <div className=' border w-1/5 rounded-md p-2 shadow-md z-50 max-md:w-full max-lg:w-full'>
+    <div className=' border w-1/5 rounded-md p-2 shadow-md z-50 max-xl:w-full'>
         <di className='flex justify-between p-2'>
             <h1 className='text-[12px] font-bold opacity-[0.7] '>!Notifications</h1>
         </di>

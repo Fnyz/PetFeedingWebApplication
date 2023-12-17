@@ -400,7 +400,8 @@ fetch(apiUrl)
      
           if(DeviceName == datas.DeviceName.trim() && isliveNow == true && Youtube_Url){
             setMessage('Do you want to continue watching the live?');
-            setLiveStreamUrl(Youtube_Url);
+            console.log('hello');
+            setLiveStreamUrl(Youtube_Url)
             setVisible1(false)
             return;
           }
@@ -523,13 +524,19 @@ fetch(apiUrl)
               </>
             ): (
 
-           <span className='text-white font-bold'>Reload</span>
+           <span className='text-white font-bold'>RELOAD</span>
             )}
           </div>
-          <div className='w-full gap-1  p-1 flex justify-center items-center rounded-md border-[#FAB1A0] border transition-all ease-in cursor-pointer' onClick={handleExitPAGE}>
-          <BiHome size={20} color='#FAB1A0' />
-           <span className='text-[#FAB1A0] font-bold text-[20px]'>Exit</span>
+          <div className='flex justify-center items-center gap-2'>
+          <div className='w-full gap-1  p-1 flex justify-center items-center rounded-md opacity-75 bg-red-500 hover:opacity-100 border transition-all ease-in cursor-pointer' onClick={handleExitPAGE}>
+           <span className='text-white font-bold text-sm'>CANCEL</span>
           </div>
+          <span className='text-[coral]'>/</span>
+          <div className='w-full  p-1 flex justify-center items-center  border  bg-blue-500 opacity-75 hover:opacity-100 rounded-md  transition-all ease-in cursor-pointer' onClick={handleGoback}>
+          <BiHome color='white' size={20}/>
+           </div>
+          </div>
+      
           </div>
         
           </div>

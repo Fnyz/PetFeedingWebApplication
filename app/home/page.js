@@ -82,7 +82,7 @@ function page() {
             objectFit='cover'
             className='max-md:hidden block'
         />
-        <div className='absolute left-0 right-0  px-5 pt-5 max-md:px-3'>
+        <div className='absolute left-0 right-0  px-5 pt-5 max-xl:px-3'>
             <div className='flex justify-between '>
             <SideBarAdmin />
         
@@ -157,8 +157,8 @@ function page() {
         </div>
             </div>
            
-        <div className='flex gap-5 w-[100%]   h-full max-md:p-2 '>
-            <div className='w-1/6  flex justify-center items-center relative max-md:hidden  '>
+        <div className='flex gap-5 w-[100%]   h-full max-xl:p-2 '>
+            <div className='w-1/6  flex justify-center items-center relative max-xl:hidden  '>
             <Image
             src="/Image/undraw_welcoming_re_x0qo.svg"
             layout='fill'
@@ -169,7 +169,7 @@ function page() {
             </div>
             <div className=' w-[100%]'>
             <TotalUser position={position} />
-            <div className='flex gap-5 mt-5 max-md:flex-col max-lg:flex-col'>
+            <div className='flex gap-5 mt-5    max-xl:flex-col'>
             <ListOfDevice setPositions={setPosition1}/>
 
             <AdminNotifications />

@@ -164,7 +164,7 @@ function page() {
             </div>
            
         <div className='flex gap-5 w-[100%]   h-full max-md:p-2 '>
-            <div className='w-1/6  flex justify-center items-center relative max-md:hidden  '>
+            <div className='w-1/6  flex justify-center items-center relative max-xl:hidden  '>
             <Image
             src="/Image/undraw_welcoming_re_x0qo.svg"
             layout='fill'
@@ -175,7 +175,7 @@ function page() {
             </div>
             <div className=' w-[100%]'>
             <TotalPets  />
-            <div className='flex gap-5 mt-5 max-md:flex-col max-lg:flex-col'>
+            <div className='flex gap-5 mt-5  max-xl:flex-col'>
             <ListOfPet />
 
             <Notifications />

@@ -500,7 +500,7 @@ const [opens, setOpens] = React.useState(false);
  
 
   return (
-    <ScrollArea className='z-50 border w-4/5 h-[500px] max-md:w-full max-lg:w-full rounded-md overflow-hidden pt-5 shadow-sm'>
+    <ScrollArea className='z-50 border w-4/5 h-[500px]  max-xl:w-full rounded-md overflow-hidden pt-5 shadow-sm'>
        <ScrollBar orientation="horizontal" />
       <div className='flex justify-between items-center max-md:flex-col  gap-5 px-10'>
       <div className='flex justify-center items-center  gap-5'>

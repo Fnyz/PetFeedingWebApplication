@@ -470,7 +470,7 @@ const suggestDeleting = () => {
  
 
   return (
-    <ScrollArea className='z-50 border w-4/5 h-[500px] max-md:w-full max-lg:w-full rounded-md overflow-hidden pt-5 shadow-sm'>
+    <ScrollArea className='z-50 border w-4/5 h-[500px] max-md:w-full max-xl:w-full rounded-md overflow-hidden pt-5 shadow-sm'>
        <ScrollBar orientation="horizontal" />
       <div className='flex justify-between items-center max-md:flex-col gap-5 px-10'>
       <div className='flex justify-center items-center  gap-5'>
@@ -499,7 +499,7 @@ const suggestDeleting = () => {
       <DropdownMenuTrigger asChild className='max-md:w-[50%]'>
         <Button variant="outline">FILTER BY USER'S</Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
+      <DropdownMenuContent className="w-full">
         <DropdownMenuLabel>Choose option</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup value={position} onValueChange={setPosition}>
@@ -603,14 +603,14 @@ const suggestDeleting = () => {
         PaperProps={{
           style: {
             maxHeight: ITEM_HEIGHT * 4.5,
-            width: !item.dt.Devicename ? '15ch' : '22ch',
+            width: '22ch',
             
           },
         }}
       >
         { device && options.map((option) => (
           <MenuItem key={option.val}  onClick={handleClose}>
-            <div className='flex justify-between items-center w-[100%]' onClick={()=> openTime(option.val)}>
+            <div className={`flex justify-between items-center w-[100%]`} onClick={()=> openTime(option.val)}>
               <label className = {`${option.color} font-bold`}> {option.val} </label>
               {option.icon}
             </div>
