@@ -202,20 +202,40 @@ useEffect(()=> {
       const datas = JSON.parse(user);
       const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
       onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-       if (change.doc.data().Weight && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
+      snapshot.docChanges().forEach(async(change) => {
+
+      if ( change.type === "modified" && change.doc.data().Rfid ) {
+      console.log('first')
+      setRfid(change.doc.data().Rfid)
+      setClick2(false);       
+        return;
+      }
+    });
+  
+  });
+
+
+  }
+},[ click2, rfid])
+
+
+useEffect(()=> {
+      
+  const user = localStorage.getItem("credentials")
+  if(user){
+      const datas = JSON.parse(user);
+      const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
+      onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach(async(change) => {
+
+        console.log('second')
+       if (change.type === "modified" &&  change.doc.data().Weight ) {
+        console.log('second')
         setWeight(change.doc.data().Weight)
         setClick1(false)
-
+    
         return;
       }
-      if (change.doc.data().Rfid && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
-        setRfid(change.doc.data().Rfid)
-        setClick2(false);
-
-        return;
-      }
-
 
     });
   
@@ -223,7 +243,8 @@ useEffect(()=> {
 
 
   }
-},[ click1, click2])
+},[ click1, weight])
+
 
 
 const suggestDeleting = () => {
@@ -412,7 +433,7 @@ const [opens, setOpens] = React.useState(false);
           type:'request_rfid',
           deviceName:datas.DeviceName.trim(),
           document_id:petId,
-          request:null,
+          request: placeSlot,
         })
       })
   
@@ -432,7 +453,7 @@ const [opens, setOpens] = React.useState(false);
           type:'request_weight',
           deviceName:datas.DeviceName.trim(),
           document_id:petId,
-          request:null,
+          request:placeSlot,
         })
       })
 

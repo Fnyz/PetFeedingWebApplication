@@ -388,7 +388,7 @@ fetch(apiUrl)
           const q = collection(db, "Livestream");
           onSnapshot(q, (snapshot) => {
          snapshot.docChanges().forEach((change) => {
-          const {DeviceName,Youtube_Url, isliveNow, ended, ApiKey, ChannelID, id  } = change.doc.data()
+          const {DeviceName,Youtube_Url, isliveNow, ended, ApiKey, ChannelID  } = change.doc.data()
     
           if(DeviceName == datas.DeviceName.trim() && !Youtube_Url && !isliveNow && !ended){
             setMessage('Please wait a minute to see the live?');
@@ -398,7 +398,7 @@ fetch(apiUrl)
 
           if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
             setMessage('Please wait for a minute, proccessing youtube url.');
-            fetchLiveStreams(ApiKey, ChannelID, id)
+            fetchLiveStreams(ApiKey, ChannelID, change.doc.id)
             setLoading(true);
             return;
           }

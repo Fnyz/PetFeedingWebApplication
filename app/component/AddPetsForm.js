@@ -340,7 +340,7 @@ function AddPetsForm() {
           type:'request_rfid',
           deviceName:credential.DeviceName.trim(),
           document_id:petId,
-          request:null,
+          request:placeSlot,
         })
       })
   
@@ -357,7 +357,7 @@ function AddPetsForm() {
           type:'request_weight',
           deviceName:credential.DeviceName.trim(),
           document_id:petId,
-          request:null,
+          request:placeSlot,
         })
       })
   

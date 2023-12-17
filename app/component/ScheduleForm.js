@@ -459,13 +459,14 @@ function ScheduleForm() {
 
    
     const res  = listSched.find(d => d.data.Days === chooseDay && d.data.DeviceName === credential.DeviceName && d.data.Petname === name);
-  
+    const res1  = petList.find(d =>  d.data.DeviceName === credential.DeviceName && d.data.Petname === name);
+ 
     const combinedData = [];
 
     const filteredArray = slots?.filter((a) => {
-      return a.data.Slot !== res?.data.Slot &&  a.data.Days !== res?.data.Days;
+      return a.data.Slot == res1?.data.Slot;
     });
-
+   console.log(filteredArray);
     filteredArray?.forEach((item) => {
  const petname = item.data?.Petname;
  const scheduleTimes = item.data.ScheduleTime.map((time) => {
@@ -477,14 +478,14 @@ function ScheduleForm() {
         const [hours, minutes] = timeStr.split(':').map(Number);
         return hours * 60 + minutes;
       };
+   
         const rs = combinedData.find(a => timeToMinutes(a.sched.time) === timeToMinutes( militaryTime.trim() ));
-  
-        
+ 
         if(rs){
         
           Swal.fire({
             title: "Warning?",
-            text: rs?.petname === name ? `You already set this time on ${res?.data.Slot==1 ? "SLOT ONE": "SLOT TWO"}` : `${militaryTime.trim()} is already set to ${rs?.petname} in ${res?.data.petSlot=="slot_one"? "SLOT_ONE": "SLOT_TWO"} on the pet schedule, please choose other time.`,
+            text: rs?.petname === name ? `You already set this time on ${res1?.data.Slot==1 ? "SLOT ONE": "SLOT TWO"}` : `${militaryTime.trim()} is already set to ${rs?.petname} in ${res1?.data.Slot== 1 ? "SLOT_ONE": "SLOT_TWO"} on the pet schedule, please choose other time.`,
             icon: "warning",
             confirmButtonColor: "#FAB1A0",
             confirmButtonText: "Set time again",
@@ -493,10 +494,13 @@ function ScheduleForm() {
           setCaps('');  
           setMilitaryTime('');
        
-          
-        }else{
+         return; 
+        }
+
+       
+
           const exist  = res?.data.ScheduleTime.find(s => timeToMinutes(s.time) === timeToMinutes(militaryTime.trim()) && s.parameters === parameters )
-    
+       
           if(exist){
             
                 setClick(false);
@@ -524,23 +528,23 @@ function ScheduleForm() {
 
         ;
 
-        const res11  = listSched.find(d => d.data.Days === chooseDay && d.data.DeviceName === credential.DeviceName);
-       
-   //for 10 minutes warning from database;
-    const filteredArray1 = slots?.filter((a) => {
-      return  a.data.Days === chooseDay && a.data.Slot === res11?.data.Slot;
-    });
-     const combinedData1 = [];
-    filteredArray1?.forEach((item) => {
-   const petname = item.data?.Petname;
-    const scheduleTimes = item.data.ScheduleTime.map((time) => {
-   return { petname, sched:time };
-     });
-    combinedData1.push(...scheduleTimes);
-        });
+  //       const res11  = listSched.find(d => d.data.Days === chooseDay && d.data.DeviceName === credential.DeviceName && d.data.Petname === name);
+  //      console.log(res11);
+  //  //for 10 minutes warning from database;
+  //   const filteredArray1 = slots?.filter((a) => {
+  //     return  a.data.Days == chooseDay && a.data.Slot == res11?.data.Slot;
+  //   });
+  //    const combinedData1 = [];
+  //   filteredArray1?.forEach((item) => {
+  //  const petname = item.data?.Petname;
+  //   const scheduleTimes = item.data.ScheduleTime.map((time) => {
+  //  return { petname, sched:time };
+  //    });
+  //   combinedData1.push(...scheduleTimes);
+  //       });
 
       
-          const isDisabled1 = combinedData1.some(
+          const isDisabled1 = combinedData.some(
           (a) =>
             Math.abs(convertTimeStringToDate(a.sched.time) - convertTimeStringToDate(militaryTime)) <= (9 * 60 * 1000) // 10 minutes in milliseconds
            );
@@ -550,7 +554,7 @@ function ScheduleForm() {
           if(isDisabled1){
                  Swal.fire({
               title: "Warning?",
-              text: `You can only set a new schedule time after at least 10 minutes on ${parseInt(res11.data.Slot) === 1 ? "Slot_one": "Slot_two"}, please check your pet schedules properly.`,
+              text: `You can only set a new schedule time after at least 10 minutes on ${res1?.data.Slot==1 ? "SLOT ONE": "SLOT TWO"}, please check your pet schedules properly.`,
               icon: "warning",
               confirmButtonColor: "#FAB1A0",
               confirmButtonText: "Try again!",
@@ -634,7 +638,7 @@ function ScheduleForm() {
       
       
         
-        }
+   
     
   
     
