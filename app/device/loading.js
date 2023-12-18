@@ -5,7 +5,7 @@ import Cw1Fr7IQkM from "../../public/Image/Cw1Fr7IQkM.json"
 
 function loading() {
   return (
-    <div className="w-full h-screen gap-2 bg-[#FAB1A0] flex  justify-center items-center max-md:flex-col max-md:p-3 ">  
+    <div className="w-full h-screen gap-2 bg-[#FAB1A0] flex  justify-center items-center max-xl:flex-col max-md:p-3 ">  
     <Lottie
        loop
        animationData={Cw1Fr7IQkM}
