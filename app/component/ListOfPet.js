@@ -462,6 +462,7 @@ const [opens, setOpens] = React.useState(false);
 
   const handleUpdate = async () => {
     setClick(true)
+    console.log(value);
     const docUpdate = {
       Petname:petname,
       Weight:weight,
@@ -473,8 +474,7 @@ const [opens, setOpens] = React.useState(false);
       Token:1,
       Slot:placeSlot,
       requestWeight:false,
-      StartGoalMonth: dayjs(value?.$d || null).format('MM/DD/YYYY'),
-      EndGoalMonth:  dayjs(value1?.$d || null).format('MM/DD/YYYY'),
+      EndGoalMonth:  dayjs(value?.$d || null).format('MM/DD/YYYY'),
     }
     try {
       const collects = doc(db, "List_of_Pets", petId);
@@ -923,8 +923,7 @@ const [opens, setOpens] = React.useState(false);
  <Label htmlFor="age" className="text-right">
  Goal Month:
  </Label>
- <Input id="age" placeholder="15" value={ value === "Invalid Date" ? "Select Start Date" : dayjs(value1).format('MM/DD/YYYY') } className="col-span-3"  disabled  />
- <Input id="age" placeholder="15" value={value1 === "Invalid Date" ? "Select End Date" : dayjs(value).format('MM/DD/YYYY') } className="col-span-3"  disabled  />
+ <Input id="age" placeholder="15" value={dayjs(value).format('MM/DD/YYYY') === "Invalid Date" ? "Select End Date" : dayjs(value).format('MM/DD/YYYY') } className="col-span-3"  disabled  />
 </div>
           )}
          
@@ -974,10 +973,9 @@ const [opens, setOpens] = React.useState(false);
   <label className='font-bold'>  Select Goal Month:</label>
   <BiX size={25} color='red' className='opacity-60 hover:opacity-100 cursor-pointer' onClick={()=> {
     setGoalMonths(false)
-    if(value === "Invalid Date" || value1 === "Invalid Date" ){
+    if(value === "Invalid Date"){
       setCanShow(false);
       setValue("Invalid Date")
-      setValue1("Invalid Date")
     }
  
   }}/>
@@ -986,8 +984,6 @@ const [opens, setOpens] = React.useState(false);
   <LocalizationProvider dateAdapter={AdapterDayjs}>
  <DemoContainer components={['DatePicker', 'DatePicker']}>
   <div className='flex flex-col gap-2 w-full'>
-  <DatePicker label="Start Date:"   value={value1}
-     onChange={(newValue) => setValue1(newValue)}/>
    <DatePicker
      label="End Date"
      value={value}

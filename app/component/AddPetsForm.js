@@ -271,6 +271,18 @@ function AddPetsForm() {
     }
 
     const handleUpdateChange = async () => {
+
+
+      if(!weight || !rfid){
+        Swal.fire({
+          title: "Warning?",
+          text: "Weight and Rfid are required, please try again!",
+          icon: "error",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Okay",
+        })
+            return;
+      }
       const petWeightss = doc(db, "List_of_Pets", petId);
       await updateDoc(petWeightss, {
         Token: 1,

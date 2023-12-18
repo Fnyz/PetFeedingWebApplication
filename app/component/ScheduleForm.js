@@ -139,10 +139,9 @@ function ScheduleForm() {
     const forPetName = [];
     querySnapshot.forEach((docs) => {
       forPetName.push({data:docs.data(), id: docs.id});
-  
     });
 
-     setSlots(forPetName)
+     setSlots(forPetName.filter(s => !s.data.Rfid))
     
   });
   
@@ -694,7 +693,9 @@ function ScheduleForm() {
   
     setPetDatas(dt);
     dt.forEach(d => {
-        dt2.push({label: d.ds.Petname})
+         if(d.ds.Rfid && d.ds.Weight){
+           dt2.push({label: d.ds.Petname})
+         }
     })
     setDataName(dt2);
    

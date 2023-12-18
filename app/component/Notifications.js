@@ -2,11 +2,12 @@ import React from 'react'
 import { AiFillWarning } from "react-icons/ai";
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useState , useEffect} from 'react';
-import {collection, query, where, onSnapshot , orderBy} from "firebase/firestore";
+import {collection, query, where, onSnapshot , orderBy, doc, deleteDoc} from "firebase/firestore";
 import { db } from '../firebase';
 import Image from 'next/image';
 import moment from 'moment';
 import { MdErrorOutline } from "react-icons/md";
+import { BiX } from "react-icons/bi";
 function Notifications() {
 
     const [notif, setNotifications] = useState([]);
@@ -27,16 +28,16 @@ function Notifications() {
           
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
               querySnapshot.forEach((doc) => {
-                const messages = doc.data().Messages.split(" ");
+             
+                const petName = doc.data().pet_name;
                 const createdAt = doc.data().createdAt.toDate(); 
                 const hasSeen = doc.data().hasSeen; 
+      
               
-                if (messages[0] === "Admin") {
-                  const adminUsername = messages[0];
-          
+                if (!petName) {
                   const usersQuery = query(
                     collection(db, "users"),
-                    where("username", "==", adminUsername)
+                    where("username", "==", "Admin")
                   );
           
                   const userUnsubscribe = onSnapshot(usersQuery, (usersQuerySnapshot) => {
@@ -46,6 +47,7 @@ function Notifications() {
                         weight: null,
                         message: doc.data().Messages,
                         hasSeen,
+                        id:doc.id,
                         createdAt
                       });
                       notificationsData.sort((a, b) => b.createdAt - a.createdAt);
@@ -56,14 +58,13 @@ function Notifications() {
                     });
                   });
                 }
-          
-                const petName = messages[1];
+         
                 const listOfPetsQuery = query(
                   collection(db, "List_of_Pets"),
                   where("DeviceName", "==", datas.DeviceName.trim()),
-                  where("Petname", "==", petName)
+                  where("Petname", "==", petName || null)
                 );
-          
+             
                 const petUnsubscribe = onSnapshot(listOfPetsQuery, (petsQuerySnapshot) => {
                   petsQuerySnapshot.forEach((petDoc) => {
                     notificationsData.push({
@@ -71,11 +72,12 @@ function Notifications() {
                       weight: petDoc.data().Weight,
                       message: doc.data().Messages, 
                       hasSeen,
+                      id:doc.id,
                       createdAt
                     });
                     notificationsData.sort((a, b) => b.createdAt - a.createdAt);
                     setNotifications([...notificationsData]); // Update state with new data
-                    
+                    console.log(notificationsData);
                     // Save data in localStorage
                     localStorage.setItem("notifications", JSON.stringify(notificationsData));
                   });
@@ -89,7 +91,7 @@ function Notifications() {
           fetchData();
           
         }
-      }, []);
+      }, [notif]);
 
       useEffect(() => {
         const storedNotifications = localStorage.getItem("notifications");
@@ -123,13 +125,18 @@ function Notifications() {
                    </div>)
                 :  notif.map((item, i) => {
                     return (
-                        <div key={i} className={` ${!item.hasSeen ? ' pointer-events-none' : 'pointer-events-auto'} w-full border mb-2 h-[100px] border-l-4 ${!item.hasSeen && item.weight && "border-[coral]"} rounded-sm shadow-md px-2 pb-1`} onTouchStart={()=> item.name === "Admin" && setIsHovered(true)} onTouchEnd={()=> item.name === "Admin" && setIsHovered(true)}
+                        <div key={i} className={` ${!item.hasSeen && !item.weight ? ' pointer-events-none' : 'pointer-events-auto'} w-full border mb-2 h-[100px] border-l-4 ${item.hasSeen && !item.weight && "border-[coral]"} rounded-sm shadow-md px-2 pb-1`} onTouchStart={()=> item.name === "Admin" && setIsHovered(true)} onTouchEnd={()=> item.name === "Admin" && setIsHovered(true)}
                          onMouseEnter={()=> item.name === "Admin" && item.hasSeen === true && setIsHovered(true)} onMouseLeave={()=> item.name === "Admin" && setIsHovered(false)} >
-                            <div className='flex items-center p-1 gap-1 mt-2 ' >
-                            <MdErrorOutline color='green' size={15} className='opacity-60' />
+                            <div className='flex items-center justify-between p-1 gap-1 mt-2 ' >
+                              <div className='flex items-center gap-1'>
+                              <MdErrorOutline color='green' size={15} className='opacity-60' />
                                 <h1 className='text-[13px] font-bold  capitalize opacity-60'>{item?.name?.toUpperCase()} * </h1>
                                 <span className='text-[10px] opacity-60 text-red-500 font-bold'> {moment(item.createdAt).calendar()}</span>
-                         
+                              </div>
+                            
+                                <BiX size={20} color='red' onClick={async()=>{
+                                    deleteDoc(doc(db, "notifications",item.id));
+                                }} className=' cursor-pointer opacity-70 transition-all ease-in hover:opacity-100'/>
                             </div>
                             
                             <div className=' flex flex-col justify-center  px-1 gap-2 '>

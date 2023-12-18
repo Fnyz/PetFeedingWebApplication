@@ -120,7 +120,8 @@ function page() {
     };
 
     const handleExitPAGE = () => {
-   
+      stopTimer();
+      resetTimer();
       if(liveStreamUrl === ""){
         const docRef = doc(db, 'Livestream', liveiD);
         updateDoc(docRef, {
@@ -442,14 +443,16 @@ fetch(apiUrl)
 
           if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
             setMessage('Please wait for a minute, proccessing youtube url.');
-            handleStart();
-            setShowTimer(true);
-            setLoading(true);
-            setApiKey(ApiKey)
-            setChannel(ChannelID)
-            setLiveId(change.doc.id)
-            setVisible(false);
-            setVisible1(false);
+            if(!liveStreamUrl){
+              handleStart();
+              setShowTimer(true);
+              setLoading(true);
+              setApiKey(ApiKey)
+              setChannel(ChannelID)
+              setLiveId(change.doc.id)
+              setVisible(false);
+              setVisible1(false);
+            }
             return;
           }
      

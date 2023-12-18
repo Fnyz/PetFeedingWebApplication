@@ -182,7 +182,8 @@ function ListOfChats() {
           deviceName:deviceName,
           Messages: `Admin is send you a message please check it to chat.`,
           createdAt: serverTimestamp(),
-          hasSeen:false,
+          hasSeen:true,
+          pet_name:null,
           type:"User"
         }
     
@@ -260,6 +261,25 @@ function ListOfChats() {
             return (
                 <div className={`flex ${!res.data.hasSeen && "border-[#FAB1A0]"} p-3 rounded-md justify-between border border-5 items-center mb-2 cursor-pointer hover:shadow-md`} key={i} onClick={()=>{
                     handleOpen(res.data.deviceName)
+
+
+                    const q = query(collection(db, "notifications"), where("type", "==", "Admin"), where("hasSeen", "==", null));
+                    onSnapshot(q, (querySnapshot) => {
+                   const dt = [];
+                   querySnapshot.forEach((doc) => {
+                       dt.push({data:doc.data(), id:doc.id});
+                   });
+                  console.log(dt)
+                   dt.map(a => {
+                    const docRef = doc(db, 'notifications', a.id);
+                  updateDoc(docRef, {
+                    hasSeen:true,
+                 }).then(()=>{
+                   console.log('update notification success!')
+                 });
+                   })
+            
+                   });
                           
           const dts = allMessages.find((d) => d.data.deviceName === res.data.deviceName && d.data.sender === res.data.sender);
              if(dts.data.hasSeen === false){
@@ -269,31 +289,15 @@ function ListOfChats() {
            }).then(()=>{
              console.log('seen now!')
            });
-           console.log("hello")
-           const q = query(collection(db, "notifications"), where("type", "==", "Admin"), where("hasSeen", "==", false));
-             onSnapshot(q, (querySnapshot) => {
-            const dt = [];
-            querySnapshot.forEach((doc) => {
-                dt.push({data:doc.data(), id:doc.id});
-            });
-           console.log(dt)
-            dt.map(a => {
-             const docRef = doc(db, 'notifications', a.id);
-           updateDoc(docRef, {
-             hasSeen:true,
-          }).then(()=>{
-            console.log('update notification success')
-          });
-            })
-     
-            });
+          
+          
         
            return;
              }
 
              
 
-             return;
+          
 
         
          

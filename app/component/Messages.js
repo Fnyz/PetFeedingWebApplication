@@ -169,9 +169,10 @@ function Messages() {
           deviceName: dvName.trim(),
           Messages: `${username} is send you a message please check it to chat.`,
           createdAt: serverTimestamp(),
-          hasSeen:false,
+          hasSeen:null,
           pet_name:null,
-          type:"Admin"
+          type:"Admin",
+  
         }
     
     
@@ -195,6 +196,8 @@ function Messages() {
           addDoc(collection(db, "Messages"),message)
           .then((docs)=> {
             if(docs.id){
+              console.log('reach')
+              console.log(notification);
               addDoc(collection(db, "notifications"),notification)
               .then((docs)=> {
               if(docs.id){
@@ -215,6 +218,8 @@ function Messages() {
               hasSeen: false,
               message:updatedMessages,
            }).then(()=>{
+            console.log('reach2')
+            console.log(notification);
             addDoc(collection(db, "notifications"),notification);
              setMess('')
              setClick(false)
@@ -249,7 +254,8 @@ function Messages() {
         return d.unseen === false ? { ...d, unseen: true } : d
        })
    
-  
+    
+
    const dts = messageData.find((d) => d.data.deviceName === dvName && d.data.sender === email);
       if(dts?.data.adminSend === false){
               const docRef = doc(db, 'Messages', dts?.id);
@@ -257,9 +263,8 @@ function Messages() {
         adminSend:true,
         message:b
     }).then(()=>{
-      console.log('seen now!')
-      const a = notif.find(e => e.data.hasSeen === true && e.data.type === "User");
-      const docRef = doc(db, 'notifications', a.id);
+      const a = notif?.find(e => e.data.hasSeen === true && e.data.type === "User");
+      const docRef = doc(db, 'notifications', a?.id);
         updateDoc(docRef, {
         hasSeen:false,
     })
