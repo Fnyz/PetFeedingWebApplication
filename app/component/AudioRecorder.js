@@ -39,14 +39,15 @@ export default class AudioRecorder extends Component {
 
       start = () => {
         if (this.state.isBlocked) {
-         
-        } else {
-          Mp3Recorder
-            .start()
-            .then(() => {
-              this.setState({ isRecording: true, click:true  })
-            }).catch((e) => console.error(e));
+          alert('Recording is blocked. Please check microphone permissions.');
+          return;
         }
+    
+        Mp3Recorder.start()
+          .then(() => {
+            this.setState({ isRecording: true, click: true });
+          })
+          .catch((e) => console.error(e));
       };
 
       stop = () => {
@@ -115,10 +116,10 @@ export default class AudioRecorder extends Component {
       
   render() {
     return (
-      <div className='flex gap-2 justify-center items-center max-md:flex-col w-full'>
+      <div className={`flex gap-2 justify-center items-center max-md:flex-col w-full ${this.props.isEdit && "flex-col"}`}>
         <div onClick={this.start} disabled={this.state.isRecording} className={`rounded-md flex justify-center items-center transition-all ease-in ${this.state.isRecording ? "opacity-50 ": "opacity-100 cursor-pointer hover:shadow-md flex items-center justify-center"} hover:bg-[coral]  w-[100%] p-2 gap-2 cursor-pointer bg-[#FAB1A0]`}>
             {this.state.click ? <BiPause size={25} color='white'/> : <BiMicrophone size={20} color='white'/>}
-            <span className='text-white font-bold'>{this.state.click ? 'RECORDING..': 'START RECORDING'}</span>
+            <span className={`text-white font-bold`}>{this.state.click ? 'RECORDING..': 'START RECORDING'}</span>
         </div>
       
         <div onClick={this.stop} className={`rounded-md transition-all ease-in  flex border justify-center items-center w-[100%] p-2 gap-2  border-[#FAB1A0] ${!this.state.isRecording ? "opacity-50 pointer-events-none cursor-not-allowed": "opacity-100 cursor-pointer hover:shadow-md"}`}>

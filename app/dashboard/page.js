@@ -10,7 +10,8 @@ import { doc, onSnapshot, updateDoc} from "firebase/firestore";
 import { db, auth } from '../firebase';
 import TotalPets from '../component/TotalPets';
 import { signOut} from 'firebase/auth'
-
+import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -24,7 +25,18 @@ import {
   } from "@/components/ui/alert-dialog"
 
  
-
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    borderRadius:10,
+    boxShadow: 24,
+    p: 4,
+  };
+  
 
 
 
@@ -34,6 +46,7 @@ function page() {
     const [profile, setProfileData] = useState({});
     const [userId, setUserId] = useState("");
     const [isclient, setIsclient] = useState(false);
+    const [logout, setLogout] = useState(false);
 
     useEffect(()=>{
       setIsclient(true);
@@ -115,55 +128,14 @@ function page() {
                 }}>
                 <ProfileAccount profile={profile} />
                 /
-
-                <AlertDialog>
-      <AlertDialogTrigger asChild>
-         <BiLogOutCircle size={20} color='red' opacity={0.6} className=' cursor-pointer'/>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogDescription>
-            Do you want to log out?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>No</AlertDialogCancel>
-          <AlertDialogAction>
-          <form
-            onSubmit={(event) => {
-              localStorage.clear();
-              window.location.href = "/login"
-              event.preventDefault();
-              signOut(auth).then(() => {
-                const a = doc(db, "users", userId);
-                updateDoc(a, {
-                isActive:false
-               }).then(()=> {
-            
-            })
-                
-              }).catch((error) => {
-                console.log(error);
-              });
-            }}
-          >
-            {/** some inputs */}
-            <button type="submit">Yes</button>
-          </form>
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-
-           
-
+                <BiLogOutCircle size={20} color='red' opacity={0.6} className=' cursor-pointer' onClick={()=> setLogout(true)}/>
                 </div>
                
         </div>
             </div>
            
         <div className='flex gap-5 w-[100%]   h-full max-md:p-2 '>
-            <div className='w-1/6  flex justify-center items-center relative max-xl:hidden  '>
+            <div className='w-1/6  flex justify-center items-center relative max-xl:hidden   '>
             <Image
             src="/Image/undraw_welcoming_re_x0qo.svg"
             layout='fill'
@@ -187,6 +159,65 @@ function page() {
         </div>
        
         </div>
+
+        
+        <Modal
+        open={logout}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      
+      >
+        <Box sx={style} >
+        <div className='flex justify-center items-center'>
+        <Image
+        width={140}
+        height={140}
+        src="/Image/output-onlinegiftools (8).gif"
+        contentFit="cover"
+       
+      />
+
+      <div>
+        <div className='flex items-center gap-1'>
+        <span className='font-bold text-lg'>Warning</span>
+        <Image
+        width={25}
+        height={25}
+        src="/Image/output-onlinegiftools (10).gif"
+        contentFit="cover"
+       
+      />
+
+        </div>
+        <p className='text-sm opacity-75'>Do you want to log out?</p>
+      </div>
+        </div>
+        <div className='flex justify-center items-center gap-2 font-bold'>
+          <div className='w-full p-2  text-center rounded-l-lg bg-[#FAB1A0] opacity-75 hover:opacity-100 cursor-pointer transition-all ease-in' onClick={()=>{
+             localStorage.clear();
+             window.location.href = "/login"
+             event.preventDefault();
+             signOut(auth).then(() => {
+               const a = doc(db, "users", userId);
+               updateDoc(a, {
+               isActive:false
+              }).then(()=> {
+           
+           })
+               
+             }).catch((error) => {
+               console.log(error);
+             });
+          }}>
+            <span className='text-white font-bold'>YES</span>
+          </div>
+          <div className='w-full p-2 border text-center rounded-r-lg font-bold border-[#FAB1A0] hover:opacity-100 opacity-60 cursor-pointer' onClick={()=> setLogout(false)}>
+            <span className='text-[#FAB1A0]'>CANCEL</span>
+          </div>
+        </div>
+       
+        </Box>
+      </Modal>
       
 
      

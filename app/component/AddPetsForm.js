@@ -164,26 +164,41 @@ function AddPetsForm() {
           const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
           onSnapshot(q, (snapshot) => {
           snapshot.docChanges().forEach((change) => {
-           if (change.doc.data().Weight && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
+           if (change.type === "modified" &&  change.doc.data().Weight) {
             SetWeight(change.doc.data().Weight)
-      
-
+            setClick(false);
             return;
           }
-          if (change.doc.data().Rfid && change.doc.data().Petname === petname && change.doc.data().Token === 0) {
-            SetRfid(change.doc.data().Rfid)
-            setClick1(false);
-
-            return;
-          }
-
         });
       
       });
 
 
       }
-  },[click, click1])
+  },[click, weight])
+
+
+  useEffect(()=> {
+      
+    const user = localStorage.getItem("credentials")
+    if(user){
+        const datas = JSON.parse(user);
+        const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
+        onSnapshot(q, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+        if ( change.type === "modified" && change.doc.data().Rfid) {
+          SetRfid(change.doc.data().Rfid)
+          setClick1(false);
+          return;
+        }
+
+      });
+    
+    });
+
+
+    }
+},[click1, rfid])
   
 
 
@@ -204,6 +219,21 @@ function AddPetsForm() {
         Swal.fire({
           title: "Warning?",
           text: "Please input all fields.",
+          icon: "warning",
+          confirmButtonColor: "#FAB1A0",
+          confirmButtonText: "Yes, I will.",
+          
+         
+        })
+      
+        return;
+      }
+
+      if(!Base64){
+        setClick2(false)
+        Swal.fire({
+          title: "Warning?",
+          text: "Please add a voice record for your pet; that is mandatory.",
           icon: "warning",
           confirmButtonColor: "#FAB1A0",
           confirmButtonText: "Yes, I will.",
@@ -388,7 +418,7 @@ function AddPetsForm() {
 
     const handleAudioEnded = () => {
       setIsPlaying(false);
-      setShow(false);
+
   
     };
 

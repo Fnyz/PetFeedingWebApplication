@@ -70,7 +70,23 @@ function page() {
       setModalTime,
       message1,
     } = useContext(TimerContext);
-  
+
+
+    
+  useEffect(() => {
+    const savedModalTime = localStorage.getItem('showHideTime');
+
+    if(savedModalTime == 'true'){
+      stopTimer();
+      resetTimer();
+      setShowTimer(false);
+      setVisible1(true);
+    }
+   
+
+
+  }, [showTimer]);
+
     const formatTime = (timeInSeconds) => {
       const minutes = Math.floor(timeInSeconds / 60);
       const seconds = timeInSeconds % 60;
@@ -92,7 +108,6 @@ function page() {
     
  
       if (count === 0) {
-        stopTimer();
         setShowTimer(false);
         resetTimer();
         fetchLiveStreams(apiKey1, channel, liveiD)
@@ -120,9 +135,10 @@ function page() {
     };
 
     const handleExitPAGE = () => {
-      stopTimer();
-      resetTimer();
+      localStorage.setItem('showHideTime', false);
       if(liveStreamUrl === ""){
+        stopTimer();
+        resetTimer();
         const docRef = doc(db, 'Livestream', liveiD);
         updateDoc(docRef, {
           Youtube_Url:'',
@@ -177,12 +193,9 @@ fetch(apiUrl)
     console.log('API Response:', data); // Log the entire API response
     const liveVideo = data?.items && data?.items[0]; // Check if items array exists
 
-    if (!data?.items.length) {
       setVisible1(true)
       setReloadPage(false)
-      return;
-    }
-
+ 
     if (liveVideo) {
       const videoId = liveVideo.id.videoId;
       const url = `https://www.youtube.com/watch?v=${videoId}`;
@@ -215,11 +228,11 @@ fetch(apiUrl)
 
   const fetchLiveStreams = async (apiKey, channelId, id) => {
 
+    localStorage.setItem('showHideTime', true);
     setApiKey(apiKey);
     setChannel(channelId);
     setLiveId(id);
-  
-    console.log('hello reached');
+    setVisible1(true);
    
     // Step 1: Get live broadcasts associated with the channel
 const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&eventType=live&type=video&part=snippet,id`;
@@ -242,15 +255,13 @@ fetch(apiUrl)
   })
   .then(data => {
     console.log('API Response:', data); // Log the entire API response
-    const liveVideo = data?.items && data?.items[0]; // Check if items array exists
-
-    if (!data?.items.length) {
-      setVisible1(true);
+    const liveVideo = data?.items && data?.items[0]; // Check if items array exist
+      stopTimer();
+      resetTimer();
+      showTimer(false)
       setVisible(false);
       setLoading(false);
-      return;
-    }
-
+   
 
     if (liveVideo) {
       const videoId = liveVideo.id.videoId;
@@ -296,10 +307,8 @@ fetch(apiUrl)
 
   },[])
   
-  
-  
-   
-  
+
+     
 
     useEffect(()=> {
 
@@ -314,7 +323,20 @@ fetch(apiUrl)
             if (change.type === "modified" && change.doc.data().isliveNow === true) {
              
                 setMessage('Please wait for a minute, proccessing youtube url.');
-                fetchLiveStreams(change.doc.data().ApiKey,change.doc.data().ChannelID, change.doc.id);
+              
+                    resetTimer();
+                    setTimeout(() => {
+                      handleStart();
+                      setShowTimer(true);
+                      setApiKey(change.doc.data().ApiKey)
+                      setChannel(change.doc.data().ChannelID)
+                      setLiveId(change.doc.id)
+                      setVisible(false);
+                    }, 2000);
+             
+                
+                 
+             
                 
             }
            
@@ -350,7 +372,7 @@ fetch(apiUrl)
     },[])
 
     const handleGoback = () => {
-   
+  
         window.location.href = '/dashboard';
     }
 
@@ -361,7 +383,7 @@ fetch(apiUrl)
     const startVideoLive = async () => {
       setLoading(true);
 
-      console.log(liveStreamUrl)
+
         if(!liveStreamUrl){
           console.log('reach')
         
@@ -422,7 +444,7 @@ fetch(apiUrl)
 
 
       const getData = async () => {
-   
+      
         try {
         
           const user = localStorage.getItem("credentials")
@@ -434,30 +456,30 @@ fetch(apiUrl)
           onSnapshot(q, (snapshot) => {
          snapshot.docChanges().forEach((change) => {
           const {DeviceName,Youtube_Url, isliveNow, ended, ApiKey, ChannelID  } = change.doc.data()
+
+
+          if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
+            setMessage('Please wait for a minute, proccessing youtube url.');
+              setLoading(true);
+              handleStart()
+              setShowTimer(true);
+              setApiKey(ApiKey)
+              setChannel(ChannelID)
+              setLiveId(change.doc.id)
+          }
+     
     
           if(DeviceName == datas.DeviceName.trim() && !Youtube_Url && !isliveNow && !ended){
             setMessage('Please wait a minute to see the live?');
             setLoading(true);
+            setShowTimer(false);
             return;
           }
 
-          if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
-            setMessage('Please wait for a minute, proccessing youtube url.');
-            if(!liveStreamUrl){
-              handleStart();
-              setShowTimer(true);
-              setLoading(true);
-              setApiKey(ApiKey)
-              setChannel(ChannelID)
-              setLiveId(change.doc.id)
-              setVisible(false);
-              setVisible1(false);
-            }
-            return;
-          }
-     
+      
           if(DeviceName == datas.DeviceName.trim() && isliveNow == true && Youtube_Url){
             setMessage('Do you want to continue watching the live?');
+            setShowTimer(false);
             console.log('hello');
             setLiveStreamUrl(Youtube_Url)
             setVisible1(false)
@@ -511,7 +533,7 @@ fetch(apiUrl)
             <div>
     
       <Modal
-        open={true}
+        open={visible}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
         

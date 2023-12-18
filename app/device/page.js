@@ -151,6 +151,12 @@ querySnapshot.forEach(async (docss) => {
   }).then(()=> {
     setDeviceName(res.data.DeviceName);
     setShow(false);
+    Swal.fire({
+      title: "Success!",
+      text: `Your account is successfully connected to a device ${res.data.DeviceName}; please close the modal and provide the password.`,
+      icon: "success",
+      showCancelButton: false,
+    })
   })
  
 });
@@ -258,20 +264,26 @@ querySnapshot.forEach(async (docss) => {
         const a = listUser.find(d => d.data.email === res.data.Email);
         if(!a) return;
         const devicesss = doc(db, "users", a.id);
+        const resgiter = doc(db, "Device_Authorization", res.id);
         await updateDoc(devicesss, {
           isActive:true
         }).then(async()=> {
-          setPassword('')
-          setClick(false);
-          Swal.fire({
-            title: "Success!",
-            text: "Your account with your device is logged in successfully.",
-            icon: "success",
-            showCancelButton: false,
+          await updateDoc(resgiter, {
+            registered:true
+          }).then(async()=> {
+            setPassword('')
+            setClick(false);
+            Swal.fire({
+              title: "Success!",
+              text: "Your account with your device is logged in successfully.",
+              icon: "success",
+              showCancelButton: false,
+            })
+            localStorage.setItem("credentials", JSON.stringify(credentials));
+            window.location.href = '/dashboard';
+            return;
           })
-          localStorage.setItem("credentials", JSON.stringify(credentials));
-          window.location.href = '/dashboard';
-          return;
+         
         })
        
       }

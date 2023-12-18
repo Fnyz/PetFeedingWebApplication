@@ -128,7 +128,7 @@ function Notifications() {
                         <div key={i} className={` ${!item.hasSeen && !item.weight ? ' pointer-events-none' : 'pointer-events-auto'} w-full border mb-2 h-[100px] border-l-4 ${item.hasSeen && !item.weight && "border-[coral]"} rounded-sm shadow-md px-2 pb-1`} onTouchStart={()=> item.name === "Admin" && setIsHovered(true)} onTouchEnd={()=> item.name === "Admin" && setIsHovered(true)}
                          onMouseEnter={()=> item.name === "Admin" && item.hasSeen === true && setIsHovered(true)} onMouseLeave={()=> item.name === "Admin" && setIsHovered(false)} >
                             <div className='flex items-center justify-between p-1 gap-1 mt-2 ' >
-                              <div className='flex items-center gap-1'>
+                              <div className='flex items-center gap-1 '>
                               <MdErrorOutline color='green' size={15} className='opacity-60' />
                                 <h1 className='text-[13px] font-bold  capitalize opacity-60'>{item?.name?.toUpperCase()} * </h1>
                                 <span className='text-[10px] opacity-60 text-red-500 font-bold'> {moment(item.createdAt).calendar()}</span>

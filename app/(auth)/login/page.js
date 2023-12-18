@@ -37,7 +37,7 @@ const style = {
   transform: 'translate(-50%, -50%)',
   width: 400,
   bgcolor: 'background.paper',
-  border: '2px solid #000',
+  borderRadius:10,
   boxShadow: 24,
   p: 4,
 };
@@ -60,7 +60,8 @@ function page() {
     const [click2, setClick2] = useState(false);
     const [deviceList, setDeviceList] = useState([]);
     const [listUser, setUserList] = useState([]);
-
+    const [showLogin, setShowLogin] = useState(false);
+    const [message, setMessage] = useState("You have successfully logged in to your account. Please wait for a moment..");
 
     
   const getListDevice = () => {
@@ -160,9 +161,13 @@ function page() {
               email:user.email,
               userId:user.uid,
             }
-            setClick(false)
-            router.push('/home');
-            localStorage.setItem("credentials", JSON.stringify(credentials));
+            setShowLogin(true);
+            setClick(false);
+            setMessage("Welcome admin you have successfully logged in to your account, please wait for a moment..")
+            setTimeout(() => {
+              router.push('/home');
+              localStorage.setItem("credentials", JSON.stringify(credentials));
+            }, 3000);
             return;
             }
             
@@ -205,7 +210,7 @@ function page() {
          
          
 
-            const res1 = deviceList.find(d => d.data.Email === user.email);
+            const res1 = deviceList.find(d => d.data.Email === user.email && d.data.registered === true);
             if(!res1){
              
              
@@ -237,7 +242,11 @@ function page() {
               setEmail('');
               setPassword('');
               localStorage.setItem("credentials", JSON.stringify(credentials));
-              window.location.href = '/dashboard';
+              setShowLogin(true);
+              setTimeout(() => {
+                window.location.href = '/dashboard';
+              }, 3000);
+
               return;
             })
            
@@ -433,6 +442,42 @@ function page() {
         </div>
 
         <div>
+
+
+        <Modal
+        open={showLogin}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      
+      >
+        <Box sx={style} >
+        <div className='flex justify-center items-center'>
+        <Image
+        width={150}
+        height={150}
+        src="/Image/output-onlinegiftools (6).gif"
+        contentFit="cover"
+       
+      />
+
+      <div>
+        <div className='flex items-center gap-1'>
+        <span className='font-bold text-lg'>SUCCESS</span>
+        <Image
+        width={25}
+        height={25}
+        src="/Image/output-onlinegiftools (7).gif"
+        contentFit="cover"
+       
+      />
+
+        </div>
+        <p className='text-sm opacity-75'>{message}</p>
+      </div>
+        </div>
+       
+        </Box>
+      </Modal>
     
       <Modal
         open={open}

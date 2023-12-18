@@ -43,8 +43,8 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
- 
-
+import AudioRecorder from './AudioRecorder';
+import { BiPlay, BiPause} from "react-icons/bi";
 
 
 const VisuallyHiddenInput = styled('input')({
@@ -115,6 +115,11 @@ function generateFakeWeight(min, max) {
 
 
 function ListOfPet() {
+
+  const [Base64, setBase64] = React.useState('')
+  const [audioRecord, setAudioRecord] = React.useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [show, setShow] = React.useState(false);
   const [warn, setWarning] = React.useState(false);
   const [goalMonthSet, setGoalMonths] = React.useState(false);
   const [value, setValue] = React.useState();
@@ -130,6 +135,7 @@ function ListOfPet() {
   const [canShow, setCanShow] = React.useState(false);
   const [position, setPosition] = React.useState("")
   const [needUpdate, setNeedUpdate] = React.useState(false);
+  const [showVisibility, setShowVisibility] = React.useState(false);
   const [gendered, setGenders] = React.useState([{
    gender:'Male',
    val: 'male',
@@ -193,6 +199,30 @@ const convertToMilitaryTime3 = (time) => {
 
 
 };  
+
+
+
+const handlePlayAudio = () => {
+  audioRecord.play()
+  setIsPlaying(true);
+  audioRecord.addEventListener('ended', handleAudioEnded);
+}
+
+const handlePauseAudio = () => {
+  audioRecord.pause()
+  setIsPlaying(false);
+}
+
+const handleAudioEnded = () => {
+  setIsPlaying(false);
+
+
+};
+
+
+
+
+
 
 
 useEffect(()=> {
@@ -382,6 +412,7 @@ const [opens, setOpens] = React.useState(false);
       setWeight(res.dt.Weight);
       setPetSlot(res.dt.Slot);
       setRfid(res.dt.Rfid);
+      setBase64(res.dt.RecordingFile)
 
       if(res.dt.StartGoalMonth === "Invalid Date"){
         setCanShow(false);
@@ -474,7 +505,9 @@ const [opens, setOpens] = React.useState(false);
       Token:1,
       Slot:placeSlot,
       requestWeight:false,
+      RecordingFile:Base64,
       EndGoalMonth:  dayjs(value?.$d || null).format('MM/DD/YYYY'),
+
     }
     try {
       const collects = doc(db, "List_of_Pets", petId);
@@ -582,7 +615,7 @@ const [opens, setOpens] = React.useState(false);
         sx={{ ml: 1, flex: 1 }}
         placeholder="SEARCH PET HERE"
         inputProps={{ 'aria-label': 'search google maps' }}
-    
+        className=' placeholder:font-bold'
       
      
       />
@@ -608,7 +641,7 @@ const [opens, setOpens] = React.useState(false);
        <div class="w-1/4 h-12 flex justify-center items-center font-bold opacity-[0.6] max-md:text-sm">OPTIONS</div>
       </div>
 
-      <div className=' h-[350px] overflow-auto  p-1 '>
+      <ScrollArea className=' h-[350px] overflow-auto scroll-smooth p-1 '>
         
         {listOfPet.length > 0 ? listOfPet.map((item, index) => {
           return (
@@ -687,7 +720,7 @@ const [opens, setOpens] = React.useState(false);
           )
         }): (
           
-          <div className='w-full border h-full flex flex-col justify-center items-center'>
+          <div className='w-full h-full pt-24 flex flex-col justify-center items-center'>
              <Image
         width={160}
         height={160}
@@ -826,7 +859,7 @@ const [opens, setOpens] = React.useState(false);
           <span className='text-red-400 font-bold text-[12px] bg-white absolute right-2 -top-2 opacity-100  border p-2 rounded-md uppercase flex justify-center items-center gap-1 cursor-not-allowed' disabled >Please wait..</span>  
         : 
         
-          <span className='text-red-400 font-bold text-[12px] bg-white absolute right-2 -top-2 cursor-pointer opacity-100  border p-2 rounded-md uppercase flex justify-center items-center gap-1' onClick={handleFakeRFID}>{rfid === "" ? <BiRfid size={15}/> :  <BiEdit size={17}/>}  {rfid ===  "" ? "Set RFID" :"Update RFID"}</span>
+          <span className ={`text-red-400 font-bold text-[12px] bg-white absolute right-2 -top-2 cursor-pointer opacity-100  border p-2 rounded-md uppercase flex justify-center items-center gap-1 ${click1 && "cursor-none pointer-events-none"}`} onClick={handleFakeRFID}>{rfid === "" ? <BiRfid size={15}/> :  <BiEdit size={17}/>}  {rfid ===  "" ? "Set RFID" :"Update RFID"}</span>
         }
         </div>
           )}
@@ -940,7 +973,7 @@ const [opens, setOpens] = React.useState(false);
        
           {!goalMonthSet && needUpdate && (
 
-<div className="flex items-center gap-2 border p-2 justify-center rounded-md border-[#FAB1A0] cursor-pointer hover:border-[coral] transition-all ease-in" onClick={handleFakeWeight}>
+<div className={`flex items-center gap-2 border p-2 justify-center rounded-md border-[#FAB1A0] cursor-pointer ${click2 && "pointer-events-none opacity-60"} hover:border-[coral] transition-all ease-in`} onClick={handleFakeWeight}>
         
             {click1 ?
  <>
@@ -965,7 +998,7 @@ const [opens, setOpens] = React.useState(false);
          {needUpdate && (
 
 <>
-<div className="grid  items-center gap-4  ">
+<div className="grid  items-center gap-1  ">
           
           {goalMonthSet ? (
  <div className='my-3'>
@@ -999,15 +1032,24 @@ const [opens, setOpens] = React.useState(false);
 
  ): (
 
-<div className='mt-3 gap-1 flex'>
-      <span className='font-bold opacity-60 text-sm'>Do you want to set the goal month?</span>
-      <span className='italic text-red-500 font-bold opacity-60 hover:opacity-100 cursor-pointer text-sm' onClick={()=> {
-       setWarning(true);
-      }}>Click here</span>
-    </div>
+
+
+<div className=' mt-1 gap-1 flex'>
+<span className='font-bold opacity-60 text-sm'>Do you want to set the goal month?</span>
+<span className='italic text-red-500 font-bold opacity-60 hover:opacity-100 cursor-pointer text-sm' onClick={()=> {
+ setWarning(true);
+}}>Click here</span>
+</div>
 
  )}
-
+{!goalMonthSet && (
+  <div className=' gap-1 flex'>
+  <span className='font-bold opacity-60 text-sm'>Record your voice to call your pet.</span>
+  <span className='italic text-red-500 font-bold opacity-60 hover:opacity-100 cursor-pointer text-sm' onClick={()=> {
+  setShowVisibility(true);
+  }}>Click here</span>
+</div>
+)}
 
           </div>
           
@@ -1211,6 +1253,53 @@ const [opens, setOpens] = React.useState(false);
       </Modal>
 
 
+      <Modal
+        open={showVisibility}
+  
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        
+        <Box sx={style}>
+        <div className='w-full justify-center  flex flex-col px-5'>
+         <h1 className='font-bold'>Change Record for pet</h1>
+         <span className='text-[12px] mb-3 opacity-40 font-bold'>Click recording to start record your voice.</span>
+         <AudioRecorder isAddPet={true} isEdit = {true} setBase64={setBase64} setAudioRecord={setAudioRecord} setShow={setShow}/>
+       
+         {show && (
+          <>
+            <span className='mt-5 text-[12px] opacity-40 font-bold mb-2'>Click here to listen your recorded file</span>
+            <div className='w-full flex justify-center items-center  border p-2 rounded-md shadow-sm cursor-pointer hover:shadow-md' onClick={!isPlaying ? handlePlayAudio : handlePauseAudio}>
+     {isPlaying ? <>
+
+<BiPause color='#FAB1A0' size={24}/>
+<span className='text-[#FAB1A0] font-bold'>Pause</span>
+
+</>: <>
+
+  <BiPlay color='#FAB1A0' size={24}/>
+       <span className='text-[#FAB1A0] font-bold'>Play</span>
+     
+     </>}
+      </div>
+          </>
+    
+
+         )}
+    
+          </div>
+       
+      <div className='flex gap-2 mt-4 '>
+          
+          <div className=" mx-5 w-full flex items-center gap-2 border p-2 justify-center rounded-md bg-[#FAB1A0] hover:bg-[coral] transition-all ease-in cursor-pointer" onClick={()=> setShowVisibility(false)}>
+          <BiX size={24} color='white' />
+           <span className='text-white font-bold'>Close</span>
+          </div>
+      </div>
+        </Box>
+      </Modal>
+
+
    
 
     
@@ -1220,7 +1309,7 @@ const [opens, setOpens] = React.useState(false);
 
     
       
-       </div>
+       </ScrollArea>
     
        
     </ScrollArea>

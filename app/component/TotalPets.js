@@ -24,16 +24,7 @@ function TotalPets() {
     
     if(user){
         const datas = JSON.parse(user);
-        
-        const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas?.DeviceName?.trim()), orderBy("Created_at", "desc"));
-        const data = [];
-        onSnapshot(q, (querySnapshot) => {
-          querySnapshot.forEach((docs) => {
-            data.push({dt:docs.data(), id: docs.id});
-            setListOfPet(data);
-        });
-        
-        })
+       
 
         const b = query(collection(db, "notifications"), where("deviceName", "==", datas?.DeviceName?.trim()), where("type", "==", "User"));
         const data1 = [];
@@ -49,7 +40,33 @@ function TotalPets() {
 
 
 
-    },[])
+    },[noti])
+
+
+    useEffect(()=>{
+
+      const user = localStorage.getItem("credentials");
+  
+      
+      if(user){
+          const datas = JSON.parse(user);
+          
+          const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas?.DeviceName?.trim()), orderBy("Created_at", "desc"));
+          const data = [];
+          onSnapshot(q, (querySnapshot) => {
+            querySnapshot.forEach((docs) => {
+              data.push({dt:docs.data(), id: docs.id});
+              setListOfPet(data);
+          });
+          
+          })
+  
+         
+      }
+  
+  
+  
+      },[listOfPet])
 
   return (
     <div className='w-4/5  flex '>
