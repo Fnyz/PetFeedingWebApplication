@@ -51,6 +51,8 @@ import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
   clipPath: 'inset(50%)',
@@ -78,6 +80,20 @@ const style = {
 };
 
 
+const style1 = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  borderRadius:2,
+  zIndex:0,
+  p: 4,
+};
+
+
 
 
 
@@ -85,6 +101,8 @@ const style = {
 
 function AddPetsForm() {
   const [warn, setWarning] = React.useState(false);
+  const [RfidGranded, setRfidGranded] = React.useState('');
+  const [rfidtaken , setRfidtaken] = React.useState(false);
   const [goalMonthSet, setGoalMonths] = React.useState(false);
   const [value, setValue] = React.useState();
   const [value1, setValue1] = React.useState();
@@ -133,11 +151,11 @@ function AddPetsForm() {
      onSnapshot(q, (querySnapshot) => {
     const dt = [];
     querySnapshot.forEach((doc) => {
-        dt.push(doc.data());
+        dt.push({data:doc.data()});
     });
   
     setPetDatas(dt);
-   
+ 
    
   });
   
@@ -157,14 +175,14 @@ function AddPetsForm() {
 
     
     useEffect(()=> {
-      
+      console.log(petname);
       const user = localStorage.getItem("credentials")
       if(user){
           const datas = JSON.parse(user);
           const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
           onSnapshot(q, (snapshot) => {
           snapshot.docChanges().forEach((change) => {
-           if (change.type === "modified" &&  change.doc.data().Weight) {
+           if (change.type === "modified" &&  change.doc.data().Weight && change.doc.data().Token === 0) {
             SetWeight(change.doc.data().Weight)
             setClick(false);
             return;
@@ -179,17 +197,48 @@ function AddPetsForm() {
 
 
   useEffect(()=> {
-      
+   
     const user = localStorage.getItem("credentials")
     if(user){
         const datas = JSON.parse(user);
         const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas.DeviceName));
         onSnapshot(q, (snapshot) => {
         snapshot.docChanges().forEach((change) => {
-        if ( change.type === "modified" && change.doc.data().Rfid) {
-          SetRfid(change.doc.data().Rfid)
-          setClick1(false);
-          return;
+        if (change.type === "modified" && change.doc.data().Rfid && parseInt(change.doc.data().Token) === 0 && change.doc.data().Petname === petname) {
+          const a = petDatas.find(d => d.data?.Rfid == change.doc.data().Rfid && d.data.Petname.trim() !== change.doc.data().Petname.trim());
+          setRfidGranded("");
+          
+          if(!a){
+            setRfidtaken(false);
+            setRfidGranded("");
+            SetRfid(change.doc.data().Rfid)
+            setClick1(false);
+            return;
+          }
+          
+  
+            setRfidtaken(true);
+            SetRfid("");
+            setRfidGranded(`RFID is already taken on pet ${RfidGranded}; please try to generate a new RFID.`);
+            setTimeout(() => {
+              setRfidtaken(false);
+              setRfidGranded("");
+            }, 3000);
+
+          
+  
+            setClick1(false);
+            return;
+       
+   
+          
+       
+
+       
+           
+          
+         
+      
         }
 
       });
@@ -244,7 +293,7 @@ function AddPetsForm() {
         return;
       }
   
-       const res = petDatas.find(d => d?.Petname.toLowerCase().trim() === petname.toLowerCase().trim() && d?.DeviceName.toLowerCase().trim() === credential.DeviceName.toLowerCase().trim());
+       const res = petDatas.find(d => d.data.Petname.toLowerCase().trim() === petname.toLowerCase().trim() && d.data.DeviceName.toLowerCase().trim() === credential.DeviceName.toLowerCase().trim());
       
        if(!res){
         
@@ -304,15 +353,17 @@ function AddPetsForm() {
 
 
       if(!weight || !rfid){
-        Swal.fire({
-          title: "Warning?",
-          text: "Weight and Rfid are required, please try again!",
-          icon: "error",
-          confirmButtonColor: "#FAB1A0",
-          confirmButtonText: "Okay",
-        })
+        setRfidtaken(true);
+        setRfidGranded('Weight and Rfid are required, please try again!')
+        setTimeout(() => {
+          setRfidtaken(false);
+          setRfidGranded("");
+        }, 3000);
+       
             return;
       }
+
+
       const petWeightss = doc(db, "List_of_Pets", petId);
       await updateDoc(petWeightss, {
         Token: 1,
@@ -357,7 +408,6 @@ function AddPetsForm() {
           SetPetAge('');
           SetRfid('');
           SetWeight('');
-          setPetName('');
           setBase64('')
           setTimeout(() => {
             window.location.href="/dashboard"
@@ -376,6 +426,8 @@ function AddPetsForm() {
       const petRrfid = doc(db, "List_of_Pets", petId);
       await updateDoc(petRrfid, {
         requestRfid: true,
+        Token:0,
+        Rfid:"",
       }).then(()=>{
         setClick1(true);
         addDoc(collection(db, "Task"), {
@@ -393,6 +445,8 @@ function AddPetsForm() {
       const petWeightss = doc(db, "List_of_Pets", petId);
       await updateDoc(petWeightss, {
         requestWeight: true,
+        Token:0,
+        Weight:"",
       }).then(()=>{
         setClick(true);
         addDoc(collection(db, "Task"), {
@@ -709,6 +763,10 @@ function AddPetsForm() {
      </form>
 
 
+
+    
+
+
      <Modal
         open={openModal}
   
@@ -724,7 +782,7 @@ function AddPetsForm() {
          <div className='flex justify-between  items-center  gap-2'>
     
          <div className="flex flex-col w-full space-y-1.5 ">
-           <Label htmlFor="rfid" className="font-bold">RFID</Label>
+            <Label htmlFor="rfid" className="font-bold">RFID</Label>
            <Input id="rfid" placeholder="Generate RFID here" disabled   value={rfid} onChange={(e)=>{
               SetRfid(e.target.value);
             }}/>
@@ -753,7 +811,7 @@ function AddPetsForm() {
          </div>
          {rfid && (
 
-<div className='flex justify-between  items-center  gap-2  '>
+<div className='flex justify-between  items-center  gap-2 mt-2  '>
     
 <div className="flex flex-col w-full space-y-1.5 ">
 <Label htmlFor="rfid">Weight</Label>
@@ -860,6 +918,30 @@ PLEASE WAIT...
         </Box>
       </Modal>
 
+      <Modal
+        open={rfidtaken}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      
+      >
+        <Box sx={style1} >
+          <div className='flex flex-col justify-center items-center w-full gap-2'>
+          <Image
+        width={150}
+        height={150}
+        src="/Image/output-onlinegiftools (8).gif"
+        contentFit="cover"
+       
+      />
+
+ 
+   
+      <p className='font-bold text-sm opacity-70 text-center'>{RfidGranded}</p>
+ 
+          </div>
+     
+        </Box>
+      </Modal>
       <Modal
         open={warn}
   

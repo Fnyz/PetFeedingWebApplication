@@ -102,6 +102,22 @@ const style = {
   p: 2,
 };
 
+const style1 = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  borderRadius:2,
+  zIndex:0,
+  p: 4,
+};
+
+
+
+
 
 const ITEM_HEIGHT = 48;
 
@@ -163,7 +179,8 @@ const [petSchesData, setPetSchedDataset] = useState([]);
 const [scheduleOpens, setScheduleOpens] = useState(false);
 const [rfid, setRfid] = useState('');
 
-
+const [RfidGranded, setRfidGranded] = React.useState('');
+const [rfidtaken , setRfidtaken] = React.useState(false);
 
 
 
@@ -235,10 +252,31 @@ useEffect(()=> {
       snapshot.docChanges().forEach(async(change) => {
 
       if ( change.type === "modified" && change.doc.data().Rfid ) {
-      console.log('first')
-      setRfid(change.doc.data().Rfid)
-      setClick2(false);       
+       
+
+      const a = listOfPet.find(d => d.dt?.Rfid == change.doc.data().Rfid && d.dt.Petname.trim() !== change.doc.data().Petname.trim());
+      setRfidGranded("");
+          
+      if(!a){
+        setRfidtaken(false);
+        setRfidGranded("");
+        setRfid(change.doc.data().Rfid)
+        setClick2(false);   
         return;
+      }
+      
+
+        setRfidtaken(true);
+        setRfid("");
+        setRfidGranded(`RFID is already taken on pet ${RfidGranded}; please try to generate a new RFID.`);
+        setTimeout(() => {
+          setRfidtaken(false);
+          setRfidGranded("");
+        }, 3000);
+        setClick2(false);   
+        return;
+   
+     
       }
     });
   
@@ -1052,6 +1090,32 @@ const [opens, setOpens] = React.useState(false);
 )}
 
           </div>
+
+
+          <Modal
+        open={rfidtaken}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      
+      >
+        <Box sx={style1} >
+          <div className='flex flex-col justify-center items-center w-full gap-2'>
+          <Image
+        width={150}
+        height={150}
+        src="/Image/output-onlinegiftools (8).gif"
+        contentFit="cover"
+       
+      />
+
+ 
+   
+      <p className='font-bold text-sm opacity-70 text-center'>{RfidGranded}</p>
+ 
+          </div>
+     
+        </Box>
+      </Modal>
           
  
 <Modal

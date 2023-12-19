@@ -14,6 +14,7 @@ import { BiHome } from "react-icons/bi";
 import Swal from 'sweetalert2'
 import { TimerContext } from '../TimerContext';
 import { useContext } from 'react';
+import { Troubleshoot } from '@mui/icons-material';
 
 
 const style = {
@@ -48,7 +49,7 @@ function page() {
     const [reloadpage, setReloadPage] = useState(false)
     const [showTimer, setShowTimer] = useState(false);
     const [errorMess, setErrorMessages] = useState("Something went wrong, please click the bottom to request the live video again?")
-
+  
 
     useEffect(()=>{
       const user = localStorage.getItem("credentials");
@@ -59,33 +60,48 @@ function page() {
     },[])
 
   
+ 
+
+
+    const [remainingTime, setRemainingTime] = useState(180); // Initial remaining time in seconds
+
+
+
+    useEffect(() => {
+      const timerInterval = setInterval(() => {
+              calculateRemainingTime();
+      }, 1000);
   
-    const {
-      count,
-      isRunning,
-      startTimer,
-      stopTimer,
-      resetTimer,
-      modalTime,
-      setModalTime,
-      message1,
-    } = useContext(TimerContext);
+      const calculateRemainingTime = () => {
+        const storedStartTime = localStorage.getItem('startTime');
+  
+        if (storedStartTime) {
+          const startTime = parseInt(storedStartTime, 10);
+          const currentTime = Date.now();
+          const elapsedTime = Math.floor((currentTime - startTime) / 1000);
+          const newRemainingTime = Math.max(0, 180 - elapsedTime);
+  
+          setRemainingTime(newRemainingTime);
+  
+          if (newRemainingTime <= 0) {
+          
+             setShowTimer(false)
+             fetchLiveStreams(apiKey1, channel, liveiD)
+             clearInterval(timerInterval);          
+          
+          }
+        }
+      };
+  
+      calculateRemainingTime();
+  
 
+  
+      // Clean up the timer when the component unmounts
+      return () => clearInterval(timerInterval);
+    }, [showTimer]);
+  
 
-    
-  useEffect(() => {
-    const savedModalTime = localStorage.getItem('showHideTime');
-
-    if(savedModalTime == 'true'){
-      stopTimer();
-      resetTimer();
-      setShowTimer(false);
-      setVisible1(true);
-    }
-   
-
-
-  }, [showTimer]);
 
     const formatTime = (timeInSeconds) => {
       const minutes = Math.floor(timeInSeconds / 60);
@@ -93,28 +109,8 @@ function page() {
       return `${minutes < 10 ? '0' : ''}${minutes} mins ${seconds < 10 ? '0' : ''}${seconds} sec`;
     };
   
-    useEffect(() => {
-      setModalTime(formatTime(count));
-    }, [count, setModalTime]);
-  
-    const handleStart = () => {
-      startTimer();
-    };
-  
 
-
-    useEffect(() => {
-      console.log('Count in UI:', count);
-    
- 
-      if (count === 0) {
-        setShowTimer(false);
-        resetTimer();
-        fetchLiveStreams(apiKey1, channel, liveiD)
-     
-      }
-    
-    }, [count]);
+  
 
     const handleVideoEnd = () => {
    
@@ -135,10 +131,9 @@ function page() {
     };
 
     const handleExitPAGE = () => {
-      localStorage.setItem('showHideTime', false);
+    
       if(liveStreamUrl === ""){
-        stopTimer();
-        resetTimer();
+        localStorage.removeItem('startTime')
         const docRef = doc(db, 'Livestream', liveiD);
         updateDoc(docRef, {
           Youtube_Url:'',
@@ -167,6 +162,7 @@ function page() {
  
 
     const handleRefetch =async () => {
+      setVisible(false);
       setReloadPage(true)
       // Step 1: Get live broadcasts associated with the channel
 const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey1}&channelId=${channel}&eventType=live&type=video&part=snippet,id`;
@@ -193,21 +189,23 @@ fetch(apiUrl)
     console.log('API Response:', data); // Log the entire API response
     const liveVideo = data?.items && data?.items[0]; // Check if items array exists
 
+
+    if(!data.items.length){
       setVisible1(true)
       setReloadPage(false)
+    }
+
  
     if (liveVideo) {
+      setVisible1(false);
       const videoId = liveVideo.id.videoId;
       const url = `https://www.youtube.com/watch?v=${videoId}`;
- 
         const docRef = doc(db, 'Livestream', liveiD);
         updateDoc(docRef, {
           Youtube_Url:url,
        }).then(()=>{
          console.log("Updated Database");
          setLiveStreamUrl(url);
-         setVisible1(false);
-         setVisible(false);
          setReloadPage(false)
     
        });
@@ -228,12 +226,7 @@ fetch(apiUrl)
 
   const fetchLiveStreams = async (apiKey, channelId, id) => {
 
-    localStorage.setItem('showHideTime', true);
-    setApiKey(apiKey);
-    setChannel(channelId);
-    setLiveId(id);
-    setVisible1(true);
-   
+   setVisible(false);
     // Step 1: Get live broadcasts associated with the channel
 const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&eventType=live&type=video&part=snippet,id`;
 
@@ -256,14 +249,21 @@ fetch(apiUrl)
   .then(data => {
     console.log('API Response:', data); // Log the entire API response
     const liveVideo = data?.items && data?.items[0]; // Check if items array exist
-      stopTimer();
-      resetTimer();
-      showTimer(false)
-      setVisible(false);
-      setLoading(false);
+
+      if(!data.items.length){
+        setShowTimer(false);
+        setVisible1(true);
+        setLoading(false);
+      }
+
+  
+   
    
 
     if (liveVideo) {
+      
+      setShowTimer(false);
+      setVisible1(false);
       const videoId = liveVideo.id.videoId;
       const url = `https://www.youtube.com/watch?v=${videoId}`;
         const docRef = doc(db, 'Livestream', id);
@@ -271,10 +271,7 @@ fetch(apiUrl)
           Youtube_Url:url,
        }).then(()=>{
          console.log("Youtube url is set successfully!");
-         setLiveStreamUrl(url);
-          setVisible1(false);
-          setVisible(false);
-       
+         setLiveStreamUrl(url);     
        });
       // // You can use the video IDs for further processing
     } else {
@@ -318,25 +315,22 @@ fetch(apiUrl)
             const q = query(collection(db, "Livestream"), where("DeviceName", "==", datas.DeviceName.trim()));
             onSnapshot(q, (snapshot) => {
             snapshot.docChanges().forEach(async(change) => {
-              setLiveId(change.doc.id)
+       
             
             if (change.type === "modified" && change.doc.data().isliveNow === true) {
              
                 setMessage('Please wait for a minute, proccessing youtube url.');
-              
-                    resetTimer();
-                    setTimeout(() => {
-                      handleStart();
-                      setShowTimer(true);
-                      setApiKey(change.doc.data().ApiKey)
-                      setChannel(change.doc.data().ChannelID)
-                      setLiveId(change.doc.id)
-                      setVisible(false);
-                    }, 2000);
-             
-                
-                 
-             
+                const storedStartTime = localStorage.getItem('startTime');
+  
+                if (!storedStartTime) {
+                  const startTime = Date.now();
+                  localStorage.setItem('startTime', startTime.toString());
+                  setShowTimer(true);
+                  setApiKey(change.doc.data().ApiKey)
+                  setChannel(change.doc.data().ChannelID)
+                  setLiveId(change.doc.id)
+                  setVisible(false);
+                }
                 
             }
            
@@ -372,12 +366,13 @@ fetch(apiUrl)
     },[])
 
     const handleGoback = () => {
-  
+     
         window.location.href = '/dashboard';
+        
+ 
     }
 
 
-    
   
 
     const startVideoLive = async () => {
@@ -385,7 +380,7 @@ fetch(apiUrl)
 
 
         if(!liveStreamUrl){
-          console.log('reach')
+
         
           
           const user = localStorage.getItem("credentials")
@@ -411,7 +406,7 @@ fetch(apiUrl)
          updateDoc(docRef, {
            ended:false,
         }).then(async()=>{
-          console.log("Updated Database");
+     
          
             await addDoc(collection(db, "Task"),{
               type:'Livestream',
@@ -444,7 +439,7 @@ fetch(apiUrl)
 
 
       const getData = async () => {
-      
+
         try {
         
           const user = localStorage.getItem("credentials")
@@ -460,12 +455,11 @@ fetch(apiUrl)
 
           if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
             setMessage('Please wait for a minute, proccessing youtube url.');
-              setLoading(true);
-              handleStart()
-              setShowTimer(true);
-              setApiKey(ApiKey)
-              setChannel(ChannelID)
-              setLiveId(change.doc.id)
+            setShowTimer(true);
+            setApiKey(ApiKey)
+            setChannel(ChannelID)
+            setLiveId(change.doc.id)
+            setVisible(false);
           }
      
     
@@ -640,17 +634,13 @@ fetch(apiUrl)
       <div>
    
       <p className='font-bold text-sm opacity-70'>Livestreaming is not ready yet; please wait until 3 minutes to see the livestream.</p>
-      {message1 && (
-        <div>
-          <p>{message1}</p>
-        </div>
-      )}
-      {modalTime && (
+     
+    
         <div className='mt-5'>
-          <p className='font-bold opacity-70'>Time remaining: <p className='font-bold text-red-500'>{modalTime}.</p></p>
+          <p className='font-bold opacity-70'>Time remaining: <p className='font-bold text-red-500'>{formatTime(remainingTime)}</p></p>
         
         </div>
-      )}
+    
         <div className='w-full gap-1  mt-5 mb-1 p-1 flex justify-center items-center rounded-md opacity-75 bg-red-500 hover:opacity-100 border transition-all ease-in cursor-pointer' onClick={handleExitPAGE}>
            <span className='text-white font-bold text-sm'>CANCEL</span>
           </div>
@@ -660,6 +650,9 @@ fetch(apiUrl)
       </div>
         </Box>
       </Modal>
+
+      
+    
     </div>
             
            

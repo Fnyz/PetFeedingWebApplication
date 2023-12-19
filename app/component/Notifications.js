@@ -77,7 +77,7 @@ function Notifications() {
                     });
                     notificationsData.sort((a, b) => b.createdAt - a.createdAt);
                     setNotifications([...notificationsData]); // Update state with new data
-                    console.log(notificationsData);
+                 
                     // Save data in localStorage
                     localStorage.setItem("notifications", JSON.stringify(notificationsData));
                   });
