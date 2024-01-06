@@ -12,6 +12,7 @@ function TotalPets() {
     
   const [listOfPet, setListOfPet] = useState([]);
   const [noti, setNotify] = useState([]);
+  const [foodLevel, setFoodLevel] = useState(100);
 
 
 
@@ -51,12 +52,12 @@ function TotalPets() {
       if(user){
           const datas = JSON.parse(user);
           
-          const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas?.DeviceName?.trim()), orderBy("Created_at", "desc"));
+          const q = query(collection(db, "Device_Authorization"), where("DeviceName", "==", datas?.DeviceName?.trim()));
           const data = [];
           onSnapshot(q, (querySnapshot) => {
             querySnapshot.forEach((docs) => {
-              data.push({dt:docs.data(), id: docs.id});
-              setListOfPet(data);
+             
+              setFoodLevel(docs.data().Food_Level);
           });
           
           })
@@ -67,6 +68,34 @@ function TotalPets() {
   
   
       },[listOfPet])
+
+      useEffect(()=>{
+
+        const user = localStorage.getItem("credentials");
+    
+        
+        if(user){
+            const datas = JSON.parse(user);
+            
+            const q = query(collection(db, "List_of_Pets"), where("DeviceName", "==", datas?.DeviceName?.trim()), orderBy("Created_at", "desc"));
+            const data = [];
+            onSnapshot(q, (querySnapshot) => {
+              querySnapshot.forEach((docs) => {
+                data.push({dt:docs.data(), id: docs.id});
+                setListOfPet(data);
+            });
+            
+            })
+    
+           
+        }
+    
+    
+    
+        },[listOfPet])
+
+      
+
 
   return (
     <div className='w-4/5  flex '>
@@ -87,6 +116,7 @@ function TotalPets() {
             
             </div>
         </div>
+
         <div className=' w-[170px] border h-20 rounded-md  shadow-sm'>
         <h1 className='pl-2 text-[10px] pt-1'>  {noti?.length > 0 ? "Pets":"Pet"}</h1>
             <div className='flex'>
@@ -101,6 +131,22 @@ function TotalPets() {
                 </div>
             </div>
         </div>
+
+        <div className=' w-[170px] border h-20 rounded-md  shadow-sm'>
+        <h1 className='pl-2 text-[10px] pt-1'>Food Level</h1>
+            <div className='flex'>
+                <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {parseFloat(foodLevel)}%</span>
+                <div className=' flex-1 relative h-[50px]'>
+                <Image
+        src="/Image/foodPet.gif"
+        layout='fill'
+      
+        alt='icons'
+        />
+                </div>
+            </div>
+        </div>
+
         <div className=' w-[150px]  h-20 rounded-md relative max-md:hidden block'>
         <Image
         src="/Image/undraw_sign_in_re_o58h.svg"
@@ -108,6 +154,7 @@ function TotalPets() {
         alt='icons'
         />
         </div>
+        
         
     </div>
    

@@ -5,7 +5,7 @@ import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
-import {collection, query, where, onSnapshot , orderBy, serverTimestamp, addDoc, deleteDoc} from "firebase/firestore";
+import {collection, query, where, onSnapshot , orderBy, serverTimestamp, addDoc, deleteDoc, getDoc} from "firebase/firestore";
 import { db } from '../firebase';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -175,6 +175,7 @@ const [search, setSearch] = React.useState('');
 const [click, setClick] = React.useState(false);
 const [click1, setClick1] = React.useState(false);
 const [click2, setClick2] = React.useState(false);
+const [click3, setClick3] = React.useState(false);
 const [petSchesData, setPetSchedDataset] = useState([]);
 const [scheduleOpens, setScheduleOpens] = useState(false);
 const [rfid, setRfid] = useState('');
@@ -528,6 +529,56 @@ const [opens, setOpens] = React.useState(false);
 
   }
 
+useEffect(()=>{
+  const user = localStorage.getItem("credentials");
+  const datas = JSON.parse(user);
+  const q = query(collection(db, "Device_Authorization"), where("DeviceName", "==", datas.DeviceName.trim()));
+  onSnapshot(q, (querySnapshot) => {
+ querySnapshot.forEach((docs) => {
+    if(docs.data().Dispense_Water){
+      setClick3(true)
+      return;
+    }
+
+    setClick3(false);
+  
+});
+
+
+  })
+  
+},[])
+
+
+  const dispensingWater  = async () => {
+    setClick3(true)
+    const user = localStorage.getItem("credentials");
+    const datas = JSON.parse(user);
+
+
+    const docRef = doc(db, "Device_Authorization", datas.DeviceName.trim());
+const docSnap = await getDoc(docRef);
+
+if (docSnap.exists()) {
+    const updateDispense = doc(db, "Device_Authorization", docSnap.id);
+      await updateDoc(updateDispense, {
+        Dispense_Water: true,
+      }).then(()=>{
+        addDoc(collection(db, "Task"), {
+          type:'dispense_water',
+          deviceName:datas.DeviceName.trim(),
+          document_id:null,
+          request:null,
+        })
+      })
+} else {
+  // docSnap.data() will be undefined in this case
+  console.log("No such document!");
+}
+
+  
+  }
+
 
   const handleUpdate = async () => {
     setClick(true)
@@ -612,8 +663,15 @@ const [opens, setOpens] = React.useState(false);
        }}>List of Pets
        </label>
       </div>
-   
+     
       <div className='flex gap-2 justify-center items-center'>
+      <div className={`${click3 ? "cursor-not-allowed opacity-100 " : "cursor-pointer opacity-70"}  border p-2 rounded-md text-white bg-[#FAB1A0]   hover:opacity-100 transition-all ease-in w-[150px] text-center`} onClick={dispensingWater}>
+        {click3 ? (
+        <span>DISPENSING...</span>
+        ): (
+          <span>DISPENSE WATER</span>
+        )}
+      </div>
       <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className=' cursor-pointer border px-4 py-2 rounded-md max-md:w-[50%] text-center'>
