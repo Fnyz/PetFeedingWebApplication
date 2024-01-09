@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image'
 import SideBar from '../component/SideBar';
 import { useState } from 'react';
-import { useEffect } from 'react';
+import { useEffect , useContext} from 'react';
 import VideoFrame from '../component/VideoFrame';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
@@ -12,9 +12,8 @@ import { db } from '../firebase';
 import CircularProgress from '@mui/material/CircularProgress';
 import { BiHome } from "react-icons/bi";
 import Swal from 'sweetalert2'
-import { TimerContext } from '../TimerContext';
-import { useContext } from 'react';
-import { Troubleshoot } from '@mui/icons-material';
+import { GlobalContext } from '../GlobalContext';
+
 
 
 const style = {
@@ -34,6 +33,7 @@ const style = {
 
 
 function page() {
+  const { showTimer, setShowTimer,  remainingTime} = useContext(GlobalContext)
 
     const [isClient , setisClient] = useState(false);
     const [visible, setVisible] = React.useState(false);
@@ -47,7 +47,8 @@ function page() {
     const [liveiD, setLiveId] = useState("");
     const [liveStreamList, setLiveStreamList] = useState([]);
     const [reloadpage, setReloadPage] = useState(false)
-    const [showTimer, setShowTimer] = useState(false);
+    const [remainingTime2, setRemainingTime2] = useState(remainingTime)
+    // const [showTimer, setShowTimer] = useState(false);
     const [errorMess, setErrorMessages] = useState("Something went wrong, please click the bottom to request the live video again?")
   
 
@@ -60,46 +61,46 @@ function page() {
     },[])
 
   
- 
-
-
-    const [remainingTime, setRemainingTime] = useState(180); // Initial remaining time in seconds
 
 
 
-    useEffect(() => {
-      const timerInterval = setInterval(() => {
-              calculateRemainingTime();
-      }, 1000);
+    // const [remainingTime, setRemainingTime] = useState(180); // Initial remaining time in seconds
+
+
+
+    // useEffect(() => {
+    //   const timerInterval = setInterval(() => {
+    //           calculateRemainingTime();
+    //   }, 1000);
   
-      const calculateRemainingTime = () => {
-        const storedStartTime = localStorage.getItem('startTime');
+    //   const calculateRemainingTime = () => {
+    //     const storedStartTime = localStorage.getItem('startTime');
   
-        if (storedStartTime) {
-          const startTime = parseInt(storedStartTime, 10);
-          const currentTime = Date.now();
-          const elapsedTime = Math.floor((currentTime - startTime) / 1000);
-          const newRemainingTime = Math.max(0, 180 - elapsedTime);
+    //     if (storedStartTime) {
+    //       const startTime = parseInt(storedStartTime, 10);
+    //       const currentTime = Date.now();
+    //       const elapsedTime = Math.floor((currentTime - startTime) / 1000);
+    //       const newRemainingTime = Math.max(0, 180 - elapsedTime);
   
-          setRemainingTime(newRemainingTime);
+    //       setRemainingTime(newRemainingTime);
   
-          if (newRemainingTime <= 0) {
+    //       if (newRemainingTime <= 0) {
           
-             setShowTimer(false)
-             fetchLiveStreams(apiKey1, channel, liveiD)
-             clearInterval(timerInterval);          
+    //          setShowTimer(false)
+    //          fetchLiveStreams(apiKey1, channel, liveiD)
+    //          clearInterval(timerInterval);          
           
-          }
-        }
-      };
+    //       }
+    //     }
+    //   };
   
-      calculateRemainingTime();
+    //   calculateRemainingTime();
   
 
   
-      // Clean up the timer when the component unmounts
-      return () => clearInterval(timerInterval);
-    }, [showTimer]);
+    //   // Clean up the timer when the component unmounts
+    //   return () => clearInterval(timerInterval);
+    // }, [showTimer]);
   
 
 
@@ -108,8 +109,21 @@ function page() {
       const seconds = timeInSeconds % 60;
       return `${minutes < 10 ? '0' : ''}${minutes} mins ${seconds < 10 ? '0' : ''}${seconds} sec`;
     };
-  
 
+    useEffect(()=>{
+
+        const storedStartTime =  localStorage.getItem('startTime');
+        if (storedStartTime !== null) {
+          if (remainingTime === 0) {
+            setShowTimer(false);
+            fetchLiveStreams(apiKey1, channel, liveiD)
+          }
+        }
+    
+   
+    },[remainingTime])
+  
+  console.log(showTimer);
   
 
     const handleVideoEnd = () => {
@@ -134,6 +148,8 @@ function page() {
     
       if(liveStreamUrl === ""){
         localStorage.removeItem('startTime')
+        localStorage.removeItem('remaintime');
+        localStorage.removeItem('flag');
         const docRef = doc(db, 'Livestream', liveiD);
         updateDoc(docRef, {
           Youtube_Url:'',
@@ -320,17 +336,29 @@ fetch(apiUrl)
             if (change.type === "modified" && change.doc.data().isliveNow === true) {
              
                 setMessage('Please wait for a minute, proccessing youtube url.');
-                const storedStartTime = localStorage.getItem('startTime');
+                // const storedStartTime = localStorage.getItem('startTime');
   
-                if (!storedStartTime) {
-                  const startTime = Date.now();
-                  localStorage.setItem('startTime', startTime.toString());
-                  setShowTimer(true);
-                  setApiKey(change.doc.data().ApiKey)
-                  setChannel(change.doc.data().ChannelID)
-                  setLiveId(change.doc.id)
-                  setVisible(false);
-                }
+                // if (!storedStartTime) {
+                //   const startTime = Date.now();
+                //   localStorage.setItem('startTime', startTime.toString());
+                //   setShowTimer(true);
+                //   setApiKey(chhange.doc.data().ChannelID)
+                //   setLiveId(change.doc.data().ApiKey)
+                //   setChannel(cange.doc.id)
+                //   setVisible(false);
+                // }
+
+                const startTime = Date.now();
+                localStorage.setItem('startTime', startTime.toString());
+                localStorage.setItem('remaintime', 1);
+                localStorage.setItem('flag', 'true');
+                setShowTimer(true);
+                setApiKey(change.doc.data().ApiKey)
+                setChannel(change.doc.data().ChannelID)
+                setLiveId(change.doc.id)
+                setVisible(false);
+                  
+
                 
             }
            
@@ -360,8 +388,9 @@ fetch(apiUrl)
 
     useEffect(()=>{
      setisClient(true);
-     setVisible(true);
-
+     if(!showTimer){
+      setVisible(true);
+    }
      handleShowCredData();
     },[])
 
@@ -408,13 +437,13 @@ fetch(apiUrl)
         }).then(async()=>{
      
          
-            await addDoc(collection(db, "Task"),{
-              type:'Livestream',
-              deviceName:credential.DeviceName.trim(),
-              document_id: res.id,
-              request:'Start',
-            });
-            console.log('Sending request to live video!');
+            // await addDoc(collection(db, "Task"),{
+            //   type:'Livestream',
+            //   deviceName:credential.DeviceName.trim(),
+            //   document_id: res.id,
+            //   request:'Start',
+            // });
+            // console.log('Sending request to live video!');
           
           setLoading(true);
          })
@@ -455,7 +484,12 @@ fetch(apiUrl)
 
           if(DeviceName == datas.DeviceName.trim() && isliveNow && !Youtube_Url && !ended){
             setMessage('Please wait for a minute, proccessing youtube url.');
-            setShowTimer(true);
+            const storedRemaingTime =  localStorage.getItem('remaintime');
+            if(storedRemaingTime !== null){
+            if(parseInt(storedRemaingTime, 10) !== 0){
+              setShowTimer(true);
+            }
+          }
             setApiKey(ApiKey)
             setChannel(ChannelID)
             setLiveId(change.doc.id)
@@ -493,6 +527,7 @@ fetch(apiUrl)
     
     
       useEffect(()=> {
+        
         getData();
     
       },[])
@@ -569,7 +604,7 @@ fetch(apiUrl)
 
       <Modal
         open={visible1}
-        aria-labelledby="modal-modal-title"
+        aria-labelledby="modal-modal-title"handleExitPAGE
         aria-describedby="modal-modal-description"
        
       >

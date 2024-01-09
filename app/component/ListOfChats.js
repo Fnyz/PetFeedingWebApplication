@@ -74,8 +74,8 @@ function ListOfChats() {
     const handleOpen = (device) => {
 
         const res =  allMessages.find(d => d.data.deviceName === device);
-        const a = res.data.message.find(m => m.type === 'User');
-        setUserName(a.username)
+     
+     
         setDeviceName(device)
         setEmail(res.data.sender)
         setOpen(true)
@@ -111,9 +111,10 @@ function ListOfChats() {
        querySnapshot.forEach((doc) => {
            dt.push({data:doc.data(), id:doc.id});
        });
-       const res = dt.find(a=> a.data.username === userName);
+       const res = dt.find(a=> a.data.Devicename === deviceName);
        setActive(res?.data.isActive)
        setImage(res?.data.image)
+       console.log(userName);
       
 
        
@@ -164,11 +165,12 @@ function ListOfChats() {
   
 
     const handleSubmit = async () => {
+     
         const initialMessage = [
             {
               message: message,
               username: 'Admin',
-              type: 'Admin',
+              type: 'User',
               messagedate: new Date(),
               image:imageAdmin,
               unseen:false,
@@ -182,7 +184,7 @@ function ListOfChats() {
           deviceName:deviceName,
           Messages: `Admin is send you a message please check it to chat.`,
           createdAt: serverTimestamp(),
-          hasSeen:true,
+          hasSeen:false,
           pet_name:null,
           type:"User"
         }
@@ -257,10 +259,11 @@ function ListOfChats() {
            
          </div>
          )}
-         {allMessages.length && allMessages.map((res,i)=>{
+         {allMessages.length > 0 && allMessages.map((res,i)=>{
             return (
-                <div className={`flex ${!res.data.hasSeen && "border-[#FAB1A0]"} p-3 rounded-md justify-between border border-5 items-center mb-2 cursor-pointer hover:shadow-md`} key={i} onClick={()=>{
+                <div className={`flex ${!res.data.hasSeen && res.data.adminSend && "border-[#FAB1A0]"} p-3 rounded-md justify-between border border-5 items-center mb-2 cursor-pointer hover:shadow-md`} key={i} onClick={()=>{
                     handleOpen(res.data.deviceName)
+                  
 
 
                     const q = query(collection(db, "notifications"), where("type", "==", "Admin"), where("hasSeen", "==", null));
@@ -304,7 +307,7 @@ function ListOfChats() {
                 }}>
                 
                 <div className='flex justify-center items-center gap-4'>
-                   <div className={` ${!res.data.hasSeen && "border-[#FAB1A0]"} border p-1 rounded-full  relative `}>
+                   <div className={` ${!res.data.hasSeen && res.data.adminSend && "border-[#FAB1A0]"} border p-1 rounded-full  relative `}>
                <Avatar
          alt="Remy Sharp"
          src={res.data.Image || "/Image/anyaCuttie.jpg"}
@@ -312,12 +315,12 @@ function ListOfChats() {
        />      
                </div>
                    <div className='flex flex-col justify-center'>
-                       <span className={`font-bold max-md:text-[12px] ${!res.data.hasSeen  && "text-  [#FAB1A0]"}`}>{res.data.deviceName}</span>
-                       <span className={`text-sm opacity-60 max-md:text-[13px] ${!res.data.hasSeen  && "text-[#FAB1A0]"}`}>  {res.data.message[res.data.message.length - 1]?.message.length > 25 ? `${res.data.message[res.data.message.length - 1]?.message.slice(0, 25)}...`: res.data.message[res.data.message.length - 1]?.message || "You read the message."}</span>
+                       <span className={`font-bold max-md:text-[12px] ${!res.data.hasSeen && res.data.adminSend  && "text-[#FAB1A0]"}`}>{res.data.deviceName}</span>
+                       <span className={`text-sm opacity-60 max-md:text-[13px] ${!res.data.hasSeen && res.data.adminSend  && "text-[#FAB1A0]"}`}>  {res.data.message[res.data.message.length - 1]?.message.length > 25 ? `${res.data.message[res.data.message.length - 1]?.message.slice(0, 25)}...`: res.data.message[res.data.message.length - 1]?.message || "You read the message."}</span>
                    </div>
                    </div>
                 
-                   <div className={`text-[12px] opacity-70 max-md:text-[10px]  ${!res.data.hasSeen && "text-[#FAB1A0]"}`}>
+                   <div className={`text-[12px] opacity-70 max-md:text-[10px]  ${!res.data.hasSeen && res.data.adminSend && "text-[#FAB1A0]"}`}>
                         {moment(res.data.message[res.data.message.length - 1]?.messagedate.toDate()).calendar()}
                    </div>
          
@@ -377,7 +380,7 @@ function ListOfChats() {
 
            {dMessage?.data.message && dMessage?.data.message.map((d, i)=>{
             return (
-                <div  className= {`space-y-2 flex items-center ${d.type === "Admin" && "ml-[157px]" }   ${d.type === "Admin"? "w-[50%]" : "w-[100%]" } gap-2 mb-2  `}>
+                <div  className= {`space-y-2 flex items-center ${d.type === "User" && "ml-[157px]" }   ${d.type === "User"? "w-[50%]" : "w-[100%]" } gap-2 mb-2  `}>
                 <div>
                 <Avatar
   alt="Remy Sharp"
@@ -386,7 +389,7 @@ function ListOfChats() {
 />      
                 </div>
                 <div className='flex flex-col'>
-                    <label className='text-[10px] opacity-70'>{deviceName} / {moment(d.messagedate.toDate()).calendar()}</label>
+                    <label className='text-[10px] opacity-70'>{d.type === "User" ? "Admin" : deviceName} / {moment(d.messagedate.toDate()).calendar()}</label>
                     <label className='text-[13px] opacity-80 font-bold'>{d.message}</label>
                 </div>
                </div>

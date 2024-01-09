@@ -48,7 +48,7 @@ function ReportsList() {
     const [mess, setMess] = useState([]);
     const [sendSMS, setSendSMS] = useState(false);
     const [active, setActive] = useState(false);
-    const [message, setMessage] = useState("")
+    const [message1, setMessage] = useState("")
     const [allMessages, setAllMessages] = useState([]);
     const [adImage, setImageAdmin] = useState("");
     const [email, setEmail] = useState("")
@@ -132,10 +132,10 @@ setReports(data);
 
    const initialMessage = [
      {
-      message: message,
+      message: message1,
       username: 'Admin',
       image: adImage,
-      type: 'Admin',
+      type: 'User',
       messagedate: new Date(),
       unseen:false,
      }
@@ -151,6 +151,7 @@ setReports(data);
     }
 
    const message = {
+    adminSend:false,
      hasDevice:true,
      Image:image,
      deviceName: dvName,
@@ -353,7 +354,7 @@ sx={{ width: 50, height: 50 }}
           } } color='red' className='cursor-pointer'/>
         </div>
         <div className='w-full flex gap-2' >
-          <Input  placeholder='Input message here' className='w-3/4'  onChange={(e)=> setMessage(e.target.value)} value={message} />
+          <Input  placeholder='Input message here' className='w-3/4'  onChange={(e)=> setMessage(e.target.value)} value={message1} />
           <div className=' rounded-md w-1/4 p-2 gap-1 justify-center font-bold flex items-center text-white bg-[#FAB1A0] cursor-pointer hover:bg-[coral]'  onClick={handleSendMessage}>
          <BiMailSend size={20} color='white'/>
           <span>SEND</span>

@@ -18,7 +18,7 @@ import Divider from '@mui/material/Divider';
 import moment from 'moment';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, doc, updateDoc, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDoc} from "firebase/firestore"; 
+import { collection, doc, updateDoc, addDoc, serverTimestamp, query, where, onSnapshot, getDoc} from "firebase/firestore"; 
 import { db } from '../firebase';
 import Image from 'next/image'
 import Badge from '@mui/material/Badge';
@@ -73,7 +73,7 @@ function Messages() {
 
     useEffect(()=>{
 
-      const q = query(collection(db, "notifications"));
+      const q = query(collection(db, "notifications"), where('type', "==", "User"));
       onSnapshot(q, (querySnapshot) => {
      const dt = [];
      querySnapshot.forEach((doc) => {
@@ -136,7 +136,7 @@ function Messages() {
     const handleSendMessage = async () => {
          setClick(true)
 
-
+           console.log('adas')
       
          if(!mess) {
           setClick(false)
@@ -158,7 +158,7 @@ function Messages() {
             message: mess,
             username: username,
             image: images,
-            type: 'User',
+            type: 'Admin',
             messagedate: new Date(),
          
           }
@@ -169,7 +169,7 @@ function Messages() {
           deviceName: dvName.trim(),
           Messages: `${username} is send you a message please check it to chat.`,
           createdAt: serverTimestamp(),
-          hasSeen:null,
+          hasSeen:false,
           pet_name:null,
           type:"Admin",
   
@@ -179,6 +179,7 @@ function Messages() {
     
     
         const message = {
+          adminSend:true,
           hasDevice:true,
           Image:images,
           deviceName: dvName.trim(),
@@ -215,11 +216,12 @@ function Messages() {
             const updatedMessages = [...currentMessage, ...initialMessage];
             const docRef = doc(db, 'Messages', dts.id);
             updateDoc(docRef, {
+              adminSend:true,
               hasSeen: false,
               message:updatedMessages,
            }).then(()=>{
             console.log('reach2')
-            console.log(notification);
+       
             addDoc(collection(db, "notifications"),notification);
              setMess('')
              setClick(false)
@@ -245,11 +247,8 @@ function Messages() {
     <>
     <Dialog >
     <DialogTrigger asChild >
-    <Box sx={{ '& > :not(style)': { m: 1, position:'absolute', right:20, bottom:25} }}>
-    <Fab aria-label="add" >
-    <Badge badgeContent={dMessage?.data?.adminSend === false ? dMessage?.data.message.filter(a => a.type === "Admin" && a.unseen === false).length: 0} color="primary">
-    <BiMessageRoundedDots size={25} className='hover:text-red-600' onClick={()=>{
-   
+    <Box sx={{ '& > :not(style)': { m: 1, position:'absolute', right:20, bottom:25} }} onClick={()=>{
+       console.log('hello');
        const b = dMessage?.data.message.map(d =>{
         return d.unseen === false ? { ...d, unseen: true } : d
        })
@@ -260,15 +259,8 @@ function Messages() {
       if(dts?.data.adminSend === false){
               const docRef = doc(db, 'Messages', dts?.id);
         updateDoc(docRef, {
-        adminSend:true,
         message:b
-    }).then(()=>{
-      const a = notif?.find(e => e.data.hasSeen === true && e.data.type === "User");
-      const docRef = doc(db, 'notifications', a?.id);
-        updateDoc(docRef, {
-        hasSeen:false,
     })
-    });
  
     return;
       }
@@ -278,23 +270,18 @@ function Messages() {
 
   
 
-    }} />
+    }}  >
+    <Fab aria-label="add" >
+    <Badge badgeContent={dMessage?.data?.adminSend === false ? dMessage?.data.message.filter(a => a.type === "User" && a.unseen === false).length: 0} color="primary">
+    <BiMessageRoundedDots size={25} className='hover:text-red-600' 
+    />
     </Badge>
     </Fab>
     
   </Box>
   
     </DialogTrigger>
-    <DialogContent className="w-full" onClick={()=> {
-          const dts = messageData.find((d) => d?.data.deviceName === dvName && d?.data.sender === email);
-          const docRef = doc(db, 'Messages', dts?.id);
-          updateDoc(docRef, {
-            adminSend:true,
-         }).then(()=>{
-           console.log('update send message success')
-         });
-    
-    }} >
+    <DialogContent className="w-full" >
       <DialogHeader>
         <DialogTitle className="max-md:text-start">Message</DialogTitle>
         <DialogDescription className="max-md:text-start">
@@ -312,7 +299,7 @@ function Messages() {
             )}
             {dMessage && dMessage?.data.message.map((data, i) => {
                return (
-               <div  className= {`space-y-2 flex  ${data.type === 'User' && " ml-[127px]" } mt-1 ${data.type === 'User' ? " w-[70%]": "w-full" }  items-center  ${data.type === 'User' && " justify-end" } `}>
+               <div  className= {`space-y-2 flex  ${data.type === 'Admin' && " ml-[127px]" } mt-1 ${data.type === 'Admin' ? " w-[70%]": "w-full" }  items-center  ${data.type === 'Admin' && " justify-end" } `}>
                 <div>
                 <Image 
           src={data.image}
@@ -324,8 +311,8 @@ function Messages() {
           />
                 </div>
                 <div className='flex flex-col w-full'>
-                    <div className={` w-full flex max-md:${data.type === 'User' && "flex-col" } gap-1 max-md:gap-0 `}>
-                    <span className='text-[10px] opacity-70 leading-normal'>{dvName} / </span>
+                    <div className={` w-full flex max-md:${data.type === 'Admin' && "flex-col" } gap-1 max-md:gap-0 `}>
+                    <span className='text-[10px] opacity-70 leading-normal'>{data.type === 'Admin' ? dvName : "Admin"} / </span>
                     <span className='text-[10px] opacity-70 leading-normal'>{moment(data.messagedate.toDate()).calendar()}</span>
                     </div>
                     <label className='text-[13px] opacity-80 font-bold'>{data.message}</label>

@@ -36,7 +36,9 @@ function Notifications() {
     const handleClose = () => setOpen(false);
 
 
-    useEffect(()=>{
+ 
+    useEffect(() => {
+
       const user = localStorage.getItem("credentials");
       const datas = JSON.parse(user);
     
@@ -48,77 +50,72 @@ function Notifications() {
           where("hasSeen", "==", false),
           orderBy("createdAt", "desc")
         );
-        const fetchData = () => {
-          const notificationsData = [];
-        
-          const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-           
-              const petName = doc.data().pet_name;
-              const createdAt = doc.data().createdAt.toDate(); 
-              const hasSeen = doc.data().hasSeen; 
-    
-            
-              if (!petName) {
-                const usersQuery = query(
-                  collection(db, "users"),
-                  where("username", "==", "Admin")
-                );
-        
-                const userUnsubscribe = onSnapshot(usersQuery, (usersQuerySnapshot) => {
-                  usersQuerySnapshot.forEach((userDoc) => {
-                    notificationsData.push({
-                      name: userDoc.data().username,
-                      weight: null,
-                      message: doc.data().Messages,
-                      hasSeen,  
-                      deviceName: datas.DeviceName.trim(),
-                      id:doc.id,
-                      createdAt
-                    });
-                    notificationsData.sort((a, b) => b.createdAt - a.createdAt);
-                    setNotifications([...notificationsData]); // Update state with new data
-        
-                    // Save data in localStorage
-                    localStorage.setItem("notifications", JSON.stringify(notificationsData));
+      
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const newNotificationsData = new Map();
+      
+          querySnapshot.forEach((doc) => {
+            const petName = doc.data().pet_name;
+            const createdAt = doc.data()?.createdAt?.toDate();
+            const hasSeen = doc.data().hasSeen;
+      
+            if (!petName) {
+              const usersQuery = query(
+                collection(db, "users"),
+                where("username", "==", "Admin")
+              );
+      
+              onSnapshot(usersQuery, (usersQuerySnapshot) => {
+                usersQuerySnapshot.forEach((userDoc) => {
+                  newNotificationsData.set(doc.id, {
+                    name: userDoc.data().username,
+                    weight: null,
+                    deviceName:datas.DeviceName.trim(),
+                    message: doc.data().Messages,
+                    image: userDoc.data().image,
+                    hasSeen,
+                    id: doc.id,
+                    createdAt,
                   });
                 });
-              }
-       
-              const listOfPetsQuery = query(
-                collection(db, "List_of_Pets"),
-                where("DeviceName", "==", datas.DeviceName.trim()),
-                where("Petname", "==", petName || null)
-              );
-           
-              const petUnsubscribe = onSnapshot(listOfPetsQuery, (petsQuerySnapshot) => {
-                petsQuerySnapshot.forEach((petDoc) => {
-                  notificationsData.push({
-                    name: petDoc.data().Petname,
-                    weight: petDoc.data().Weight,
-                    message: doc.data().Messages, 
-                    hasSeen,
-                    deviceName: datas.DeviceName.trim(),
-                    id:doc.id,
-                    createdAt
-                  });
-                  notificationsData.sort((a, b) => b.createdAt - a.createdAt);
-                  setNotifications([...notificationsData]); // Update state with new data
-               
-                  // Save data in localStorage
-                  localStorage.setItem("notifications", JSON.stringify(notificationsData));
+      
+                // Update state
+                setNotifications([...newNotificationsData.values()]);
+                localStorage.setItem("notifications", JSON.stringify([...newNotificationsData.values()]));
+              });
+            }
+      
+            const listOfPetsQuery = query(
+              collection(db, "List_of_Pets"),
+              where("DeviceName", "==", datas.DeviceName.trim()),
+              where("Petname", "==", petName || null)
+            );
+      
+            onSnapshot(listOfPetsQuery, (petsQuerySnapshot) => {
+              petsQuerySnapshot.forEach((petDoc) => {
+                newNotificationsData.set(doc.id, {
+                  name: petDoc.data().Petname,
+                  weight: petDoc.data().Weight,
+                  deviceName:datas.DeviceName.trim(),
+                  message: doc.data().Messages,
+                  image: petDoc.data().image,
+                  hasSeen,
+                  id: doc.id,
+                  createdAt,
                 });
               });
+              
+              // Update state
+              setNotifications([...newNotificationsData.values()]);
+              localStorage.setItem("notifications", JSON.stringify([...newNotificationsData.values()]));
             });
           });
-        
-          return unsubscribe;
-        };
-
-        fetchData();
-        
+        });
+      
+        return unsubscribe;
       }
-    },[notif])
+    
+    }, []);
 
 
     const handleUpdateSeen = () => {
@@ -312,7 +309,8 @@ function Notifications() {
                       <Image
                  width={160}
                  height={160}   
-                 src="/Image/SadDog.png"
+                 src="/Image/sadface.gif"
+                 className='opacity-70'
                  contentFit="cover"
                 
                />

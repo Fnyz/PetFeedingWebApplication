@@ -26,7 +26,7 @@ function SideBarAdmin() {
 
 
   useEffect(()=>{
-    const q = query(collection(db, "Messages"), where("hasDevice", "==", true), where("hasSeen", "==", false));
+    const q = query(collection(db, "Messages"), where("hasDevice", "==", true), where("hasSeen", "==", false), where("adminSend", "==", true));
     onSnapshot(q, (querySnapshot) => {
    const dt = [];
    querySnapshot.forEach((doc) => {

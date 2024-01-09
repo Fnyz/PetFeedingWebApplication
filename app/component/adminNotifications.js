@@ -70,7 +70,8 @@ function AdminNotifications() {
                 <Image
            width={160}
            height={160}
-           src="/Image/SadDog.png"
+           className=' opacity-70'
+           src="/Image/sadface.gif"
            contentFit="cover"
           
          />

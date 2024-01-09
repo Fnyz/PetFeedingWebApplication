@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { BiSolidHand, BiLogOutCircle} from "react-icons/bi";
 import ListOfPet from '@/app/component/ListOfPet';
@@ -12,17 +12,7 @@ import TotalPets from '../component/TotalPets';
 import { signOut} from 'firebase/auth'
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-  } from "@/components/ui/alert-dialog"
+
 
  
   const style = {
@@ -67,6 +57,7 @@ function page() {
         onSnapshot(doc(db, "users", datas.userId), (doc) => {
             setProfileData(doc.data());
             setUserId(doc.id)
+          
         });
     }
 
