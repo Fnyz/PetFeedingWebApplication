@@ -353,7 +353,7 @@ export function ProfileAccount() {
             <Label htmlFor="username" className="text-right">
               Username
             </Label>
-            <Input id="username" disabled={disables ? false: true} value={username} className="col-span-3"  onChange={(e)=>{
+            <Input id="username" disabled={username === "Admin" ? true : disables ? false: true} value={username} className="col-span-3"  onChange={(e)=>{
               setUserName(e.target.value);
             }} />
           </div>

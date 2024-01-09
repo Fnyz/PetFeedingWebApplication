@@ -11,15 +11,23 @@ import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { auth, db } from '@/app/firebase'
-import { setDoc , doc} from 'firebase/firestore';
+import { setDoc , doc, query, where, onSnapshot, collection} from 'firebase/firestore';
 import { createUserWithEmailAndPassword , sendEmailVerification} from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2'
 import CircularProgress from '@mui/material/CircularProgress';
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
 function page() {
-
+    const [hasAdmin, setHasAdmin] = useState(false);
+    const [userType, setTypeUser] = React.useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [firstName, setFirstname] = useState('');
@@ -28,8 +36,11 @@ function page() {
     const router = useRouter()
     const [isclient, setIsClient] = useState(false);
     const [click, setClick] = useState(false);
+    const typeOfUser = [
+      {val: true, label: 'Admin' },
+      {val: false, label: 'User' },
+    ]
  
-
     const [showPassword, setShowPassword] = React.useState(false);
 
 
@@ -38,14 +49,31 @@ function page() {
     },[])
 
 
+    useEffect(()=>{
+      const q = query(collection(db, "users"));
+      onSnapshot(q, (querySnapshot) => {
+     const dt = [];
+     querySnapshot.forEach((doc) => {
+         dt.push({data:doc.data()});
+     });
+   
+     const res = dt.find(a => a.data.isAdmin === true);
+
+     if(!res) {
+      setHasAdmin(false);
+      return;
+     }
+
+     setHasAdmin(true);
+     });
+    },[])
+
+
 
 
     const handleSubmit = () => {
 
-      setClick(true);
-    
-        
-    
+        setClick(true);
         if(!firstName || !lastName || !username || !password){
           setClick(false);
           Swal.fire({
@@ -81,7 +109,7 @@ function page() {
                   deviceId: null,
                   registered: false,
                   created_at: Date.now(),
-                  isAdmin: false,
+                  isAdmin: username === "Admin" ? true : false,
                   hadDevice: false,
                   Devicename:null
                }).catch((error) => {
@@ -195,10 +223,36 @@ function page() {
         <label className='font-bold text-[30px]'>SIGN UP!</label>
         <label className='text-sm opacity-[0.7]'>Fill out this form.</label>
          <div className='flex flex-col gap-3 mt-5'>
+          {!hasAdmin && (
+         <div className="flex flex-col space-y-1.5">
+           <Label htmlFor="typeuser" className="mb-1 font-bold">TYPE OF USER: </Label>
+           <Select  onValueChange={(e)=> {
+            setTypeUser(e);
+            if(e){
+              setUsername("Admin");
+            }else{
+              setUsername("");
+            }
+           }}  >
+             <SelectTrigger id="typeuser">
+               <SelectValue placeholder="Select here" />
+             </SelectTrigger>
+             <SelectContent position="popper ">
+              {typeOfUser.map((d, i)=> {
+                return (
+                  <SelectItem value={d.val} key={i}>{d.label}</SelectItem>
+                )
+              })}
+         
+            
+             </SelectContent>
+           </Select>
+         </div>
 
+          )}
          <TextField id="outlined-basic1" label="Firstname" variant="outlined" className='w-full' placeholder='John' value={firstName} onChange={(e)=> setFirstname(e.target.value)}/>
         <TextField id="outlined-basic2" label="Lastname" variant="outlined" className='w-full' placeholder='Doe' value={lastName} onChange={(e)=> setLastname(e.target.value)}/>
-        <TextField id="outlined-basic3" label="Username" variant="outlined" className='w-full' placeholder='PeanutButter' value={username} onChange={(e)=> setUsername(e.target.value)}/>
+        <TextField id="outlined-basic3" label="Username" variant="outlined" className='w-full' placeholder='PeanutButter' disabled={userType} value={username} onChange={(e)=> setUsername(e.target.value)}/>
         <TextField id="outlined-basic4" label="Email" variant="outlined" className='w-full'placeholder='noonenero@gmail.com' value={email} onChange={(e)=> setEmail(e.target.value)} />
         <FormControl className='w-full' variant="outlined" >
           <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
