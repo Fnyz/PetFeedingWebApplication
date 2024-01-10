@@ -665,7 +665,7 @@ if (docSnap.exists()) {
       </div>
      
       <div className='flex gap-2 justify-center items-center'>
-      <div className={`${click3 ? "cursor-not-allowed opacity-100 " : "cursor-pointer opacity-70"}  border p-2 rounded-md text-white bg-[#FAB1A0]   hover:opacity-100 transition-all ease-in w-[150px] text-center`} onClick={dispensingWater}>
+      <div className={`${click3 ? "cursor-not-allowed opacity-100 " : "cursor-pointer opacity-70"}  border p-2 rounded-md text-white bg-[#FAB1A0] max-md:text-sm max-md:w-[40%]  hover:opacity-100 transition-all ease-in w-[150px] text-center`} onClick={dispensingWater}>
         {click3 ? (
         <span>DISPENSING...</span>
         ): (

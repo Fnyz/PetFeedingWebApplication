@@ -238,7 +238,7 @@ export function ProfileAccount() {
       <DialogTrigger asChild className='cursor-pointer' onClick={handleShowUserData}>
         <BiEditAlt  size={20} opacity={0.5} />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]  bg-gray absolute">
+      <DialogContent className=" max-md:ml-2  bg-gray absolute">
         <DialogHeader>
           <DialogTitle>Update profile</DialogTitle>
           <DialogDescription>
@@ -256,15 +256,15 @@ export function ProfileAccount() {
        </div>
           <Sheet >
       <SheetTrigger asChild>
-        <div className='justify-center items-center border gap-1 flex mx-24 p-2 rounded-md bg-[#FAB1A0] cursor-pointer'>
+        <div className='justify-center items-center border gap-1 flex mx-24 max-md:mx-16 p-2 rounded-md bg-[#FAB1A0] cursor-pointer'>
         <BiEditAlt  size={15} color='white' />
-          <label className='text-[10px] text-white font-bold cursor-pointer'>CHOOSE YOUR IMAGE</label>
+          <label className='text-[10px] text-white font-bold cursor-pointer '>CHOOSE YOUR IMAGE</label>
         </div>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>CHOOSE YOUR IMAGE</SheetTitle>
-          <SheetDescription>
+          <SheetTitle className=" max-md:text-start">CHOOSE YOUR IMAGE</SheetTitle>
+          <SheetDescription className=" max-md:text-[10px] max-md:text-start">
             Feel free to choose it your favorite image here.
           </SheetDescription>
         </SheetHeader>
@@ -295,7 +295,7 @@ export function ProfileAccount() {
           <ImageList  cols={3} rowHeight={110}>
       {female.map((item) => (
         <ImageListItem key={item.image}>
-          <div className={`${item.image === choose && " border-2 border-[#FAB1A0]"} w-[100px] h-[100px] border overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]`} onClick={()=> setChoose(item.image)}>
+          <div className={`${item.image === choose && " border-2 border-[#FAB1A0]"} w-[100px] h-[100px]  border overflow-hidden rounded-md relative hover:border hover:border-[#FAB1A0]`} onClick={()=> setChoose(item.image)}>
           <Image 
           src={item.image}
           fill

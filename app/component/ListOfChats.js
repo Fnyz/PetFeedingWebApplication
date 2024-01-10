@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState , useMemo, useRef} from 'react'
+import React, { useEffect, useState , useMemo, useRef, useCallback} from 'react'
 import {  BiX, BiCircle , BiMailSend} from "react-icons/bi";
 import Image from 'next/image';
 import {
@@ -63,6 +63,65 @@ function ListOfChats() {
         messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
       }
     };
+
+
+    
+    const handleSubmit = useCallback (() => {
+     
+      const initialMessage = [
+          {
+            message: message,
+            username: 'Admin',
+            type: 'User',
+            messagedate: new Date(),
+            image:imageAdmin,
+            unseen:false,
+          }
+        ]
+
+
+
+        
+      const notification = {
+        deviceName:deviceName,
+        Messages: `Admin is send you a message please check it to chat.`,
+        createdAt: serverTimestamp(),
+        hasSeen:false,
+        pet_name:null,
+        type:"User"
+      }
+  
+
+
+     
+    
+    
+    
+
+    
+    
+              console.log("hey");
+        
+           const dts = allMessages.find((d) => d.data.deviceName === deviceName && d.data.sender === email);
+      
+            const currentMessage  = dts.data.message || [];
+            const updatedMessages = [...currentMessage, ...initialMessage];
+            console.log(updatedMessages);
+            const docRef = doc(db, 'Messages', dts.id);
+            updateDoc(docRef, {
+              adminSend:false,
+              message:updatedMessages,
+           }).then(()=>{
+             setSendMessage('')
+             setMessage('')
+             addDoc(collection(db, "notifications"),notification);
+           console.log('update send message success')
+           });
+    
+    
+          
+      },[message])
+
 
 
 
@@ -164,71 +223,12 @@ function ListOfChats() {
 
   
 
-    const handleSubmit = async () => {
-     
-        const initialMessage = [
-            {
-              message: message,
-              username: 'Admin',
-              type: 'User',
-              messagedate: new Date(),
-              image:imageAdmin,
-              unseen:false,
-            }
-          ]
-
-
-
-          
-        const notification = {
-          deviceName:deviceName,
-          Messages: `Admin is send you a message please check it to chat.`,
-          createdAt: serverTimestamp(),
-          hasSeen:false,
-          pet_name:null,
-          type:"User"
-        }
-    
-
-
-       
-      
-      
-      
-
-      
-      
-      
-          
-          const dts = allMessages.find((d) => d.data.deviceName === deviceName && d.data.sender === email);
-        
-              const currentMessage  = dts.data.message || [];
-              const updatedMessages = [...currentMessage, ...initialMessage];
-              const docRef = doc(db, 'Messages', dts.id);
-              updateDoc(docRef, {
-                adminSend:false,
-                message:updatedMessages,
-             }).then(()=>{
-               setSendMessage('')
-               setMessage('')
-               addDoc(collection(db, "notifications"),notification);
-            
-  
-               console.log('update send message success')
-             });
-      
-      
-            
-        }
-
  
       const dataMessage = (m, device) => {
       
         return m.find(d => d.data.deviceName === device);
     
       }
-    
-     
     
     
       const dMessage = useMemo(()=> dataMessage(allMessages, deviceName), [allMessages, deviceName]);

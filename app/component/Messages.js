@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useCallback, useRef } from 'react'
 import Box from '@mui/material/Box';
 import Fab from '@mui/material/Fab';
 import { BiMessageRoundedDots, BiMailSend } from "react-icons/bi";
@@ -133,7 +133,7 @@ function Messages() {
 
 
 
-    const handleSendMessage = async () => {
+    const handleSendMessage = useCallback(() => {
          setClick(true)
 
            console.log('adas')
@@ -227,7 +227,7 @@ function Messages() {
              setClick(false)
            });
            return;
-      }
+      },[mess])
 
 
       const dataMessage = (m) => {

@@ -141,7 +141,7 @@ function page() {
             </div>
            
         <div className='flex gap-5 w-[100%]   h-full max-xl:p-2 '>
-            <div className='w-1/6  flex justify-center items-center relative max-xl:hidden  '>
+            <div className='w-1/6   2xl:flex justify-center items-center relative md:hidden  '>
             <Image
             src="/Image/undraw_welcoming_re_x0qo.svg"
             layout='fill'

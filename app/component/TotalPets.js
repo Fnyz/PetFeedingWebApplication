@@ -98,9 +98,10 @@ function TotalPets() {
 
 
   return (
-    <div className='w-4/5  flex '>
-    <div className='flex flex-row gap-2 '>
-        <div className=' w-[170px] border h-20 rounded-md  shadow-sm'>
+    <div className='w-4/5  flex   max-md:w-full  max-md:pr-7'>
+    <div className='flex flex-row gap-2  max-md:flex-col max-md:w-full'>
+        <div className='flex gap-2 max-md:w-full'>
+        <div className=' w-[170px] border h-20 rounded-md  shadow-sm max-md:w-full'>
             <h1 className='pl-2 text-[10px] pt-1'> {noti?.length > 0 ? "Notifications":"Notification"}</h1>
             <div className='flex'>
                 <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {noti?.length}</span>
@@ -117,7 +118,7 @@ function TotalPets() {
             </div>
         </div>
 
-        <div className=' w-[170px] border h-20 rounded-md  shadow-sm'>
+        <div className=' w-[170px] border h-20 rounded-md  shadow-sm max-md:w-full'>
         <h1 className='pl-2 text-[10px] pt-1'>  {noti?.length > 0 ? "Pets":"Pet"}</h1>
             <div className='flex'>
                 <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {listOfPet.length}</span>
@@ -131,8 +132,10 @@ function TotalPets() {
                 </div>
             </div>
         </div>
-
-        <div className=' w-[170px] border h-20 rounded-md  shadow-sm'>
+        </div>
+     
+        
+        <div className=' w-[170px] max-md:w-full border h-20 rounded-md  shadow-sm'>
         <h1 className='pl-2 text-[10px] pt-1'>Food Level</h1>
             <div className='flex'>
                 <span className='flex-1  pl-2 font-bold opacity-[0.8]'><span className='text-[#FAB1A0]'>|</span> {parseFloat(foodLevel)}%</span>
@@ -140,7 +143,7 @@ function TotalPets() {
                 <Image
         src="/Image/foodPet.gif"
         layout='fill'
-      
+   
         alt='icons'
         />
                 </div>

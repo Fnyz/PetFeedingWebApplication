@@ -12,7 +12,7 @@ import TotalPets from '../component/TotalPets';
 import { signOut} from 'firebase/auth'
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
-
+import { usePathname } from 'next/navigation'
 
  
   const style = {
@@ -32,17 +32,13 @@ import Modal from '@mui/material/Modal';
 
 function page() {
 
-
+  const pathname = usePathname()
     const [profile, setProfileData] = useState({});
     const [userId, setUserId] = useState("");
     const [isclient, setIsclient] = useState(false);
     const [logout, setLogout] = useState(false);
 
-    useEffect(()=>{
-      setIsclient(true);
-    },[])
-  
-
+   
  
 
   useEffect(()=>{
@@ -51,7 +47,8 @@ function page() {
     if(!user){
       window.location.href = "/login";
     }
-    
+
+   
     if(user){
         const datas = JSON.parse(user);
         onSnapshot(doc(db, "users", datas.userId), (doc) => {
@@ -60,8 +57,9 @@ function page() {
           
         });
     }
-
-
+    setIsclient(true);
+   
+   
   },[])
   
  
@@ -85,7 +83,7 @@ function page() {
             objectFit='cover'
             className=' max-md:hidden block'
         />
-        <div className='absolute left-0 right-0  px-5 pt-5 max-md:px-3'>
+        <div className='absolute left-0 right-0 px-5 pt-5 max-md:px-2'>
             <div className='flex justify-between '>
             <SideBar />
         
@@ -125,8 +123,8 @@ function page() {
         </div>
             </div>
            
-        <div className='flex gap-5 w-[100%]   h-full max-md:p-2 '>
-            <div className='w-1/6  flex justify-center items-center relative max-xl:hidden   '>
+        <div className='flex gap-5 w-[100%]   h-full max-md:py-5  '>
+            <div className='w-1/6  2xl:flex justify-center items-center relative md:hidden   '>
             <Image
             src="/Image/undraw_welcoming_re_x0qo.svg"
             layout='fill'
@@ -135,9 +133,9 @@ function page() {
         />
                 
             </div>
-            <div className=' w-[100%]'>
+            <div className=' w-[100%]   '>
             <TotalPets  />
-            <div className='flex gap-5 mt-5  max-xl:flex-col'>
+            <div className='flex gap-5 mt-5  max-2xl:flex-col max-md:pr-7'>
             <ListOfPet />
 
             <Notifications />

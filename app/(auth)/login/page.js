@@ -63,6 +63,20 @@ function page() {
     const [showLogin, setShowLogin] = useState(false);
     const [message, setMessage] = useState("You have successfully logged in to your account. Please wait for a moment..");
 
+    useEffect(()=>{
+      const user = localStorage.getItem("credentials");
+      if(user){
+       
+        if(!user.DeviceName){
+          window.location.href = "/home";
+        }else{
+          window.location.href = "/dashboard";
+        }
+      }
+      
+    },[])
+  
+
     
   const getListDevice = () => {
     
