@@ -116,6 +116,7 @@ function page() {
                   userId: users.user.uid,
                   image: null,
                   deviceId: null,
+                  isActive:false,
                   registered: false,
                   created_at: Date.now(),
                   isAdmin: username === "Admin" ? true : false,
@@ -180,6 +181,7 @@ function page() {
                   cancelButtonColor: "#d33",
                   confirmButtonText: "Try again",
                 })
+                return;
               }
         
          

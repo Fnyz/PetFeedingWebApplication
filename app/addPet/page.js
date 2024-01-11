@@ -14,9 +14,15 @@ function page() {
   useEffect(()=>{
     const user = localStorage.getItem("credentials");
     if(!user){
-      window.location.href = "/login";
+        window.location.href = "/login";
+        return;
     }
-    
+
+    const d = JSON.parse(user);
+    if(!d.DeviceName){
+     window.location.href = "/home"
+     return;
+    }
     setIsclient(true)
   },[])
 

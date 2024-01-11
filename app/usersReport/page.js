@@ -9,7 +9,23 @@ import SideBarAdmin from '../component/SideBarAdmin';
 
 function page() {
 
+    useEffect(()=>{
+
+        const user = localStorage.getItem("credentials");
+        if(!user){
+            window.location.href = "/login"
+            return;
+        }
     
+       
+        const d = JSON.parse(user);
+        if(d.DeviceName){
+         window.location.href = "/dashboard"
+         return;
+        }
+       
+       
+      },[])
 
     return (
         <div className="h-screen relative">

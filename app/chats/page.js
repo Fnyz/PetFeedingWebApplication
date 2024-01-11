@@ -10,6 +10,19 @@ function page() {
   const [isclient, SetIsClient] = useState(false);
 
   useEffect(()=>{
+    const user = localStorage.getItem("credentials");
+    if(!user){
+        window.location.href = "/login"
+        return;
+    }
+
+   
+    const d = JSON.parse(user);
+    if(d.DeviceName){
+     window.location.href = "/dashboard"
+     return;
+    }
+    
     SetIsClient(true)
   },[])
 

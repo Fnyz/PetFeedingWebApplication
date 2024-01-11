@@ -151,42 +151,17 @@ function page() {
           })
             return;
         }
-    
-        signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-      
+  
+         signInWithEmailAndPassword(auth, email, password).then((userCredential) => {
+   
             const user = userCredential.user;
-
+        
             
             const profile = {
               email: user.email,
               id: user.uid,
             }
 
-
-            const res = allUserData.find(ur => ur.id === user.uid && ur.data.isAdmin === true);
-        
-            if(res){
-            setEmail('');
-            setPassword('');
-
-            const credentials = {
-              DeviceName: null,
-              email:user.email,
-              userId:user.uid,
-            }
-            setShowLogin(true);
-            setClick(false);
-            setMessage("Welcome admin you have successfully logged in to your account, please wait for a moment..")
-            setTimeout(() => {
-              router.push('/home');
-              localStorage.setItem("credentials", JSON.stringify(credentials));
-            }, 3000);
-            return;
-            }
-            
-            
-           
             if(!user.emailVerified){
               setClick(false)
                 Swal.fire({
@@ -220,6 +195,32 @@ function page() {
   
               return;
             }
+
+
+            const res = allUserData.find(ur => ur.id === user.uid && ur.data.isAdmin === true);
+        
+            if(res){
+            setEmail('');
+            setPassword('');
+
+            const credentials = {
+              DeviceName: null,
+              email:user.email,
+              userId:user.uid,
+            }
+            setShowLogin(true);
+            setClick(false);
+            setMessage("Welcome admin you have successfully logged in to your account, please wait for a moment..")
+            setTimeout(() => {
+              router.push('/home');
+              localStorage.setItem("credentials", JSON.stringify(credentials));
+            }, 3000);
+            return;
+            }
+            
+            
+           
+            
       
          
          
@@ -270,11 +271,10 @@ function page() {
            
        
        
-        })
-        .catch((error) => {
+        }).catch((error) => {
       
           let errorMessage = null;
-      
+          console.log(error)
       
           switch(error.code) {
             case "auth/missing-password":
@@ -292,7 +292,7 @@ function page() {
             case 'auth/user-not-found':
               errorMessage = "Email is not registered!";
             break;
-            case 'auth/invalid-login-credentials':
+            case 'auth/invalid-credential':
               errorMessage = "Invalid login credentials";
             break;
             case 'auth/too-many-requests':

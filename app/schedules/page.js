@@ -9,17 +9,25 @@ import { useSearchParams } from 'next/navigation';
 
 
 function page() {
+    const searchParams = useSearchParams()
+    const petnames = searchParams.get('petnames') || null
 
+    
     useEffect(()=>{
         const user = localStorage.getItem("credentials");
+        const d = JSON.parse(user);
+        if(!d.DeviceName){
+         window.location.href = "/home"
+         return;
+        }
         if(!user){
-          window.location.href = "/login";
-        }    
+                window.location.href = "/login";
+                return;
+        }
+    
     },[])
     
-const searchParams = useSearchParams()
 
-const petnames = searchParams.get('petnames') || null
 
     return (
         <div className="h-screen relative">

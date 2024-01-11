@@ -57,6 +57,12 @@ function page() {
       if(!user){
         window.location.href = "/login";
       }
+
+      const d = JSON.parse(user);
+      if(!d.DeviceName){
+       window.location.href = "/home"
+       return;
+      }
      
     },[])
 

@@ -64,15 +64,23 @@ function page() {
     useEffect(()=>{
     
         const user = localStorage.getItem("credentials");
-    
+        if(!user){
+          window.location.href = "/login"
+          return;
+      }
         
-        if(user){
+     
+          const d = JSON.parse(user);
+          if(d.DeviceName){
+           window.location.href = "/dashboard"
+           return;
+          }
             const datas = JSON.parse(user);
             onSnapshot(doc(db, "users", datas.userId), (doc) => {
                 setProfileData(doc.data())
                 
             });
-        }
+     
       },[])
  
 

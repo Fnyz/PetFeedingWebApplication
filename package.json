@@ -41,7 +41,7 @@
     "dayjs": "^1.11.10",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.13",
-    "firebase": "^10.5.0",
+    "firebase": "^10.7.1",
     "lottie-react": "^2.4.0",
     "lucide-react": "^0.263.1",
     "material-ui-popup-state": "^5.0.10",

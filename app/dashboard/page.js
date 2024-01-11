@@ -32,7 +32,6 @@ import { usePathname } from 'next/navigation'
 
 function page() {
 
-  const pathname = usePathname()
     const [profile, setProfileData] = useState({});
     const [userId, setUserId] = useState("");
     const [isclient, setIsclient] = useState(false);
@@ -45,18 +44,25 @@ function page() {
 
     const user = localStorage.getItem("credentials");
     if(!user){
-      window.location.href = "/login";
+        window.location.href = "/login"
+        return;
     }
 
-   
-    if(user){
+        
+    
+       const d = JSON.parse(user);
+       if(!d.DeviceName){
+        window.location.href = "/home"
+        return;
+       }
+       
         const datas = JSON.parse(user);
         onSnapshot(doc(db, "users", datas.userId), (doc) => {
             setProfileData(doc.data());
             setUserId(doc.id)
           
         });
-    }
+  
     setIsclient(true);
    
    
