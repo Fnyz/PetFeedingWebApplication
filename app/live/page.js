@@ -427,7 +427,7 @@ fetch(apiUrl)
             Swal.fire({
               title: "Warning?",
               text: "Please contact administrator to set up your live video, thank you!",
-              icon: "success",
+              icon: "warning",
               confirmButtonColor: "#FAB1A0",
               confirmButtonText: "Okay",
             }).then(()=>{

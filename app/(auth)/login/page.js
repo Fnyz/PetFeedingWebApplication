@@ -66,14 +66,13 @@ function page() {
     useEffect(()=>{
       const user = localStorage.getItem("credentials");
       if(user){
-       
-        if(!user.DeviceName){
+        const d = JSON.parse(user);
+        if(!d.DeviceName){
           window.location.href = "/home";
         }else{
           window.location.href = "/dashboard";
         }
-      }
-      
+      }  
     },[])
   
 
