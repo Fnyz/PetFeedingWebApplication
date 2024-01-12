@@ -185,7 +185,7 @@ export const TimerProvider = ({ children }) => {
 
   return (
     <GlobalContext.Provider value={{
-      setShowTimer, showTimer, remainingTime
+      setShowTimer, showTimer, remainingTime, flag
     }}>
       {children}
     </GlobalContext.Provider>

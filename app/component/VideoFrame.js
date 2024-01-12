@@ -32,6 +32,7 @@ function VideoFrame({youtubeUrl, handleVideoEnd, liveiD, deviceName}) {
   const [show, setshow] = useState(false);
 
   const handleStopLiveStream = () => {
+    
     const docRef = doc(db, 'Livestream', liveiD);
     updateDoc(docRef, {
       Youtube_Url:'',

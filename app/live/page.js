@@ -70,43 +70,6 @@ function page() {
 
 
 
-    // const [remainingTime, setRemainingTime] = useState(180); // Initial remaining time in seconds
-
-
-
-    // useEffect(() => {
-    //   const timerInterval = setInterval(() => {
-    //           calculateRemainingTime();
-    //   }, 1000);
-  
-    //   const calculateRemainingTime = () => {
-    //     const storedStartTime = localStorage.getItem('startTime');
-  
-    //     if (storedStartTime) {
-    //       const startTime = parseInt(storedStartTime, 10);
-    //       const currentTime = Date.now();
-    //       const elapsedTime = Math.floor((currentTime - startTime) / 1000);
-    //       const newRemainingTime = Math.max(0, 180 - elapsedTime);
-  
-    //       setRemainingTime(newRemainingTime);
-  
-    //       if (newRemainingTime <= 0) {
-          
-    //          setShowTimer(false)
-    //          fetchLiveStreams(apiKey1, channel, liveiD)
-    //          clearInterval(timerInterval);          
-          
-    //       }
-    //     }
-    //   };
-  
-    //   calculateRemainingTime();
-  
-
-  
-    //   // Clean up the timer when the component unmounts
-    //   return () => clearInterval(timerInterval);
-    // }, [showTimer]);
   
 
 
@@ -115,7 +78,7 @@ function page() {
       const seconds = timeInSeconds % 60;
       return `${minutes < 10 ? '0' : ''}${minutes} mins ${seconds < 10 ? '0' : ''}${seconds} sec`;
     };
-
+ 
     useEffect(()=>{
 
         const storedStartTime =  localStorage.getItem('startTime');
@@ -123,13 +86,15 @@ function page() {
           if (remainingTime === 0) {
             setShowTimer(false);
             fetchLiveStreams(apiKey1, channel, liveiD)
+            console.log("run heres");
           }
         }
+       
     
    
     },[remainingTime])
   
-  console.log(showTimer);
+
   
 
     const handleVideoEnd = () => {
@@ -248,7 +213,10 @@ fetch(apiUrl)
 
   const fetchLiveStreams = async (apiKey, channelId, id) => {
 
+   localStorage.removeItem('startTime')
    setVisible(false);
+ 
+        
     // Step 1: Get live broadcasts associated with the channel
 const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&eventType=live&type=video&part=snippet,id`;
 
@@ -292,6 +260,7 @@ fetch(apiUrl)
         updateDoc(docRef, {
           Youtube_Url:url,
        }).then(()=>{
+        setShowTimer(false);
          console.log("Youtube url is set successfully!");
          setLiveStreamUrl(url);     
        });
@@ -403,6 +372,7 @@ fetch(apiUrl)
     const handleGoback = () => {
      
         window.location.href = '/dashboard';
+       
         
  
     }
@@ -449,7 +419,6 @@ fetch(apiUrl)
               request:'Start',
             });
             console.log('Sending request to live video!');
-          
           setLoading(true);
          })
 
@@ -513,7 +482,7 @@ fetch(apiUrl)
           if(DeviceName == datas.DeviceName.trim() && isliveNow == true && Youtube_Url){
             setMessage('Do you want to continue watching the live?');
             setShowTimer(false);
-            console.log('hello');
+            setLiveId(change.doc.id)
             setLiveStreamUrl(Youtube_Url)
             setVisible1(false)
             return;
