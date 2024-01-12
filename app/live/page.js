@@ -441,15 +441,14 @@ fetch(apiUrl)
          updateDoc(docRef, {
            ended:false,
         }).then(async()=>{
-     
-         
-            // await addDoc(collection(db, "Task"),{
-            //   type:'Livestream',
-            //   deviceName:credential.DeviceName.trim(),
-            //   document_id: res.id,
-            //   request:'Start',
-            // });
-            // console.log('Sending request to live video!');
+            setLiveId(res.id);   
+            await addDoc(collection(db, "Task"),{
+              type:'Livestream',
+              deviceName:credential.DeviceName.trim(),
+              document_id: res.id,
+              request:'Start',
+            });
+            console.log('Sending request to live video!');
           
           setLoading(true);
          })
@@ -595,7 +594,12 @@ fetch(apiUrl)
           )}
            <span className='text-white font-bold'>{loading ? 'Please wait..': 'Yes'}</span>
           </div>
+          {loading && (
+          <div className='w-full gap-1  p-2 flex justify-center items-center rounded-md opacity-75 bg-red-500 hover:opacity-100 border transition-all ease-in cursor-pointer' onClick={handleExitPAGE}>
+           <span className='text-white font-bold text-sm'>CANCEL</span>
+          </div>
 
+          )}
           
           <div className='w-full  p-1 flex gap-2 justify-center items-center border-[#FAB1A0] rounded-md  border  hover:border-[coral] transition-all ease-in cursor-pointer' onClick={handleGoback}>
           <BiHome color='#FAB1A0' size={20}/>

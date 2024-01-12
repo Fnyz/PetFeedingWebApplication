@@ -929,16 +929,19 @@ function ScheduleForm() {
       noValidate
       autoComplete="off"
     >
-      <TextField id="outlined-basic" className='w-full'  label="Set cups here" variant="outlined" value={caps} onChange={(e)=> setCaps(e.target.value)}/>
+      
+      <TextField id="outlined-basic" className='w-full'  label="Set portion here" variant="outlined" value={caps} onChange={(e)=> setCaps(e.target.value)}/>
     </Box>
 
       
     </div>
 
-    
-    <div className='w-full rounded-md p-2 text-center  bg-[#FAB1A0] text-white hover:bg-[coral] transition-all ease-in cursor-pointer flex justify-center items-center gap-2 shadow-sm' onClick={addFoodItem} >
+    <diV>
+      <span className=' text-red-500 font-bold opacity-80'>* Take note: 1 portion is equivalent to 35 to 45 grams.</span>
+    </diV>
+    <div className='mt-5 w-full rounded-md p-2 text-center  bg-[#FAB1A0] text-white hover:bg-[coral] transition-all ease-in cursor-pointer flex justify-center items-center gap-2 shadow-sm' onClick={addFoodItem} >
       <BiAddToQueue size={20} />
-      <label className='cursor-pointer font-bold'>SET CUPS AND TIME</label>
+      <label className='cursor-pointer font-bold'>SET PORTION AND TIME</label>
     </div>
    
      <div className='flex justify-between items-center '>
@@ -998,7 +1001,7 @@ function ScheduleForm() {
                  <div className='flex  items-center gap-1 space-y-0'>
                  <label className='text-[15px]'>{ convertToMilitaryTime3(s.time)} {s.parameters}</label>
                  <label className='text-[15px] text-[#FAB1A0]'>/</label>
-                 <label  className='text-[15px]'>{s.cups} {s.cups > 1 ? 'cups': 'cup'}</label>
+                 <label  className='text-[15px]'>{s.cups} {s.cups > 1 ? 'portions': 'portion'}</label>
                  </div>
                  <div className='flex gap-2 justify-center items-center  '>
                  

@@ -1102,8 +1102,10 @@ if (docSnap.exists()) {
   <label className='font-bold'>  Select Goal Month:</label>
   <BiX size={25} color='red' className='opacity-60 hover:opacity-100 cursor-pointer' onClick={()=> {
     setGoalMonths(false)
+   
     if(value === "Invalid Date"){
       setCanShow(false);
+    
       setValue("Invalid Date")
     }
  
@@ -1116,7 +1118,10 @@ if (docSnap.exists()) {
    <DatePicker
      label="End Date"
      value={value}
-     onChange={(newValue) => setValue(newValue)}
+     onChange={(newValue) => {  
+      setGoalMonths(false)
+      setValue(newValue)
+     }}
    />
   </div>
   
