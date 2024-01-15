@@ -130,7 +130,7 @@ function generateFakeWeight(min, max) {
 
 
 
-function ListOfPet() {
+function ListOfPets() {
 
   const [Base64, setBase64] = React.useState('')
   const [audioRecord, setAudioRecord] = React.useState(null);
@@ -371,6 +371,7 @@ const [opens, setOpens] = React.useState(false);
        });
        
        setListOfPet1(data);
+       setListOfPet(data);
        
      });
         return;
@@ -665,7 +666,7 @@ if (docSnap.exists()) {
       </div>
      
       <div className='flex gap-2 justify-center items-center'>
-      <div className={`${click3 ? "cursor-not-allowed opacity-100 " : "cursor-pointer opacity-70"}  border p-2 rounded-md text-white bg-[#FAB1A0] max-md:text-sm max-md:w-[40%]  hover:opacity-100 transition-all ease-in w-[150px] text-center`} onClick={dispensingWater}>
+      <div className={`${click3 ? "cursor-not-allowed pointer-events-none opacity-100" : "cursor-pointer opacity-70"}  border p-2 rounded-md text-white bg-[#FAB1A0] max-md:text-sm max-md:w-[40%]  hover:opacity-100 transition-all ease-in w-[150px] text-center`} onClick={dispensingWater}>
         {click3 ? (
         <span>DISPENSING...</span>
         ): (
@@ -1443,4 +1444,4 @@ if (docSnap.exists()) {
   )
 }
 
-export default ListOfPet
+export default ListOfPets

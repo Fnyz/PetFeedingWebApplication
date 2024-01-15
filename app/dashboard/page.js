@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { BiSolidHand, BiLogOutCircle} from "react-icons/bi";
-import ListOfPet from '@/app/component/ListOfPet';
+import ListOfPets from '@/app/component/ListOfPets';
 import Notifications from '@/app/component/Notifications';
 import SideBar from '../component/SideBar';
 import { ProfileAccount } from '../component/Profile';
@@ -48,9 +48,7 @@ function page() {
         return;
     }
 
-        
-    
-       const d = JSON.parse(user);
+ const d = JSON.parse(user);
        if(!d.DeviceName){
         window.location.href = "/home"
         return;
@@ -64,6 +62,9 @@ function page() {
         });
   
     setIsclient(true);
+     
+    
+      
    
    
   },[])
@@ -142,7 +143,7 @@ function page() {
             <div className=' w-[100%]   '>
             <TotalPets  />
             <div className='flex gap-5 mt-5  max-2xl:flex-col max-md:pr-7'>
-            <ListOfPet />
+            <ListOfPets />
 
             <Notifications />
             </div>

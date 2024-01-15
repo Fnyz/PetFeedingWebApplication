@@ -479,7 +479,7 @@ fetch(apiUrl)
           }
 
       
-          if(DeviceName == datas.DeviceName.trim() && isliveNow == true && Youtube_Url){
+          if(DeviceName == datas.DeviceName.trim() && isliveNow && Youtube_Url){
             setMessage('Do you want to continue watching the live?');
             setShowTimer(false);
             setLiveId(change.doc.id)
